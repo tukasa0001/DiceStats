@@ -53,6 +53,11 @@ const Stats: FC = () => {
 
     const list = [...stats];
 
+    const avgFormatter = Intl.NumberFormat("ja-JP", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+
     return (
         <div className="card">
             <table>
@@ -64,32 +69,28 @@ const Stats: FC = () => {
                 </thead>
                 <tbody>
                     <tr>
+                        <td>技能振り回数</td>
+                        {list.map(tp => createElement("td", { key: `stats-rollnum-${tp[0]}` }, tp[1].skillRollNum))}
+                    </tr>
+                    <tr>
+                        <td>平均出目</td>
+                        {list.map(tp => createElement("td", { key: `stats-rollavg-${tp[0]}` }, tp[1].skillRollNum == 0 ? "N/A" : avgFormatter.format(tp[1].skillRollSum / tp[1].skillRollNum)))}
+                    </tr>
+                    <tr>
                         <td>クリティカル</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
+                        {list.map(tp => createElement("td", { key: `stats-crit-${tp[0]}` }, tp[1].criticalNum))}
                     </tr>
                     <tr>
                         <td>内1クリ</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
+                        {list.map(tp => createElement("td", { key: `stats-spcrit-${tp[0]}` }, tp[1].spCriticalNum))}
                     </tr>
                     <tr>
                         <td>ファンブル</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
+                        {list.map(tp => createElement("td", { key: `stats-fum-${tp[0]}` }, tp[1].fumbleNum))}
                     </tr>
                     <tr>
                         <td>内100ファン</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
+                        {list.map(tp => createElement("td", { key: `stats-spfum-${tp[0]}` }, tp[1].spFumbleNum))}
                     </tr>
                 </tbody>
             </table>
