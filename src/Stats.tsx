@@ -79,7 +79,7 @@ const Stats: FC = () => {
 
     return (
         <div className="card">
-            <h1>統計情報</h1>
+            <h2>技能振り統計</h2>
             <table>
                 <thead>
                     <tr>
