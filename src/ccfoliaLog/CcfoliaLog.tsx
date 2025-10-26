@@ -31,7 +31,7 @@ const parseCcfoliaLog = (log: string): CcfoliaMessage[] => {
             msgs.push(new CoCSkillRollMessage(channel, name, skillName, diceValue, successValue));
         }
         else {
-            // msgs.push(new TalkMessage(channel, name, text));
+            msgs.push(new TalkMessage(channel, name, text));
         }
     }
 

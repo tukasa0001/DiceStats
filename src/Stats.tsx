@@ -5,6 +5,7 @@ import parseCcfoliaLog from './ccfoliaLog/CcfoliaLog';
 import { CoCSkillRollMessage } from './ccfoliaLog/message/CoCSkillRollMessage';
 import "./Stats.css"
 import { ParamChangeMessage } from './ccfoliaLog/message/ParamChangeMessage';
+import { TalkMessage } from './ccfoliaLog/message/TalkMessasge';
 
 class Stat {
     // 技能関連
@@ -22,7 +23,10 @@ class Stat {
     totalDamage: number = 0;
     minHealth: number | undefined = undefined;
     totalLostSAN: number = 0;
-    minSAN: number | undefined = undefined
+    minSAN: number | undefined = undefined;
+
+    // その他
+    talkNum: number = 0;
 };
 
 const Stats: FC = () => {
@@ -88,6 +92,10 @@ const Stats: FC = () => {
                 }
             }
         }
+        else if (msg instanceof TalkMessage) {
+            const stat = getStat(msg.sender);
+            stat.talkNum++;
+        }
     }
 
     const list = [...stats];
@@ -142,6 +150,11 @@ const Stats: FC = () => {
                 Data("最低HP", list.map(tp => tp[1].minHealth ?? "N/A")),
                 Data("合計喪失SAN", list.map(tp => tp[1].totalLostSAN)),
                 Data("最低SAN", list.map(tp => tp[1].minSAN ?? "N/A"))
+            ]} />
+
+            <h2>その他の統計</h2>
+            <StatTable characters={list.map(tp => tp[0])} data={[
+                Data("発言数", list.map(tp => tp[1].talkNum))
             ]} />
         </div>
     );
