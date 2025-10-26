@@ -4,8 +4,10 @@ import { LogCtx } from './App';
 import parseCcfoliaLog from './ccfoliaLog/CcfoliaLog';
 import { CoCSkillRollMessage } from './ccfoliaLog/message/CoCSkillRollMessage';
 import "./Stats.css"
+import { ParamChangeMessage } from './ccfoliaLog/message/ParamChangeMessage';
 
 class Stat {
+    // 技能関連
     skillRollNum: number = 0;
     skillRollSum: number = 0;
     successNum: number = 0;
@@ -15,6 +17,9 @@ class Stat {
     fumbleNum: number = 0;
     spFumbleNum: number = 0;
     skillRolls: Map<string, number> = new Map<string, number>();
+
+    // ステータス関連
+    totalDamage: number = 0;
 };
 
 const Stats: FC = () => {
@@ -51,6 +56,17 @@ const Stats: FC = () => {
                 }
             }
             stat.skillRolls.set(msg.skill, (stat.skillRolls.get(msg.skill) ?? 0) + 1);
+        }
+        else if (msg instanceof ParamChangeMessage) {
+            if (msg.paramName === "HP" && msg.value < msg.prevValue) {
+                // HP減少
+                let stat = stats.get(msg.sender);
+                if (stat === undefined) {
+                    stat = new Stat();
+                    stats.set(msg.sender, stat);
+                }
+                stat.totalDamage += msg.prevValue - msg.value;
+            }
         }
     }
 
@@ -118,6 +134,11 @@ const Stats: FC = () => {
                     <tr className='indent1'>
                         <td>内100ファン</td>
                         {list.map(tp => createElement("td", { key: `stats-spfum-${tp[0]}` }, tp[1].spFumbleNum))}
+                    </tr>
+
+                    <tr className="separate">
+                        <td>受けたダメージ</td>
+                        {list.map(tp => createElement("td", { key: `stats-damage-${tp[0]}` }, tp[1].totalDamage))}
                     </tr>
                 </tbody>
             </table>
