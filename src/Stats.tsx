@@ -107,7 +107,7 @@ const Stats: FC = () => {
                         <td>クリティカル</td>
                         {list.map(tp => createElement("td", { key: `stats-crit-${tp[0]}` }, tp[1].criticalNum))}
                     </tr>
-                    <tr>
+                    <tr className='indent1'>
                         <td>内1クリ</td>
                         {list.map(tp => createElement("td", { key: `stats-spcrit-${tp[0]}` }, tp[1].spCriticalNum))}
                     </tr>
@@ -115,7 +115,7 @@ const Stats: FC = () => {
                         <td>ファンブル</td>
                         {list.map(tp => createElement("td", { key: `stats-fum-${tp[0]}` }, tp[1].fumbleNum))}
                     </tr>
-                    <tr>
+                    <tr className='indent1'>
                         <td>内100ファン</td>
                         {list.map(tp => createElement("td", { key: `stats-spfum-${tp[0]}` }, tp[1].spFumbleNum))}
                     </tr>

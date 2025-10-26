@@ -21,6 +21,10 @@ table {
         border-top: 2px solid white;
     }
 
+    tr.indent1 td:first-child {
+        padding-left: 2em;
+    }
+
     tr:hover {
         background-color: #ca059263;
     }
