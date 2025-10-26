@@ -190,7 +190,7 @@ const StatTable = (props: StatTableProps) => {
             <tbody>
                 {props.data.map((data, i) => {
                     return (
-                        <tr key={`${data.title}-${i}`} className={`${data.indent ? "indent1" : ""} ${data.separate ? "separate" : ""}`}>
+                        <tr key={`${data.title}-${i}`} className={`${data.indent ? "indent1" : ""} ${data.separate || i === 0 ? "separate" : ""}`}>
                             <td>{data.title}</td>
                             {data.values.map((val, i) => <td key={`${props.characters[i]}-${data.title}`}>{val}</td>)}
                         </tr>
