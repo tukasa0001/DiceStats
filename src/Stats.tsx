@@ -3,6 +3,7 @@ import './App.css'
 import { LogCtx } from './App';
 import parseCcfoliaLog from './ccfoliaLog/CcfoliaLog';
 import { CoCSkillRollMessage } from './ccfoliaLog/message/CoCSkillRollMessage';
+import "./Stats.css"
 
 class Stat {
     skillRollNum: number = 0;
@@ -68,7 +69,7 @@ const Stats: FC = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
+                    <tr className="separate">
                         <td>技能振り回数</td>
                         {list.map(tp => createElement("td", { key: `stats-rollnum-${tp[0]}` }, tp[1].skillRollNum))}
                     </tr>
@@ -76,7 +77,7 @@ const Stats: FC = () => {
                         <td>平均出目</td>
                         {list.map(tp => createElement("td", { key: `stats-rollavg-${tp[0]}` }, tp[1].skillRollNum == 0 ? "N/A" : avgFormatter.format(tp[1].skillRollSum / tp[1].skillRollNum)))}
                     </tr>
-                    <tr>
+                    <tr className="separate">
                         <td>成功</td>
                         {list.map(tp => createElement("td", { key: `stats-success-${tp[0]}` }, tp[1].successNum))}
                     </tr>
