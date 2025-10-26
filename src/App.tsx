@@ -1,13 +1,19 @@
-import { useState } from 'react'
+import { createContext, useState } from 'react'
 import type { FC } from 'react'
 import './App.css'
 import UploadForm from './UploadForm'
 
+type LogState = [string, (React.Dispatch<React.SetStateAction<string>>)];
+export const LogCtx: React.Context<LogState> = createContext(["", a => { }]);
+
 const App: FC = () => {
+    const [log, setLog] = useState("");
+
     return (
-        <>
+        <LogCtx.Provider value={[log, setLog]}>
             <UploadForm />
-        </>
+            <p>{log}</p>
+        </LogCtx.Provider>
     )
 }
 
