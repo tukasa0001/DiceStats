@@ -44,7 +44,7 @@ const UploadForm: FC = () => {
                     }
                 }}></input>
             </form>
-            {parseCcfoliaLog(file).map((msg, i) => createElement("p", { key: i + 3000 }, msg.toString()))}
+            {parseCcfoliaLog(file).map((msg, i) => createElement("p", { key: `ccfolia-log-${i}` }, msg.toString()))}
         </div>
     )
 }
