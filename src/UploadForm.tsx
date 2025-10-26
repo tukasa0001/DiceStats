@@ -32,7 +32,7 @@ const UploadForm: FC = () => {
     }
 
     return (
-        <div className="step">
+        <div className="card">
             <h1>1.ログをアップロード</h1>
             <p>Ccfoliaのログをアップロードしてください</p>
             <form>
