@@ -33,9 +33,13 @@ const UploadForm: FC = () => {
 
     return (
         <div className="card">
-            <h1>1.ログをアップロード</h1>
-            <p>Ccfoliaのログをアップロードしてください</p>
+            <h1>TRPG統計ツール</h1>
+            <p>
+                Ccfoliaのログからダイスロールなどの統計を取得します。<br />
+                CoC6版のみ対応しています。
+            </p>
             <form>
+                <label>Ccfoliaのログをアップロードしてください： </label>
                 <input type="file" accept=".html,.htm" onChange={e => {
                     if (e.target.files != null) {
                         const file = e.target.files[0];
