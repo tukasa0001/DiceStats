@@ -63,6 +63,7 @@ const Stats: FC = () => {
 
     return (
         <div className="card">
+            <h1>統計情報</h1>
             <table>
                 <thead>
                     <tr>
