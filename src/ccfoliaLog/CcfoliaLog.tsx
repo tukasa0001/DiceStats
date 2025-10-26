@@ -1,5 +1,6 @@
 import { CcfoliaMessage } from "./message/CcfoliaMessage";
 import { CoCSkillRollMessage } from "./message/CoCSkillRollMessage";
+import { ParamChangeMessage } from "./message/ParamChangeMessage";
 import { TalkMessage } from "./message/TalkMessasge";
 
 const parseCcfoliaLog = (log: string): CcfoliaMessage[] => {
@@ -15,7 +16,14 @@ const parseCcfoliaLog = (log: string): CcfoliaMessage[] => {
         const name = span[1].textContent.trim();
         const text = span[2].textContent.trim();
 
-        if (text.startsWith("CCB<=")) {
+        if (name === "system") {
+            // [ {name} ] {param} : {prev} → {value}
+            const regex = text.match(/\[ (.+) \] (.+) : ([0-9]+) → ([0-9]+)/);
+            if (regex === null) continue;
+            msgs.push(new ParamChangeMessage(channel, regex[1], regex[2], Number(regex[3]), Number(regex[4])));
+            console.log(regex);
+        }
+        else if (text.startsWith("CCB<=")) {
             // CCB<={successValue} 【{skillName}】 (1D100<={successValue}) ＞ {diceValue} ＞ {結果}
             const successValue = Number(text.match(/CCB<=([0-9]*)/)?.[1] ?? "0");
             const skillName = text.match(/【(.*)】/)?.[1] ?? "";
