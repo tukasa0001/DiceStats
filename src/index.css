@@ -71,9 +71,3 @@ button:focus-visible {
         background-color: #f9f9f9;
     }
 }
-
-div.step {
-    border: 2px solid #646cff;
-    padding: 1em;
-    border-radius: 1em;
-}
