@@ -77,6 +77,14 @@ const Stats: FC = () => {
                         {list.map(tp => createElement("td", { key: `stats-rollavg-${tp[0]}` }, tp[1].skillRollNum == 0 ? "N/A" : avgFormatter.format(tp[1].skillRollSum / tp[1].skillRollNum)))}
                     </tr>
                     <tr>
+                        <td>成功</td>
+                        {list.map(tp => createElement("td", { key: `stats-success-${tp[0]}` }, tp[1].successNum))}
+                    </tr>
+                    <tr>
+                        <td>失敗</td>
+                        {list.map(tp => createElement("td", { key: `stats-fail-${tp[0]}` }, tp[1].failNum))}
+                    </tr>
+                    <tr>
                         <td>クリティカル</td>
                         {list.map(tp => createElement("td", { key: `stats-crit-${tp[0]}` }, tp[1].criticalNum))}
                     </tr>
