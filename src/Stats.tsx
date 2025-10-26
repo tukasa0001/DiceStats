@@ -127,19 +127,19 @@ const Stats: FC = () => {
                         .join(", ") + ` (${sorted[0][1]}回)`; // 技能名を結合し、末尾に回数を付け加える
                 })),
 
-                Data("成功数", list.map(tp => tp[1].successNum)),
+                Data("成功数", list.map(tp => tp[1].successNum), { separate: true }),
                 Data("失敗数", list.map(tp => tp[1].failNum)),
                 Data("クリティカル数", list.map(tp => tp[1].criticalNum)),
-                Data("内1クリ", list.map(tp => tp[1].spCriticalNum), true),
+                Data("内1クリ", list.map(tp => tp[1].spCriticalNum), { indent: true }),
                 Data("ファンブル数", list.map(tp => tp[1].fumbleNum)),
-                Data("内100ファン", list.map(tp => tp[1].spFumbleNum), true),
+                Data("内100ファン", list.map(tp => tp[1].spFumbleNum), { indent: true }),
 
-                Data("成功率", list.map(tp => percentageFormatter.format(tp[1].successNum / tp[1].skillRollNum))),
+                Data("成功率", list.map(tp => percentageFormatter.format(tp[1].successNum / tp[1].skillRollNum)), { separate: true }),
                 Data("失敗率", list.map(tp => percentageFormatter.format(tp[1].failNum / tp[1].skillRollNum))),
                 Data("クリティカル率", list.map(tp => percentageFormatter.format(tp[1].criticalNum / tp[1].skillRollNum))),
-                Data("内1クリ", list.map(tp => percentageFormatter.format(tp[1].spCriticalNum / tp[1].skillRollNum)), true),
+                Data("内1クリ", list.map(tp => percentageFormatter.format(tp[1].spCriticalNum / tp[1].skillRollNum)), { indent: true }),
                 Data("ファンブル率", list.map(tp => percentageFormatter.format(tp[1].fumbleNum / tp[1].skillRollNum))),
-                Data("内100ファン", list.map(tp => percentageFormatter.format(tp[1].spFumbleNum / tp[1].skillRollNum)), true)
+                Data("内100ファン", list.map(tp => percentageFormatter.format(tp[1].spFumbleNum / tp[1].skillRollNum)), { indent: true })
             ]} />
 
             <h2>ステータス統計</h2>
@@ -161,7 +161,8 @@ type StatTableProps = {
 type StatTableData = {
     title: string,
     values: (string | number)[],
-    indent: boolean
+    indent: boolean,
+    separate: boolean
 };
 
 const StatTable = (props: StatTableProps) => {
@@ -174,9 +175,9 @@ const StatTable = (props: StatTableProps) => {
                 </tr>
             </thead>
             <tbody>
-                {props.data.map(data => {
+                {props.data.map((data, i) => {
                     return (
-                        <tr key={data.title} className={data.indent ? "indent1" : ""}>
+                        <tr key={`${data.title}-${i}`} className={`${data.indent ? "indent1" : ""} ${data.separate ? "separate" : ""}`}>
                             <td>{data.title}</td>
                             {data.values.map((val, i) => <td key={`${props.characters[i]}-${data.title}`}>{val}</td>)}
                         </tr>
@@ -187,11 +188,12 @@ const StatTable = (props: StatTableProps) => {
     )
 }
 
-const Data = (title: string, values: (string | number)[], indent: boolean = false): StatTableData => {
+const Data = (title: string, values: (string | number)[], props: { indent?: boolean, separate?: boolean } = {}): StatTableData => {
     return {
         title: title,
         values: values,
-        indent: indent
+        indent: props.indent ?? false,
+        separate: props.separate ?? false
     }
 }
 

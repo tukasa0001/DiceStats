@@ -18,7 +18,7 @@ table {
     }
 
     tr.separate {
-        border-top: 2px solid white;
+        border-top: 3px solid white;
     }
 
     tr.indent1 td:first-child {
