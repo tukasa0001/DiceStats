@@ -14,6 +14,7 @@ class Stat {
     spCriticalNum: number = 0;
     fumbleNum: number = 0;
     spFumbleNum: number = 0;
+    skillRolls: Map<string, number> = new Map<string, number>();
 };
 
 const Stats: FC = () => {
@@ -49,6 +50,7 @@ const Stats: FC = () => {
                     }
                 }
             }
+            stat.skillRolls.set(msg.skill, (stat.skillRolls.get(msg.skill) ?? 0) + 1);
         }
     }
 
@@ -76,6 +78,21 @@ const Stats: FC = () => {
                     <tr>
                         <td>平均出目</td>
                         {list.map(tp => createElement("td", { key: `stats-rollavg-${tp[0]}` }, tp[1].skillRollNum == 0 ? "N/A" : avgFormatter.format(tp[1].skillRollSum / tp[1].skillRollNum)))}
+                    </tr>
+                    <tr>
+                        <td>一番振った技能</td>
+                        {list.map(tp => {
+                            if (tp[1].skillRolls.size == 0) {
+                                return createElement("td", { key: `stats-mostskill-${tp[0]}` }, "N/A");
+                            }
+                            let sorted = [...tp[1].skillRolls]
+                                .sort((a, b) => b[1] - a[1]); // 技能振り数降順に並べ替え
+                            let skills = sorted
+                                .filter(x => x[1] == sorted[0][1]) // 一番多く振った技能と同じ回数振った技能のみ残す
+                                .map(x => x[0]) // 技能名のみ残す
+                                .join(", ") + ` (${sorted[0][1]}回)`; // 技能名を結合し、末尾に回数を付け加える
+                            return createElement("td", { key: `stats-mostskill-${tp[0]}` }, skills);
+                        })}
                     </tr>
                     <tr className="separate">
                         <td>成功</td>
