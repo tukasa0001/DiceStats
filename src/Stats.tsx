@@ -20,6 +20,9 @@ class Stat {
 
     // ステータス関連
     totalDamage: number = 0;
+    minHealth: number | undefined = undefined;
+    totalLostSAN: number = 0;
+    minSAN: number | undefined = undefined
 };
 
 const Stats: FC = () => {
@@ -27,14 +30,18 @@ const Stats: FC = () => {
     const log = parseCcfoliaLog(file);
 
     const stats = new Map<string, Stat>();
+    const getStat = (name: string) => {
+        let stat = stats.get(name);
+        if (stat === undefined) {
+            stat = new Stat();
+            stats.set(name, stat);
+        }
+        return stat;
+    }
 
     for (let msg of log) {
         if (msg instanceof CoCSkillRollMessage) {
-            let stat = stats.get(msg.sender);
-            if (stat === undefined) {
-                stat = new Stat();
-                stats.set(msg.sender, stat);
-            }
+            const stat = getStat(msg.sender);
             stat.skillRollNum++;
             stat.skillRollSum += msg.diceValue;
             if (msg.isSuccess()) {
@@ -58,14 +65,27 @@ const Stats: FC = () => {
             stat.skillRolls.set(msg.skill, (stat.skillRolls.get(msg.skill) ?? 0) + 1);
         }
         else if (msg instanceof ParamChangeMessage) {
-            if (msg.paramName === "HP" && msg.value < msg.prevValue) {
-                // HP減少
-                let stat = stats.get(msg.sender);
-                if (stat === undefined) {
-                    stat = new Stat();
-                    stats.set(msg.sender, stat);
+            if (msg.paramName === "HP") {
+                // HP変動
+                const stat = getStat(msg.sender);
+                if (stat.minHealth === undefined || msg.value < stat.minHealth) {
+                    stat.minHealth = msg.value;
                 }
-                stat.totalDamage += msg.prevValue - msg.value;
+                if (msg.value < msg.prevValue) {
+                    // HP減少
+                    stat.totalDamage += msg.prevValue - msg.value;
+                }
+            }
+            if (msg.paramName === "SAN") {
+                // SAN変動
+                const stat = getStat(msg.sender);
+                if (stat.minSAN === undefined || msg.value < stat.minSAN) {
+                    stat.minSAN = msg.value;
+                }
+                if (msg.value < msg.prevValue) {
+                    // SAN減少
+                    stat.totalLostSAN += msg.prevValue - msg.value;
+                }
             }
         }
     }
@@ -98,6 +118,14 @@ const Stats: FC = () => {
                 Data("内1クリ", list.map(tp => tp[1].spCriticalNum), true),
                 Data("ファンブル数", list.map(tp => tp[1].fumbleNum)),
                 Data("内100ファン", list.map(tp => tp[1].spFumbleNum), true)
+            ]} />
+
+            <h2>ステータス統計</h2>
+            <StatTable characters={list.map(tp => tp[0])} data={[
+                Data("合計被ダメージ", list.map(tp => tp[1].totalDamage)),
+                Data("最低HP", list.map(tp => tp[1].minHealth ?? "N/A")),
+                Data("合計喪失SAN", list.map(tp => tp[1].totalLostSAN)),
+                Data("最低SAN", list.map(tp => tp[1].minSAN ?? "N/A"))
             ]} />
         </div>
     );
