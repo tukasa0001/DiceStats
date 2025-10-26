@@ -1,4 +1,4 @@
-import { createElement, useContext, type FC } from 'react'
+import { createElement, useContext, useState, type FC } from 'react'
 import './App.css'
 import { LogCtx } from './App';
 import parseCcfoliaLog from './ccfoliaLog/CcfoliaLog';
@@ -26,6 +26,8 @@ class Stat {
 };
 
 const Stats: FC = () => {
+    const [showPercentage, setShowPercentage] = useState(false);
+
     const [file] = useContext(LogCtx);
     const log = parseCcfoliaLog(file);
 
@@ -97,9 +99,19 @@ const Stats: FC = () => {
         maximumFractionDigits: 2
     });
 
+    const percentageFormatter = Intl.NumberFormat("ja-JP", {
+        style: "percent",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
+
     return (
         <div className="card">
             <h2>技能振り統計</h2>
+            <label>
+                <input type="checkbox" checked={showPercentage} onChange={e => setShowPercentage(e.target.checked)} />
+                割合で表示
+            </label>
             <StatTable characters={list.map(tp => tp[0])} data={[
                 Data("技能振り回数", list.map(tp => tp[1].skillRollNum)),
                 Data("平均出目", list.map(tp => tp[1].skillRollNum == 0 ? "N/A" : avgFormatter.format(tp[1].skillRollSum / tp[1].skillRollNum))),
@@ -114,10 +126,20 @@ const Stats: FC = () => {
                         .map(x => x[0]) // 技能名のみ残す
                         .join(", ") + ` (${sorted[0][1]}回)`; // 技能名を結合し、末尾に回数を付け加える
                 })),
+
+                Data("成功数", list.map(tp => tp[1].successNum)),
+                Data("失敗数", list.map(tp => tp[1].failNum)),
                 Data("クリティカル数", list.map(tp => tp[1].criticalNum)),
                 Data("内1クリ", list.map(tp => tp[1].spCriticalNum), true),
                 Data("ファンブル数", list.map(tp => tp[1].fumbleNum)),
-                Data("内100ファン", list.map(tp => tp[1].spFumbleNum), true)
+                Data("内100ファン", list.map(tp => tp[1].spFumbleNum), true),
+
+                Data("成功率", list.map(tp => percentageFormatter.format(tp[1].successNum / tp[1].skillRollNum))),
+                Data("失敗率", list.map(tp => percentageFormatter.format(tp[1].failNum / tp[1].skillRollNum))),
+                Data("クリティカル率", list.map(tp => percentageFormatter.format(tp[1].criticalNum / tp[1].skillRollNum))),
+                Data("内1クリ", list.map(tp => percentageFormatter.format(tp[1].spCriticalNum / tp[1].skillRollNum)), true),
+                Data("ファンブル率", list.map(tp => percentageFormatter.format(tp[1].fumbleNum / tp[1].skillRollNum))),
+                Data("内100ファン", list.map(tp => percentageFormatter.format(tp[1].spFumbleNum / tp[1].skillRollNum)), true)
             ]} />
 
             <h2>ステータス統計</h2>
