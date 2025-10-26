@@ -80,70 +80,69 @@ const Stats: FC = () => {
     return (
         <div className="card">
             <h2>技能振り統計</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>-</th>
-                        {list.map((tp) => tp[0]).map(name => createElement("th", { key: `stats-table-head-${name}` }, name))}
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr className="separate">
-                        <td>技能振り回数</td>
-                        {list.map(tp => createElement("td", { key: `stats-rollnum-${tp[0]}` }, tp[1].skillRollNum))}
-                    </tr>
-                    <tr>
-                        <td>平均出目</td>
-                        {list.map(tp => createElement("td", { key: `stats-rollavg-${tp[0]}` }, tp[1].skillRollNum == 0 ? "N/A" : avgFormatter.format(tp[1].skillRollSum / tp[1].skillRollNum)))}
-                    </tr>
-                    <tr>
-                        <td>一番振った技能</td>
-                        {list.map(tp => {
-                            if (tp[1].skillRolls.size == 0) {
-                                return createElement("td", { key: `stats-mostskill-${tp[0]}` }, "N/A");
-                            }
-                            let sorted = [...tp[1].skillRolls]
-                                .sort((a, b) => b[1] - a[1]); // 技能振り数降順に並べ替え
-                            let skills = sorted
-                                .filter(x => x[1] == sorted[0][1]) // 一番多く振った技能と同じ回数振った技能のみ残す
-                                .map(x => x[0]) // 技能名のみ残す
-                                .join(", ") + ` (${sorted[0][1]}回)`; // 技能名を結合し、末尾に回数を付け加える
-                            return createElement("td", { key: `stats-mostskill-${tp[0]}` }, skills);
-                        })}
-                    </tr>
-                    <tr className="separate">
-                        <td>成功</td>
-                        {list.map(tp => createElement("td", { key: `stats-success-${tp[0]}` }, tp[1].successNum))}
-                    </tr>
-                    <tr>
-                        <td>失敗</td>
-                        {list.map(tp => createElement("td", { key: `stats-fail-${tp[0]}` }, tp[1].failNum))}
-                    </tr>
-                    <tr>
-                        <td>クリティカル</td>
-                        {list.map(tp => createElement("td", { key: `stats-crit-${tp[0]}` }, tp[1].criticalNum))}
-                    </tr>
-                    <tr className='indent1'>
-                        <td>内1クリ</td>
-                        {list.map(tp => createElement("td", { key: `stats-spcrit-${tp[0]}` }, tp[1].spCriticalNum))}
-                    </tr>
-                    <tr>
-                        <td>ファンブル</td>
-                        {list.map(tp => createElement("td", { key: `stats-fum-${tp[0]}` }, tp[1].fumbleNum))}
-                    </tr>
-                    <tr className='indent1'>
-                        <td>内100ファン</td>
-                        {list.map(tp => createElement("td", { key: `stats-spfum-${tp[0]}` }, tp[1].spFumbleNum))}
-                    </tr>
-
-                    <tr className="separate">
-                        <td>受けたダメージ</td>
-                        {list.map(tp => createElement("td", { key: `stats-damage-${tp[0]}` }, tp[1].totalDamage))}
-                    </tr>
-                </tbody>
-            </table>
+            <StatTable characters={list.map(tp => tp[0])} data={[
+                Data("技能振り回数", list.map(tp => tp[1].skillRollNum)),
+                Data("平均出目", list.map(tp => tp[1].skillRollNum == 0 ? "N/A" : avgFormatter.format(tp[1].skillRollSum / tp[1].skillRollNum))),
+                Data("一番振った技能", list.map(tp => {
+                    if (tp[1].skillRolls.size == 0) {
+                        return "N/A";
+                    }
+                    let sorted = [...tp[1].skillRolls]
+                        .sort((a, b) => b[1] - a[1]); // 技能振り数降順に並べ替え
+                    return sorted
+                        .filter(x => x[1] == sorted[0][1]) // 一番多く振った技能と同じ回数振った技能のみ残す
+                        .map(x => x[0]) // 技能名のみ残す
+                        .join(", ") + ` (${sorted[0][1]}回)`; // 技能名を結合し、末尾に回数を付け加える
+                })),
+                Data("クリティカル数", list.map(tp => tp[1].criticalNum)),
+                Data("内1クリ", list.map(tp => tp[1].spCriticalNum), true),
+                Data("ファンブル数", list.map(tp => tp[1].fumbleNum)),
+                Data("内100ファン", list.map(tp => tp[1].spFumbleNum), true)
+            ]} />
         </div>
+    );
+}
+
+type StatTableProps = {
+    characters: string[],
+    data: StatTableData[]
+};
+
+type StatTableData = {
+    title: string,
+    values: (string | number)[],
+    indent: boolean
+};
+
+const StatTable = (props: StatTableProps) => {
+    return (
+        <table>
+            <thead>
+                <tr>
+                    <th>-</th>
+                    {props.characters.map(name => <th key={name}>{name}</th>)}
+                </tr>
+            </thead>
+            <tbody>
+                {props.data.map(data => {
+                    return (
+                        <tr key={data.title} className={data.indent ? "indent1" : ""}>
+                            <td>{data.title}</td>
+                            {data.values.map((val, i) => <td key={`${props.characters[i]}-${data.title}`}>{val}</td>)}
+                        </tr>
+                    )
+                })}
+            </tbody>
+        </table>
     )
+}
+
+const Data = (title: string, values: (string | number)[], indent: boolean = false): StatTableData => {
+    return {
+        title: title,
+        values: values,
+        indent: indent
+    }
 }
 
 export default Stats
