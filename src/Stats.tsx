@@ -26,8 +26,6 @@ class Stat {
 };
 
 const Stats: FC = () => {
-    const [showPercentage, setShowPercentage] = useState(false);
-
     const [file] = useContext(LogCtx);
     const log = parseCcfoliaLog(file);
 
@@ -108,10 +106,6 @@ const Stats: FC = () => {
     return (
         <div className="card">
             <h2>技能振り統計</h2>
-            <label>
-                <input type="checkbox" checked={showPercentage} onChange={e => setShowPercentage(e.target.checked)} />
-                割合で表示
-            </label>
             <StatTable characters={list.map(tp => tp[0])} data={[
                 Data("技能振り回数", list.map(tp => tp[1].skillRollNum)),
                 Data("平均出目", list.map(tp => tp[1].skillRollNum == 0 ? "N/A" : avgFormatter.format(tp[1].skillRollSum / tp[1].skillRollNum))),
