@@ -21,7 +21,6 @@ const parseCcfoliaLog = (log: string): CcfoliaMessage[] => {
             const regex = text.match(/\[ (.+) \] (.+) : ([0-9]+) → ([0-9]+)/);
             if (regex === null) continue;
             msgs.push(new ParamChangeMessage(channel, regex[1], regex[2], Number(regex[3]), Number(regex[4])));
-            console.log(regex);
         }
         else if (text.startsWith("CCB<=")) {
             // CCB<={successValue} 【{skillName}】 (1D100<={successValue}) ＞ {diceValue} ＞ {結果}
