@@ -10,25 +10,6 @@ const UploadForm: FC = () => {
     const onFileChanged = async (file: File) => {
         const str = await file.text();
         setFile(str);
-
-        // === 簡易統計処理 ===
-        const logs = parseCcfoliaLog(str);
-        console.log("==stats==")
-        let table: any = {};
-        logs.forEach(msg => {
-            let dice = msg as CoCSkillRollMessage;
-            if (table[dice.sender] == undefined) {
-                table[dice.sender] = { crit: 0, fum: 0 };
-            }
-            if (dice.isCritical()) {
-                table[dice.sender].crit += 1;
-            }
-            if (dice.isFumble()) {
-                table[dice.sender].fum += 1;
-            }
-        });
-
-        console.log(table);
     }
 
     return (
