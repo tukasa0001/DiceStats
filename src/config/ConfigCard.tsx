@@ -20,22 +20,24 @@ const ConfigCard = (props: ConfigCardProps) => {
                     ある名前を別の名前として処理します<br />
                     名前を省略できるほか、複数の名前の記録を統合することもできます
                 </p>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>元の名前</th>
-                            <th>読み替え後の名前</th>
-                            <th>削除</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {config.nameAliases.map(([before, after], i) => <tr key={i}>
-                            <td><input type="text" value={before} onChange={e => setConf(config.changed(c => c.nameAliases[i][0] = e.target.value))} /></td>
-                            <td><input type="text" value={after} onChange={e => setConf(config.changed(c => c.nameAliases[i][1] = e.target.value))} /></td>
-                            <td><button onClick={() => setConf(config.changed(c => c.nameAliases.splice(i, 1)))}>削除</button></td>
-                        </tr>)}
-                    </tbody>
-                </table>
+                {config.nameAliases.length === 0 ? "" :
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>元の名前</th>
+                                <th>読み替え後の名前</th>
+                                <th>削除</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {config.nameAliases.map(([before, after], i) => <tr key={i}>
+                                <td><input type="text" value={before} onChange={e => setConf(config.changed(c => c.nameAliases[i][0] = e.target.value))} /></td>
+                                <td><input type="text" value={after} onChange={e => setConf(config.changed(c => c.nameAliases[i][1] = e.target.value))} /></td>
+                                <td><button onClick={() => setConf(config.changed(c => c.nameAliases.splice(i, 1)))}>削除</button></td>
+                            </tr>)}
+                        </tbody>
+                    </table>
+                }
                 <button onClick={() => setConf(config.changed(c => c.nameAliases.push(["", ""])))}>追加</button>
             </>} />
         </div>
