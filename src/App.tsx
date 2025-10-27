@@ -8,13 +8,13 @@ import DisplayConfig from './config/DisplayConfig';
 
 const App: FC = () => {
     const [log, setLog] = useState<string | undefined>(undefined);
-    const [config] = useState(new DisplayConfig());
+    const [config, setConfig] = useState(new DisplayConfig());
 
     return (
         <>
             <UploadForm onLogFileChanged={setLog} />
             {log !== undefined ? <Stats logFile={log} /> : ""}
-            <ConfigCard config={config} />
+            <ConfigCard config={config} onConfigChanged={setConfig} />
         </>
     )
 }

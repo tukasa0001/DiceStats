@@ -3,11 +3,13 @@ import DisplayConfig from "./DisplayConfig";
 import "./ConfigCard.css"
 
 type ConfigCardProps = {
-    config: DisplayConfig
+    config: DisplayConfig,
+    onConfigChanged: (x: DisplayConfig) => void
 }
 
 const ConfigCard = (props: ConfigCardProps) => {
     const config = props.config;
+    const setConf = props.onConfigChanged;
     const [show, setShow] = useState(false);
 
     return (
@@ -28,13 +30,13 @@ const ConfigCard = (props: ConfigCardProps) => {
                     </thead>
                     <tbody>
                         {config.nameAliases.map(([before, after], i) => <tr key={i}>
-                            <td><input type="text" value={before} onChange={e => config.nameAliases[i][0] = e.target.value} /></td>
-                            <td><input type="text" value={after} onChange={e => config.nameAliases[i][1] = e.target.value} /></td>
-                            <td><button onClick={() => config.nameAliases.splice(i, 1)}>削除</button></td>
+                            <td><input type="text" value={before} onChange={e => setConf(config.changed(c => c.nameAliases[i][0] = e.target.value))} /></td>
+                            <td><input type="text" value={after} onChange={e => setConf(config.changed(c => c.nameAliases[i][1] = e.target.value))} /></td>
+                            <td><button onClick={() => setConf(config.changed(c => c.nameAliases.splice(i, 1)))}>削除</button></td>
                         </tr>)}
                     </tbody>
                 </table>
-                <button onClick={() => config.nameAliases.push(["", ""])}>追加</button>
+                <button onClick={() => setConf(config.changed(c => c.nameAliases.push(["", ""])))}>追加</button>
             </>} />
         </div>
     )
