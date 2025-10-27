@@ -7,12 +7,19 @@ type ConfigCardProps = {
 }
 
 const ConfigCard = (props: ConfigCardProps) => {
+    const config = props.config;
     const [show, setShow] = useState(false);
 
     return (
         <div className="card">
             <h2>詳細設定</h2>
-            <ToggleBox title="名前を読み替える" elem={<p>todo</p>} />
+            <ToggleBox title="名前の読み替え設定" elem={<>
+                <p>
+                    ある名前を別の名前として処理します<br />
+                    名前を省略できるほか、複数の名前の記録を統合することもできます
+                </p>
+
+            </>} />
         </div>
     )
 }
@@ -22,7 +29,7 @@ const ToggleBox = (props: { title: string, elem: JSX.Element }) => {
 
     return (
         <div>
-            <p className="toggleButton" onClick={() => setShow(!show)}>{`${show ? "▼" : "▶"} ${props.title}`}</p>
+            <button className="toggleButton" onClick={() => setShow(!show)}>{`${show ? "▼" : "▶"} ${props.title}`}</button>
             {show ? <div className="toggleBox">{props.elem}</div> : null}
         </div>
     );
