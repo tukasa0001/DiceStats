@@ -5,3 +5,32 @@
 .toggleBox {
     margin-left: 3em;
 }
+
+table.nameAliasTable {
+
+    margin-bottom: 1em;
+
+    th {
+        padding: 0 1em;
+    }
+
+    td:not(.del) {
+        padding: 0;
+        width: 15em;
+
+        input {
+            width: 90%;
+            margin: 0 5%;
+        }
+    }
+
+    td.del {
+        padding: 0;
+        width: 6em;
+
+        button {
+            width: 80%;
+            margin: 0.25em 10%;
+        }
+    }
+}

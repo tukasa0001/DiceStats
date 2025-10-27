@@ -21,19 +21,26 @@ const ConfigCard = (props: ConfigCardProps) => {
                     名前を省略できるほか、複数の名前の記録を統合することもできます
                 </p>
                 {config.nameAliases.length === 0 ? "" :
-                    <table>
+                    <table className="nameAliasTable">
                         <thead>
                             <tr>
                                 <th>元の名前</th>
                                 <th>読み替え後の名前</th>
-                                <th>削除</th>
+                                <th className="del">削除</th>
                             </tr>
                         </thead>
                         <tbody>
                             {config.nameAliases.map(([before, after], i) => <tr key={i}>
-                                <td><input type="text" value={before} onChange={e => setConf(config.changed(c => c.nameAliases[i][0] = e.target.value))} /></td>
-                                <td><input type="text" value={after} onChange={e => setConf(config.changed(c => c.nameAliases[i][1] = e.target.value))} /></td>
-                                <td><button onClick={() => setConf(config.changed(c => c.nameAliases.splice(i, 1)))}>削除</button></td>
+                                <td><input type="text"
+                                    value={before}
+                                    onChange={e => setConf(config.changed(c => c.nameAliases[i][0] = e.target.value))}
+                                /></td>
+                                <td><input type="text"
+                                    value={after}
+                                    onChange={e => setConf(config.changed(c => c.nameAliases[i][1] = e.target.value))}
+                                    placeholder="（統計から除外）"
+                                /></td>
+                                <td className="del"><button onClick={() => setConf(config.changed(c => c.nameAliases.splice(i, 1)))}>削除</button></td>
                             </tr>)}
                         </tbody>
                     </table>
