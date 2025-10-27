@@ -1,31 +1,10 @@
-table {
-    border-collapse: collapse;
-
-    th,
-    td {
-        border: 1px solid white;
-        padding-left: 1em;
-        padding-right: 1em;
-    }
-
-    th {
-        text-align: center;
-    }
-
+table.stats {
     td:not(:first-child) {
         text-align: right;
         padding-right: 2em;
     }
 
-    tr.separate {
-        border-top: 3px solid white;
-    }
-
     tr.indent1 td:first-child {
         padding-left: 2em;
-    }
-
-    tr:hover {
-        background-color: #ca059263;
     }
 }

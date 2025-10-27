@@ -194,7 +194,7 @@ type StatTableData = {
 
 const StatTable = (props: StatTableProps) => {
     return (
-        <table>
+        <table className='stats'>
             <thead>
                 <tr>
                     <th>-</th>

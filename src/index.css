@@ -71,3 +71,26 @@ button:focus-visible {
         background-color: #f9f9f9;
     }
 }
+
+table {
+    border-collapse: collapse;
+
+    th,
+    td {
+        border: 1px solid white;
+        padding-left: 1em;
+        padding-right: 1em;
+    }
+
+    th {
+        text-align: center;
+    }
+
+    tr.separate {
+        border-top: 3px solid white;
+    }
+
+    tr:hover {
+        background-color: #ca059263;
+    }
+}
