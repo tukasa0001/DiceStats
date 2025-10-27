@@ -50,7 +50,16 @@ const Stats = (props: StatsProps) => {
         return stat;
     }
 
+    let isStarted: boolean = props.config.startMessage === "";
     for (let msg of log) {
+        // 開始メッセージまで無視
+        if (!isStarted && msg instanceof TalkMessage && props.config.startMessage === msg.text) {
+            isStarted = true;
+        }
+        if (!isStarted) {
+            continue;
+        }
+
         let sender = msg.sender;
         for (let [before, after] of props.config.nameAliases) {
             if (sender === before) {
@@ -134,6 +143,7 @@ const Stats = (props: StatsProps) => {
     return (
         <div className="card">
             <h2>技能振り統計</h2>
+            {isStarted ? "" : <p>開始メッセージが見つかりませんでした</p>}
             <StatTable characters={skills.map(tp => tp[0])} data={[
                 Data("技能振り回数", skills.map(tp => tp[1].skillRollNum)),
                 Data("平均出目", skills.map(tp => tp[1].skillRollNum == 0 ? "N/A" : avgFormatter.format(tp[1].skillRollSum / tp[1].skillRollNum))),

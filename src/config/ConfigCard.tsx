@@ -47,6 +47,17 @@ const ConfigCard = (props: ConfigCardProps) => {
                 }
                 <button onClick={() => setConf(config.changed(c => c.nameAliases.push(["", ""])))}>追加</button>
             </>} />
+
+            <ToggleBox title="特定の発言から開始" elem={<>
+                <p>
+                    指定した発言から先の統計を取ります
+                </p>
+                <input type="text"
+                    value={config.startMessage}
+                    onChange={e => setConf(config.changed(c => c.startMessage = e.target.value.trim()))}
+                    placeholder=""
+                />
+            </>} />
         </div>
     )
 }
@@ -55,9 +66,9 @@ const ToggleBox = (props: { title: string, elem: JSX.Element }) => {
     const [show, setShow] = useState(false);
 
     return (
-        <div>
+        <div className="toggleBox">
             <button className="toggleButton" onClick={() => setShow(!show)}>{`${show ? "▼" : "▶"} ${props.title}`}</button>
-            {show ? <div className="toggleBox">{props.elem}</div> : null}
+            {show ? <div>{props.elem}</div> : null}
         </div>
     );
 }

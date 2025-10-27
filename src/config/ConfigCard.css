@@ -2,8 +2,12 @@
     cursor: pointer;
 }
 
-.toggleBox {
-    margin-left: 3em;
+div.toggleBox {
+    margin-bottom: 1em;
+
+    div {
+        margin-left: 3em;
+    }
 }
 
 table.nameAliasTable {

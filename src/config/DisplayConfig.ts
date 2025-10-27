@@ -1,5 +1,6 @@
 export default class DisplayConfig {
-    nameAliases: [string, string][] = []
+    nameAliases: [string, string][] = [];
+    startMessage: string = "";
 
     clone(): DisplayConfig {
         const conf = new DisplayConfig();
