@@ -5,6 +5,7 @@ import "./Stats.css"
 import { ParamChangeMessage } from './ccfoliaLog/message/ParamChangeMessage';
 import { TalkMessage } from './ccfoliaLog/message/TalkMessasge';
 import DisplayConfig from './config/DisplayConfig';
+import { SanityCheckMessage } from './ccfoliaLog/message/SanityCheckMessage';
 
 class SkillStat {
     // 技能関連
@@ -18,6 +19,13 @@ class SkillStat {
     spFumbleNum: number = 0;
     skillRolls: Map<string, number> = new Map<string, number>();
 }
+class SanityCheckStat {
+    // SANチェック
+    checkNum: number = 0;
+    successNum: number = 0;
+    criticalNum: number = 0;
+    fumbleNum: number = 0;
+};
 class StatusStat {
     // ステータス関連
     totalDamage: number = 0;
@@ -40,6 +48,7 @@ const Stats = (props: StatsProps) => {
 
     const skillStats = new Map<string, SkillStat>();
     const statusStats = new Map<string, StatusStat>();
+    const sanityCheckStatus = new Map<string, SanityCheckStat>();
     const otherStats = new Map<string, OtherStat>();
     const getStat = <T,>(map: Map<string, T>, name: string, factory: new () => T): T => {
         let stat = map.get(name);
@@ -119,6 +128,13 @@ const Stats = (props: StatsProps) => {
                 }
             }
         }
+        else if (msg instanceof SanityCheckMessage) {
+            const stat = getStat(sanityCheckStatus, sender, SanityCheckStat);
+            stat.checkNum++;
+            if (msg.isSuccess()) stat.successNum++;
+            if (msg.isCritical()) stat.criticalNum++;
+            if (msg.isFumble()) stat.fumbleNum++;
+        }
         else if (msg instanceof TalkMessage) {
             const stat = getStat(otherStats, sender, OtherStat);
             stat.talkNum++;
@@ -127,6 +143,7 @@ const Stats = (props: StatsProps) => {
 
     const skills = [...skillStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
     const status = [...statusStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
+    const sanity = [...sanityCheckStatus].sort((a, b) => a[0].localeCompare(b[0], "ja"));
     const others = [...otherStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
 
     const avgFormatter = Intl.NumberFormat("ja-JP", {
@@ -180,6 +197,15 @@ const Stats = (props: StatsProps) => {
                 Data("最低HP", status.map(tp => tp[1].minHealth ?? "N/A")),
                 Data("合計喪失SAN", status.map(tp => tp[1].totalLostSAN)),
                 Data("最低SAN", status.map(tp => tp[1].minSAN ?? "N/A"))
+            ]} />
+            <h2>SANチェック統計</h2>
+            <StatTable characters={sanity.map(tp => tp[0])} data={[
+                Data("合計回数", sanity.map(tp => tp[1].checkNum)),
+                Data("成功回数", sanity.map(tp => tp[1].successNum)),
+                Data("失敗回数", sanity.map(tp => tp[1].checkNum - tp[1].successNum)),
+                Data("成功率", sanity.map(tp => tp[1].checkNum == 0 ? "N/A" : percentageFormatter.format(tp[1].successNum / tp[1].checkNum))),
+                Data("クリティカル回数", sanity.map(tp => tp[1].criticalNum), { separate: true }),
+                Data("ファンブル回数", sanity.map(tp => tp[1].fumbleNum))
             ]} />
 
             <h2>その他の統計</h2>
