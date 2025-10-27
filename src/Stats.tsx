@@ -1,6 +1,4 @@
-import { createElement, useContext, useState, type FC } from 'react'
 import './App.css'
-import { LogCtx } from './App';
 import parseCcfoliaLog from './ccfoliaLog/CcfoliaLog';
 import { CoCSkillRollMessage } from './ccfoliaLog/message/CoCSkillRollMessage';
 import "./Stats.css"
@@ -31,9 +29,12 @@ class OtherStat {
     talkNum: number = 0;
 };
 
-const Stats: FC = () => {
-    const [file] = useContext(LogCtx);
-    const log = parseCcfoliaLog(file);
+type StatsProps = {
+    logFile: string
+}
+
+const Stats = (props: StatsProps) => {
+    const log = parseCcfoliaLog(props.logFile);
 
     const skillStats = new Map<string, SkillStat>();
     const statusStats = new Map<string, StatusStat>();

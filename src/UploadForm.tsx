@@ -1,15 +1,11 @@
-import { createElement, useContext, useState } from 'react'
-import type { FC } from 'react'
-import parseCcfoliaLog from "./ccfoliaLog/CcfoliaLog"
-import { CoCSkillRollMessage } from './ccfoliaLog/message/CoCSkillRollMessage';
-import { LogCtx } from './App';
+type UploadFormProps = {
+    onLogFileChanged: (x: string) => void
+};
 
-const UploadForm: FC = () => {
-    const [file, setFile] = useContext(LogCtx);
-
+const UploadForm = (props: UploadFormProps) => {
     const onFileChanged = async (file: File) => {
         const str = await file.text();
-        setFile(str);
+        props.onLogFileChanged(str);
     }
 
     return (
