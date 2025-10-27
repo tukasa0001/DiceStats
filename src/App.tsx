@@ -5,12 +5,12 @@ import UploadForm from './UploadForm'
 import Stats from './Stats';
 
 const App: FC = () => {
-    const [log, setLog] = useState("");
+    const [log, setLog] = useState<string | undefined>(undefined);
 
     return (
         <>
             <UploadForm onLogFileChanged={setLog} />
-            <Stats logFile={log} />
+            {log !== undefined ? <Stats logFile={log} /> : ""}
         </>
     )
 }
