@@ -13,7 +13,7 @@ const App: FC = () => {
     return (
         <>
             <UploadForm onLogFileChanged={setLog} />
-            {log !== undefined ? <Stats logFile={log} /> : ""}
+            {log !== undefined ? <Stats logFile={log} config={config} /> : ""}
             <ConfigCard config={config} onConfigChanged={setConfig} />
         </>
     )

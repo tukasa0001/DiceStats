@@ -4,6 +4,7 @@ import { CoCSkillRollMessage } from './ccfoliaLog/message/CoCSkillRollMessage';
 import "./Stats.css"
 import { ParamChangeMessage } from './ccfoliaLog/message/ParamChangeMessage';
 import { TalkMessage } from './ccfoliaLog/message/TalkMessasge';
+import DisplayConfig from './config/DisplayConfig';
 
 class SkillStat {
     // 技能関連
@@ -31,6 +32,7 @@ class OtherStat {
 
 type StatsProps = {
     logFile: string
+    config: DisplayConfig
 }
 
 const Stats = (props: StatsProps) => {
@@ -49,8 +51,19 @@ const Stats = (props: StatsProps) => {
     }
 
     for (let msg of log) {
+        let sender = msg.sender;
+        for (let [before, after] of props.config.nameAliases) {
+            if (sender === before) {
+                sender = after;
+                break;
+            }
+        }
+        // 送信者名が空文字列の場合は無視
+        if (sender === "") {
+            continue;
+        }
         if (msg instanceof CoCSkillRollMessage) {
-            const stat = getStat(skillStats, msg.sender, SkillStat);
+            const stat = getStat(skillStats, sender, SkillStat);
             stat.skillRollNum++;
             stat.skillRollSum += msg.diceValue;
             if (msg.isSuccess()) {
@@ -76,7 +89,7 @@ const Stats = (props: StatsProps) => {
         else if (msg instanceof ParamChangeMessage) {
             if (msg.paramName === "HP") {
                 // HP変動
-                const stat = getStat(statusStats, msg.sender, StatusStat);
+                const stat = getStat(statusStats, sender, StatusStat);
                 if (stat.minHealth === undefined || msg.value < stat.minHealth) {
                     stat.minHealth = msg.value;
                 }
@@ -87,7 +100,7 @@ const Stats = (props: StatsProps) => {
             }
             if (msg.paramName === "SAN") {
                 // SAN変動
-                const stat = getStat(statusStats, msg.sender, StatusStat);
+                const stat = getStat(statusStats, sender, StatusStat);
                 if (stat.minSAN === undefined || msg.value < stat.minSAN) {
                     stat.minSAN = msg.value;
                 }
@@ -98,7 +111,7 @@ const Stats = (props: StatsProps) => {
             }
         }
         else if (msg instanceof TalkMessage) {
-            const stat = getStat(otherStats, msg.sender, OtherStat);
+            const stat = getStat(otherStats, sender, OtherStat);
             stat.talkNum++;
         }
     }
