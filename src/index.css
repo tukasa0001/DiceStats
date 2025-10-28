@@ -94,3 +94,16 @@ table {
         background-color: #ca059263;
     }
 }
+
+div.errorBlock {
+    border-left: 4px solid rgb(255, 93, 44);
+    padding: 1em 0 1em 2em;
+}
+
+div.errorBlock::before {
+    color: rgb(255, 130, 93);
+    content: "エラー";
+    font-size: 1.2em;
+    display: block;
+    margin-left: -0.5em;
+}

@@ -64,9 +64,10 @@ const Stats = (props: StatsProps) => {
         // 開始メッセージまで無視
         if (!isStarted && msg instanceof TalkMessage && props.config.startMessage === msg.text) {
             isStarted = true;
-        }
-        if (!isStarted) {
-            continue;
+            skillStats.clear();
+            statusStats.clear();
+            sanityCheckStatus.clear();
+            otherStats.clear();
         }
 
         let sender = msg.sender;
@@ -159,8 +160,11 @@ const Stats = (props: StatsProps) => {
 
     return (
         <div className="card">
+            {isStarted ? "" : <div className="errorBlock">
+                開始メッセージが見つかりませんでした<br />
+                ログの最初からの統計を表示します
+            </div>}
             <h2>技能振り統計</h2>
-            {isStarted ? "" : <p>開始メッセージが見つかりませんでした</p>}
             <StatTable characters={skills.map(tp => tp[0])} data={[
                 Data("技能振り回数", skills.map(tp => tp[1].skillRollNum)),
                 Data("平均出目", skills.map(tp => tp[1].skillRollNum == 0 ? "N/A" : avgFormatter.format(tp[1].skillRollSum / tp[1].skillRollNum))),
