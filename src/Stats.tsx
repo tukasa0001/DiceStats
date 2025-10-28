@@ -61,6 +61,7 @@ class StatusStat {
 class OtherStat {
     // その他
     talkNum: number = 0;
+    charNum: number = 0;
 };
 
 type StatsProps = {
@@ -154,6 +155,7 @@ const Stats = (props: StatsProps) => {
         else if (msg instanceof TalkMessage) {
             const stat = getStat(otherStats, sender, OtherStat);
             stat.talkNum++;
+            stat.charNum += msg.text.length;
         }
     }
 
@@ -255,7 +257,9 @@ const Stats = (props: StatsProps) => {
 
             <h2>その他の統計</h2>
             <StatTable characters={others.map(tp => tp[0])} data={[
-                Data("発言数", others.map(tp => tp[1].talkNum))
+                Data("発言数", others.map(tp => tp[1].talkNum)),
+                Data("発言文字数", others.map(tp => tp[1].charNum)),
+                Data("平均文字数", others.map(tp => avgFormatter.format(tp[1].charNum / tp[1].talkNum))),
             ]} />
         </div>
     );
