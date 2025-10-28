@@ -18,11 +18,9 @@ const parseCcfoliaLog = (log: string): CcfoliaMessage[] => {
         const text = span[2].textContent.trim();
         let reg: RegExpMatchArray | null = null;
 
-        if (name === "system") {
+        if (name === "system" && (reg = text.match(/\[ (.+) \] (.+) : ([0-9]+) → ([0-9]+)/))) {
             // [ {name} ] {param} : {prev} → {value}
-            const regex = text.match(/\[ (.+) \] (.+) : ([0-9]+) → ([0-9]+)/);
-            if (regex === null) continue;
-            msgs.push(new ParamChangeMessage(channel, regex[1], regex[2], Number(regex[3]), Number(regex[4])));
+            msgs.push(new ParamChangeMessage(channel, reg[1], reg[2], Number(reg[3]), Number(reg[4])));
         }
         else if (reg = text.match(/^(S|s)?(CCB|ccb)<=([0-9]+)\s*(【.*】)?\s*\(1D100<=[0-9]+\) ＞ ([0-9]+) ＞/)) {
             // CCB<={successValue} 【{skillName}】 (1D100<={successValue}) ＞ {diceValue} ＞ {結果}
