@@ -30,12 +30,9 @@ const parseCcfoliaLog = (log: string): CcfoliaMessage[] => {
 
             msgs.push(new CoCSkillRollMessage(channel, name, skillName, diceValue, successValue));
         }
-        else if (text.match(/1d100<=[0-9]+ 【正気度ロール】/)) {
+        else if (reg = text.match(/^(S|s)?1d100<=([0-9]+)\s*【正気度ロール】\s*\(1D100<=[0-9]+\) ＞ ([0-9]+) ＞/)) {
             // 1d100<={successValue} 【正気度ロール】 (1D100<={successValue}) ＞ {diceValue} ＞ 成功
-            const regex = text.match(/1d100<=([0-9]+) 【正気度ロール】 \(1D100<=[0-9]+\) ＞ ([0-9]+) ＞/);
-            if (regex === null) continue;
-            console.log("sanity+")
-            msgs.push(new SanityCheckMessage(channel, name, Number(regex[2]), Number(regex[1])));
+            msgs.push(new SanityCheckMessage(channel, name, Number(reg[3]), Number(reg[2])));
         }
         else {
             msgs.push(new TalkMessage(channel, name, text));
