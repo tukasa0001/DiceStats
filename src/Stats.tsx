@@ -279,24 +279,26 @@ type StatTableData = {
 
 const StatTable = (props: StatTableProps) => {
     return (
-        <table className='stats'>
-            <thead>
-                <tr>
-                    <th>-</th>
-                    {props.characters.map(name => <th key={name}>{name}</th>)}
-                </tr>
-            </thead>
-            <tbody>
-                {props.data.map((data, i) => {
-                    return (
-                        <tr key={`${data.title}-${i}`} className={`${data.indent ? "indent1" : ""} ${data.separate || i === 0 ? "separate" : ""}`}>
-                            <td>{data.title}</td>
-                            {data.values.map((val, i) => <td key={`${props.characters[i]}-${data.title}`}>{val}</td>)}
-                        </tr>
-                    )
-                })}
-            </tbody>
-        </table>
+        <div className='statsTable'>
+            <table>
+                <thead>
+                    <tr>
+                        <th>-</th>
+                        {props.characters.map(name => <th key={name}>{name}</th>)}
+                    </tr>
+                </thead>
+                <tbody>
+                    {props.data.map((data, i) => {
+                        return (
+                            <tr key={`${data.title}-${i}`} className={`${data.indent ? "indent1" : ""} ${data.separate || i === 0 ? "separate" : ""}`}>
+                                <td>{data.title}</td>
+                                {data.values.map((val, i) => <td key={`${props.characters[i]}-${data.title}`}>{val}</td>)}
+                            </tr>
+                        )
+                    })}
+                </tbody>
+            </table>
+        </div>
     )
 }
 
