@@ -15,5 +15,5 @@ div.card {
     border: 2px solid #646cff;
     padding: 1em;
     border-radius: 1em;
-    margin-bottom: 2em;
+    margin: 0 auto 2em auto;
 }
