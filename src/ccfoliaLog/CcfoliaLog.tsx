@@ -25,7 +25,7 @@ const parseCcfoliaLog = (log: string): CcfoliaMessage[] => {
         else if (reg = text.match(/^(S|s)?(CCB|ccb)<=([0-9]+)\s*(【.*】)?\s*\(1D100<=[0-9]+\) ＞ ([0-9]+) ＞/)) {
             // CCB<={successValue} 【{skillName}】 (1D100<={successValue}) ＞ {diceValue} ＞ {結果}
             const successValue = Number(reg[3]);
-            const skillName = reg[4] ?? "不明な技能";
+            const skillName = reg[4].substring(1, reg[4].length - 1) ?? "不明な技能";
             const diceValue = Number(reg[5]);
 
             msgs.push(new CoCSkillRollMessage(channel, name, skillName, diceValue, successValue, reg[1] !== undefined));
