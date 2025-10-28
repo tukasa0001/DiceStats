@@ -6,6 +6,7 @@ import { ParamChangeMessage } from './ccfoliaLog/message/ParamChangeMessage';
 import { TalkMessage } from './ccfoliaLog/message/TalkMessasge';
 import DisplayConfig from './config/DisplayConfig';
 import { SanityCheckMessage } from './ccfoliaLog/message/SanityCheckMessage';
+import { useState } from 'react';
 
 class SkillStat {
     // 技能関連
@@ -18,6 +19,30 @@ class SkillStat {
     fumbleNum: number = 0;
     spFumbleNum: number = 0;
     skillRolls: Map<string, number> = new Map<string, number>();
+
+    increment(msg: CoCSkillRollMessage) {
+        this.skillRollNum++;
+        this.skillRollSum += msg.diceValue;
+        if (msg.isSuccess()) {
+            this.successNum++;
+            if (msg.isCritical()) {
+                this.criticalNum++;
+                if (msg.diceValue === 1) {
+                    this.spCriticalNum++;
+                }
+            }
+        }
+        else {
+            this.failNum++;
+            if (msg.isFumble()) {
+                this.fumbleNum++;
+                if (msg.diceValue === 100) {
+                    this.spFumbleNum++;
+                }
+            }
+        }
+        this.skillRolls.set(msg.skill, (this.skillRolls.get(msg.skill) ?? 0) + 1);
+    }
 }
 class SanityCheckStat {
     // SANチェック
@@ -44,12 +69,16 @@ type StatsProps = {
 }
 
 const Stats = (props: StatsProps) => {
+    const [skillFilter, setSkillFinter] = useState("");
+
     const log = parseCcfoliaLog(props.logFile);
 
     const skillStats = new Map<string, SkillStat>();
+    const filteredSkillStats = new Map<string, SkillStat>();
     const statusStats = new Map<string, StatusStat>();
     const sanityCheckStatus = new Map<string, SanityCheckStat>();
     const otherStats = new Map<string, OtherStat>();
+    const allSkills = new Set<string>();
     const getStat = <T,>(map: Map<string, T>, name: string, factory: new () => T): T => {
         let stat = map.get(name);
         if (stat === undefined) {
@@ -65,6 +94,7 @@ const Stats = (props: StatsProps) => {
         if (!isStarted && msg instanceof TalkMessage && props.config.startMessage === msg.text) {
             isStarted = true;
             skillStats.clear();
+            filteredSkillStats.clear();
             statusStats.clear();
             sanityCheckStatus.clear();
             otherStats.clear();
@@ -83,27 +113,12 @@ const Stats = (props: StatsProps) => {
         }
         if (msg instanceof CoCSkillRollMessage) {
             const stat = getStat(skillStats, sender, SkillStat);
-            stat.skillRollNum++;
-            stat.skillRollSum += msg.diceValue;
-            if (msg.isSuccess()) {
-                stat.successNum++;
-                if (msg.isCritical()) {
-                    stat.criticalNum++;
-                    if (msg.diceValue === 1) {
-                        stat.spCriticalNum++;
-                    }
-                }
+            stat.increment(msg);
+            if (msg.skill === skillFilter) {
+                const stat2 = getStat(filteredSkillStats, sender, SkillStat);
+                stat2.increment(msg);
             }
-            else {
-                stat.failNum++;
-                if (msg.isFumble()) {
-                    stat.fumbleNum++;
-                    if (msg.diceValue === 100) {
-                        stat.spFumbleNum++;
-                    }
-                }
-            }
-            stat.skillRolls.set(msg.skill, (stat.skillRolls.get(msg.skill) ?? 0) + 1);
+            allSkills.add(msg.skill);
         }
         else if (msg instanceof ParamChangeMessage) {
             if (msg.paramName === "HP") {
@@ -143,6 +158,7 @@ const Stats = (props: StatsProps) => {
     }
 
     const skills = [...skillStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
+    const filteredSkills = [...filteredSkillStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
     const status = [...statusStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
     const sanity = [...sanityCheckStatus].sort((a, b) => a[0].localeCompare(b[0], "ja"));
     const others = [...otherStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
@@ -211,6 +227,31 @@ const Stats = (props: StatsProps) => {
                 Data("クリティカル回数", sanity.map(tp => tp[1].criticalNum), { separate: true }),
                 Data("ファンブル回数", sanity.map(tp => tp[1].fumbleNum))
             ]} />
+
+            <h2>技能当たりの統計</h2>
+            <select name="skill" defaultValue="未選択" onChange={e => setSkillFinter(e.target.value)}>
+                <option value="">未選択</option>
+                {[...allSkills].sort((a, b) => a[0].localeCompare(b[0], "ja"))
+                    .map((skill, i) => <option key={i} value={skill}>{skill}</option>)}
+            </select>
+            {skillFilter !== "" ? <StatTable characters={filteredSkills.map(tp => tp[0])} data={[
+                Data("技能振り回数", filteredSkills.map(tp => tp[1].skillRollNum)),
+                Data("平均出目", filteredSkills.map(tp => tp[1].skillRollNum == 0 ? "N/A" : avgFormatter.format(tp[1].skillRollSum / tp[1].skillRollNum))),
+
+                Data("成功数", filteredSkills.map(tp => tp[1].successNum), { separate: true }),
+                Data("失敗数", filteredSkills.map(tp => tp[1].failNum)),
+                Data("クリティカル数", filteredSkills.map(tp => tp[1].criticalNum)),
+                Data("内1クリ", filteredSkills.map(tp => tp[1].spCriticalNum), { indent: true }),
+                Data("ファンブル数", filteredSkills.map(tp => tp[1].fumbleNum)),
+                Data("内100ファン", filteredSkills.map(tp => tp[1].spFumbleNum), { indent: true }),
+
+                Data("成功率", filteredSkills.map(tp => percentageFormatter.format(tp[1].successNum / tp[1].skillRollNum)), { separate: true }),
+                Data("失敗率", filteredSkills.map(tp => percentageFormatter.format(tp[1].failNum / tp[1].skillRollNum))),
+                Data("クリティカル率", filteredSkills.map(tp => percentageFormatter.format(tp[1].criticalNum / tp[1].skillRollNum))),
+                Data("内1クリ", filteredSkills.map(tp => percentageFormatter.format(tp[1].spCriticalNum / tp[1].skillRollNum)), { indent: true }),
+                Data("ファンブル率", filteredSkills.map(tp => percentageFormatter.format(tp[1].fumbleNum / tp[1].skillRollNum))),
+                Data("内100ファン", filteredSkills.map(tp => percentageFormatter.format(tp[1].spFumbleNum / tp[1].skillRollNum)), { indent: true })
+            ]} /> : null}
 
             <h2>その他の統計</h2>
             <StatTable characters={others.map(tp => tp[0])} data={[
