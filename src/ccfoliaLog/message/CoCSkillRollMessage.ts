@@ -6,13 +6,15 @@ export class CoCSkillRollMessage implements CcfoliaMessage {
     skill: string;
     diceValue: number;
     successValue: number;
+    isSecret: boolean
 
-    constructor(channel: string, sender: string, skill: string, diceValue: number, successValue: number) {
+    constructor(channel: string, sender: string, skill: string, diceValue: number, successValue: number, isSecret: boolean = false) {
         this.channel = channel;
         this.sender = sender;
         this.skill = skill;
         this.diceValue = diceValue;
         this.successValue = successValue;
+        this.isSecret = isSecret;
     }
 
     isSuccess(): boolean {
