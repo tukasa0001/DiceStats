@@ -41,11 +41,9 @@ table.nameAliasTable {
 
     td.del {
         padding: 0;
-        width: 6em;
 
         button {
-            width: 80%;
-            margin: 0.25em 10%;
+            margin: 0.25em;
         }
     }
 }

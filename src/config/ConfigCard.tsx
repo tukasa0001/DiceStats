@@ -1,6 +1,7 @@
 import { JSX, useEffect, useState } from "react";
 import DisplayConfig from "./DisplayConfig";
 import "./ConfigCard.css"
+import { Trash } from "lucide-react";
 
 type ConfigCardProps = {
     config: DisplayConfig,
@@ -40,7 +41,7 @@ const ConfigCard = (props: ConfigCardProps) => {
                                     onChange={e => setConf(config.changed(c => c.nameAliases[i][1] = e.target.value))}
                                     placeholder="（統計から除外）"
                                 /></td>
-                                <td className="del"><button onClick={() => setConf(config.changed(c => c.nameAliases.splice(i, 1)))}>削除</button></td>
+                                <td className="del"><button onClick={() => setConf(config.changed(c => c.nameAliases.splice(i, 1)))}><Trash /></button></td>
                             </tr>)}
                         </tbody>
                     </table>
