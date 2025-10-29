@@ -14,16 +14,23 @@ div.statsTable {
 
 @keyframes card_fade {
     0% {
-        transform: translateY(-10px);
+        max-height: 0;
         opacity: 0;
+        overflow: hidden;
+    }
+
+    25% {
+        opacity: 1;
+        overflow: hidden;
     }
 
     100% {
-        transform: translateY(0);
+        max-height: 500vh;
         opacity: 1;
+        overflow: visible;
     }
 }
 
-.card {
-    animation: card_fade 0.5s ease-in forwards;
+.stats_card {
+    animation: card_fade 1.5s ease-in forwards;
 }

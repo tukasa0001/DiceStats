@@ -177,7 +177,7 @@ const Stats = (props: StatsProps) => {
     });
 
     return (
-        <div className="card">
+        <div className="card stats_card">
             {isStarted ? "" : <div className="errorBlock">
                 開始メッセージが見つかりませんでした<br />
                 ログの最初からの統計を表示します
