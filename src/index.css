@@ -36,7 +36,8 @@ h1 {
     line-height: 1.1;
 }
 
-button {
+button,
+select:not([multiple]) {
     border-radius: 8px;
     border: 1px solid transparent;
     padding: 0.6em 1.2em;
@@ -46,15 +47,38 @@ button {
     background-color: #1a1a1a;
     cursor: pointer;
     transition: border-color 0.25s;
+
+    &:hover {
+        border-color: #646cff;
+    }
+
+    &:focus,
+    &:focus-visible {
+        outline: 4px auto -webkit-focus-ring-color;
+    }
 }
 
-button:hover {
-    border-color: #646cff;
-}
+input[type="file"] {
+    &::file-selector-button {
+        border-radius: 8px;
+        border: 1px solid transparent;
+        padding: 0.6em 1.2em;
+        font-size: 1em;
+        font-weight: 500;
+        font-family: inherit;
+        background-color: #1a1a1a;
+        cursor: pointer;
+        transition: border-color 0.25s;
+    }
 
-button:focus,
-button:focus-visible {
-    outline: 4px auto -webkit-focus-ring-color;
+    &:hover::file-selector-button {
+        border-color: #646cff;
+    }
+
+    &:focus::file-selector-button,
+    &:focus-visible::file-selector-button {
+        outline: 4px auto -webkit-focus-ring-color;
+    }
 }
 
 @media (prefers-color-scheme: light) {
@@ -106,4 +130,9 @@ div.errorBlock::before {
     font-size: 1.2em;
     display: block;
     margin-left: -0.5em;
+}
+
+div.infoBlock {
+    border-left: 4px solid rgb(209, 44, 255);
+    padding: 1em 0 1em 2em;
 }
