@@ -11,3 +11,19 @@ div.statsTable {
         padding-left: 2em;
     }
 }
+
+@keyframes card_fade {
+    0% {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.card {
+    animation: card_fade 0.5s ease-in forwards;
+}
