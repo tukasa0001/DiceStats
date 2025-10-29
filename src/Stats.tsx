@@ -6,7 +6,7 @@ import { ParamChangeMessage } from './ccfoliaLog/message/ParamChangeMessage';
 import { TalkMessage } from './ccfoliaLog/message/TalkMessasge';
 import DisplayConfig from './config/DisplayConfig';
 import { SanityCheckMessage } from './ccfoliaLog/message/SanityCheckMessage';
-import { useState } from 'react';
+import { JSX, useState } from 'react';
 
 class SkillStat {
     // 技能関連
@@ -178,57 +178,65 @@ const Stats = (props: StatsProps) => {
 
     return (
         <div className="card stats_card">
-            {isStarted ? "" : <div className="errorBlock">
-                開始メッセージが見つかりませんでした<br />
-                ログの最初からの統計を表示します
-            </div>}
+            {isStarted ? "" : <ErrorBlock>
+                <>
+                    開始メッセージが見つかりませんでした<br />
+                    ログの最初からの統計を表示します
+                </>
+            </ErrorBlock>}
             <h2>技能振り統計</h2>
-            <StatTable characters={skills.map(tp => tp[0])} data={[
-                Data("技能振り回数", skills.map(tp => tp[1].skillRollNum)),
-                Data("平均出目", skills.map(tp => tp[1].skillRollNum == 0 ? "N/A" : avgFormatter.format(tp[1].skillRollSum / tp[1].skillRollNum))),
-                Data("一番振った技能", skills.map(tp => {
-                    if (tp[1].skillRolls.size == 0) {
-                        return "N/A";
-                    }
-                    let sorted = [...tp[1].skillRolls]
-                        .sort((a, b) => b[1] - a[1]); // 技能振り数降順に並べ替え
-                    return sorted
-                        .filter(x => x[1] == sorted[0][1]) // 一番多く振った技能と同じ回数振った技能のみ残す
-                        .map(x => x[0]) // 技能名のみ残す
-                        .join(", ") + ` (${sorted[0][1]}回)`; // 技能名を結合し、末尾に回数を付け加える
-                })),
+            {0 < skills.length ?
+                <StatTable characters={skills.map(tp => tp[0])} data={[
+                    Data("技能振り回数", skills.map(tp => tp[1].skillRollNum)),
+                    Data("平均出目", skills.map(tp => tp[1].skillRollNum == 0 ? "N/A" : avgFormatter.format(tp[1].skillRollSum / tp[1].skillRollNum))),
+                    Data("一番振った技能", skills.map(tp => {
+                        if (tp[1].skillRolls.size == 0) {
+                            return "N/A";
+                        }
+                        let sorted = [...tp[1].skillRolls]
+                            .sort((a, b) => b[1] - a[1]); // 技能振り数降順に並べ替え
+                        return sorted
+                            .filter(x => x[1] == sorted[0][1]) // 一番多く振った技能と同じ回数振った技能のみ残す
+                            .map(x => x[0]) // 技能名のみ残す
+                            .join(", ") + ` (${sorted[0][1]}回)`; // 技能名を結合し、末尾に回数を付け加える
+                    })),
 
-                Data("成功数", skills.map(tp => tp[1].successNum), { separate: true }),
-                Data("失敗数", skills.map(tp => tp[1].failNum)),
-                Data("クリティカル数", skills.map(tp => tp[1].criticalNum)),
-                Data("内1クリ", skills.map(tp => tp[1].spCriticalNum), { indent: true }),
-                Data("ファンブル数", skills.map(tp => tp[1].fumbleNum)),
-                Data("内100ファン", skills.map(tp => tp[1].spFumbleNum), { indent: true }),
+                    Data("成功数", skills.map(tp => tp[1].successNum), { separate: true }),
+                    Data("失敗数", skills.map(tp => tp[1].failNum)),
+                    Data("クリティカル数", skills.map(tp => tp[1].criticalNum)),
+                    Data("内1クリ", skills.map(tp => tp[1].spCriticalNum), { indent: true }),
+                    Data("ファンブル数", skills.map(tp => tp[1].fumbleNum)),
+                    Data("内100ファン", skills.map(tp => tp[1].spFumbleNum), { indent: true }),
 
-                Data("成功率", skills.map(tp => percentageFormatter.format(tp[1].successNum / tp[1].skillRollNum)), { separate: true }),
-                Data("失敗率", skills.map(tp => percentageFormatter.format(tp[1].failNum / tp[1].skillRollNum))),
-                Data("クリティカル率", skills.map(tp => percentageFormatter.format(tp[1].criticalNum / tp[1].skillRollNum))),
-                Data("内1クリ", skills.map(tp => percentageFormatter.format(tp[1].spCriticalNum / tp[1].skillRollNum)), { indent: true }),
-                Data("ファンブル率", skills.map(tp => percentageFormatter.format(tp[1].fumbleNum / tp[1].skillRollNum))),
-                Data("内100ファン", skills.map(tp => percentageFormatter.format(tp[1].spFumbleNum / tp[1].skillRollNum)), { indent: true })
-            ]} />
+                    Data("成功率", skills.map(tp => percentageFormatter.format(tp[1].successNum / tp[1].skillRollNum)), { separate: true }),
+                    Data("失敗率", skills.map(tp => percentageFormatter.format(tp[1].failNum / tp[1].skillRollNum))),
+                    Data("クリティカル率", skills.map(tp => percentageFormatter.format(tp[1].criticalNum / tp[1].skillRollNum))),
+                    Data("内1クリ", skills.map(tp => percentageFormatter.format(tp[1].spCriticalNum / tp[1].skillRollNum)), { indent: true }),
+                    Data("ファンブル率", skills.map(tp => percentageFormatter.format(tp[1].fumbleNum / tp[1].skillRollNum))),
+                    Data("内100ファン", skills.map(tp => percentageFormatter.format(tp[1].spFumbleNum / tp[1].skillRollNum)), { indent: true })
+                ]} />
+                : <InfoBlock>記録なし</InfoBlock>}
 
             <h2>ステータス統計</h2>
-            <StatTable characters={status.map(tp => tp[0])} data={[
-                Data("合計被ダメージ", status.map(tp => tp[1].totalDamage)),
-                Data("最低HP", status.map(tp => tp[1].minHealth ?? "N/A")),
-                Data("合計喪失SAN", status.map(tp => tp[1].totalLostSAN)),
-                Data("最低SAN", status.map(tp => tp[1].minSAN ?? "N/A"))
-            ]} />
+            {0 < status.length ?
+                <StatTable characters={status.map(tp => tp[0])} data={[
+                    Data("合計被ダメージ", status.map(tp => tp[1].totalDamage)),
+                    Data("最低HP", status.map(tp => tp[1].minHealth ?? "N/A")),
+                    Data("合計喪失SAN", status.map(tp => tp[1].totalLostSAN)),
+                    Data("最低SAN", status.map(tp => tp[1].minSAN ?? "N/A"))
+                ]} />
+                : <InfoBlock>記録なし</InfoBlock>}
             <h2>SANチェック統計</h2>
-            <StatTable characters={sanity.map(tp => tp[0])} data={[
-                Data("合計回数", sanity.map(tp => tp[1].checkNum)),
-                Data("成功回数", sanity.map(tp => tp[1].successNum)),
-                Data("失敗回数", sanity.map(tp => tp[1].checkNum - tp[1].successNum)),
-                Data("成功率", sanity.map(tp => tp[1].checkNum == 0 ? "N/A" : percentageFormatter.format(tp[1].successNum / tp[1].checkNum))),
-                Data("クリティカル回数", sanity.map(tp => tp[1].criticalNum), { separate: true }),
-                Data("ファンブル回数", sanity.map(tp => tp[1].fumbleNum))
-            ]} />
+            {0 < sanity.length ?
+                <StatTable characters={sanity.map(tp => tp[0])} data={[
+                    Data("合計回数", sanity.map(tp => tp[1].checkNum)),
+                    Data("成功回数", sanity.map(tp => tp[1].successNum)),
+                    Data("失敗回数", sanity.map(tp => tp[1].checkNum - tp[1].successNum)),
+                    Data("成功率", sanity.map(tp => tp[1].checkNum == 0 ? "N/A" : percentageFormatter.format(tp[1].successNum / tp[1].checkNum))),
+                    Data("クリティカル回数", sanity.map(tp => tp[1].criticalNum), { separate: true }),
+                    Data("ファンブル回数", sanity.map(tp => tp[1].fumbleNum))
+                ]} />
+                : <InfoBlock>記録なし</InfoBlock>}
 
             <h2>技能当たりの統計</h2>
             <select className='skillSelect' name="skill" defaultValue="未選択" onChange={e => setSkillFinter(e.target.value)}>
@@ -256,11 +264,13 @@ const Stats = (props: StatsProps) => {
             ]} /> : null}
 
             <h2>その他の統計</h2>
-            <StatTable characters={others.map(tp => tp[0])} data={[
-                Data("発言数", others.map(tp => tp[1].talkNum)),
-                Data("発言文字数", others.map(tp => tp[1].charNum)),
-                Data("平均文字数", others.map(tp => avgFormatter.format(tp[1].charNum / tp[1].talkNum))),
-            ]} />
+            {0 < others.length ?
+                <StatTable characters={others.map(tp => tp[0])} data={[
+                    Data("発言数", others.map(tp => tp[1].talkNum)),
+                    Data("発言文字数", others.map(tp => tp[1].charNum)),
+                    Data("平均文字数", others.map(tp => avgFormatter.format(tp[1].charNum / tp[1].talkNum))),
+                ]} />
+                : <InfoBlock>記録なし</InfoBlock>}
         </div>
     );
 }
@@ -300,6 +310,18 @@ const StatTable = (props: StatTableProps) => {
             </table>
         </div>
     )
+}
+
+const InfoBlock = (props: { children: JSX.Element | string }) => {
+    return <div className="infoBlock">
+        {props.children}
+    </div>
+}
+
+const ErrorBlock = (props: { children: JSX.Element | string }) => {
+    return <div className="errorBlock">
+        {props.children}
+    </div>
 }
 
 const Data = (title: string, values: (string | number)[], props: { indent?: boolean, separate?: boolean } = {}): StatTableData => {

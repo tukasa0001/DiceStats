@@ -131,3 +131,8 @@ div.errorBlock::before {
     display: block;
     margin-left: -0.5em;
 }
+
+div.infoBlock {
+    border-left: 4px solid rgb(209, 44, 255);
+    padding: 1em 0 1em 2em;
+}
