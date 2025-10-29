@@ -11,3 +11,26 @@ div.statsTable {
         padding-left: 2em;
     }
 }
+
+@keyframes card_fade {
+    0% {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+    }
+
+    25% {
+        opacity: 1;
+        overflow: hidden;
+    }
+
+    100% {
+        max-height: 500vh;
+        opacity: 1;
+        overflow: visible;
+    }
+}
+
+.stats_card {
+    animation: card_fade 1.5s ease-in forwards;
+}

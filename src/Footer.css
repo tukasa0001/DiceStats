@@ -1,0 +1,13 @@
+footer.footer {
+    height: 4em;
+    text-align: center;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    div {
+        margin: 0 2em;
+    }
+}
