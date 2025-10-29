@@ -283,7 +283,7 @@ const StatTable = (props: StatTableProps) => {
             <table>
                 <thead>
                     <tr>
-                        <th>-</th>
+                        <th className='value_title'>-</th>
                         {props.characters.map(name => <th key={name}>{name}</th>)}
                     </tr>
                 </thead>
@@ -291,7 +291,7 @@ const StatTable = (props: StatTableProps) => {
                     {props.data.map((data, i) => {
                         return (
                             <tr key={`${data.title}-${i}`} className={`${data.indent ? "indent1" : ""} ${data.separate || i === 0 ? "separate" : ""}`}>
-                                <td>{data.title}</td>
+                                <td className='value_title'>{data.title}</td>
                                 {data.values.map((val, i) => <td key={`${props.characters[i]}-${data.title}`}>{val}</td>)}
                             </tr>
                         )

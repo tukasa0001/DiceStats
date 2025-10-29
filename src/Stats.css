@@ -10,6 +10,11 @@ div.statsTable {
     tr.indent1 td:first-child {
         padding-left: 2em;
     }
+
+    th.value_title,
+    td.value_title {
+        white-space: nowrap;
+    }
 }
 
 @keyframes card_fade {
