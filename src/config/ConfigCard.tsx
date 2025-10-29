@@ -15,17 +15,17 @@ const ConfigCard = (props: ConfigCardProps) => {
     return (
         <div className="card">
             <h2>詳細設定</h2>
-            <ToggleBox title="名前の読み替え設定" elem={<>
+            <ToggleBox title="名前の変換設定" elem={<>
                 <p>
-                    ある名前を別の名前として処理します<br />
-                    名前を省略できるほか、複数の名前の記録を統合することもできます
+                    指定した名前を別の名前に変換します。<br />
+                    変換先が重複した場合、それらの記録は統合されます。
                 </p>
                 {config.nameAliases.length === 0 ? "" :
                     <table className="nameAliasTable">
                         <thead>
                             <tr>
                                 <th>元の名前</th>
-                                <th>読み替え後の名前</th>
+                                <th>変換後の名前</th>
                                 <th className="del">削除</th>
                             </tr>
                         </thead>
