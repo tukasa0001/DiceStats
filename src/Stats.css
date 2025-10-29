@@ -39,3 +39,7 @@ div.statsTable {
 .stats_card {
     animation: card_fade 1.5s ease-in forwards;
 }
+
+select.skillSelect {
+    margin-bottom: 1em;
+}

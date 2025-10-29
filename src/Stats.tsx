@@ -231,7 +231,7 @@ const Stats = (props: StatsProps) => {
             ]} />
 
             <h2>技能当たりの統計</h2>
-            <select name="skill" defaultValue="未選択" onChange={e => setSkillFinter(e.target.value)}>
+            <select className='skillSelect' name="skill" defaultValue="未選択" onChange={e => setSkillFinter(e.target.value)}>
                 <option value="">未選択</option>
                 {[...allSkills].sort((a, b) => a[0].localeCompare(b[0], "ja"))
                     .map((skill, i) => <option key={i} value={skill}>{skill}</option>)}
