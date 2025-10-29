@@ -44,6 +44,14 @@ table.nameAliasTable {
 
         button {
             margin: 0.25em;
+
+            svg {
+                transition: stroke 0.25s;
+            }
+        }
+
+        button:hover svg {
+            stroke: rgb(255, 102, 102);
         }
     }
 }
