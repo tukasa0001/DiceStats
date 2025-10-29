@@ -1,7 +1,7 @@
 import { JSX, useEffect, useState } from "react";
 import DisplayConfig from "./DisplayConfig";
 import "./ConfigCard.css"
-import { Trash } from "lucide-react";
+import { PinIcon, Trash, X } from "lucide-react";
 
 type ConfigCardProps = {
     config: DisplayConfig,
@@ -11,11 +11,14 @@ type ConfigCardProps = {
 const ConfigCard = (props: ConfigCardProps) => {
     const config = props.config;
     const setConf = props.onConfigChanged;
-    const [show, setShow] = useState(false);
+    const [isPinned, setPinned] = useState(false);
 
     return (
-        <div className="card">
+        <div className={`card configCard ${isPinned ? "pinned" : ""}`}>
             <h2>詳細設定</h2>
+            <button className="pin" onClick={() => setPinned(!isPinned)}>
+                {isPinned ? <X /> : <PinIcon />}
+            </button>
             <ToggleBox title="名前の変換設定" elem={<>
                 <p>
                     指定した名前を別の名前に変換します。<br />

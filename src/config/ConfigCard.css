@@ -55,3 +55,30 @@ table.nameAliasTable {
         }
     }
 }
+
+div.configCard {
+    position: relative;
+
+    /* 固定ボタン */
+    button.pin {
+        position: absolute;
+        top: 1em;
+        right: 1em;
+
+        svg {
+            position: relative;
+            top: 1.5px;
+        }
+    }
+
+    /* 固定中 */
+    &.pinned {
+        position: fixed;
+        bottom: 2vh;
+        right: 2vw;
+        min-width: 40vw;
+        max-width: 96vw;
+        height: 30vh;
+        overflow-y: scroll;
+    }
+}
