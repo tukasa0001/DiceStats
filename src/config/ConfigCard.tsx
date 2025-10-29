@@ -66,9 +66,9 @@ const ToggleBox = (props: { title: string, elem: JSX.Element }) => {
     const [show, setShow] = useState(false);
 
     return (
-        <div className="toggleBox">
+        <div className={`toggleBox ${show ? "active" : "inactive"}`}>
             <button className="toggleButton" onClick={() => setShow(!show)}>{`${show ? "▼" : "▶"} ${props.title}`}</button>
-            {show ? <div>{props.elem}</div> : null}
+            <div className="toggleElement"><div>{props.elem}</div></div>
         </div>
     );
 }

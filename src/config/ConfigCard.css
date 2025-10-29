@@ -5,8 +5,19 @@
 div.toggleBox {
     margin-bottom: 1em;
 
-    div {
+    div.toggleElement {
         margin-left: 3em;
+        display: grid;
+        grid-template-rows: 1fr;
+        transition: grid-template-rows 0.3s ease-in-out;
+
+        div {
+            overflow: hidden;
+        }
+    }
+
+    &.inactive div.toggleElement {
+        grid-template-rows: 0fr;
     }
 }
 
