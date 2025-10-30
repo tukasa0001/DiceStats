@@ -56,6 +56,14 @@ select:not([multiple]) {
     &:focus-visible {
         outline: 4px auto -webkit-focus-ring-color;
     }
+
+    svg {
+        transition: stroke 0.25s;
+    }
+
+    &:hover svg {
+        stroke: #646cff;
+    }
 }
 
 input[type="file"] {
