@@ -52,7 +52,6 @@ select:not([multiple]) {
         border-color: #646cff;
     }
 
-    &:focus,
     &:focus-visible {
         outline: 4px auto -webkit-focus-ring-color;
     }
@@ -81,11 +80,6 @@ input[type="file"] {
 
     &:hover::file-selector-button {
         border-color: #646cff;
-    }
-
-    &:focus::file-selector-button,
-    &:focus-visible::file-selector-button {
-        outline: 4px auto -webkit-focus-ring-color;
     }
 }
 
