@@ -83,21 +83,6 @@ input[type="file"] {
     }
 }
 
-@media (prefers-color-scheme: light) {
-    :root {
-        color: #213547;
-        background-color: #ffffff;
-    }
-
-    a:hover {
-        color: #747bff;
-    }
-
-    button {
-        background-color: #f9f9f9;
-    }
-}
-
 table {
     border-collapse: collapse;
 
@@ -137,4 +122,36 @@ div.errorBlock::before {
 div.infoBlock {
     border-left: 4px solid rgb(209, 44, 255);
     padding: 1em 0 1em 2em;
+}
+
+
+/* ホワイトテーマ専用処理 */
+@media (prefers-color-scheme: light) {
+    :root {
+        color: #213547;
+        background-color: #ffffff;
+    }
+
+    a:hover {
+        color: #747bff;
+    }
+
+    button,
+    select:not([multiple]),
+    input[type="file"]::file-selector-button {
+        background-color: #eeeeee;
+    }
+
+    table th,
+    table td {
+        border-color: black;
+    }
+
+    table tr.separate {
+        border-top-color: black;
+    }
+
+    table tr:hover {
+        background-color: #ff39c78f;
+    }
 }

@@ -19,3 +19,9 @@
     border-radius: 1em;
     margin: 0 auto 2em auto;
 }
+
+@media (prefers-color-scheme: light) {
+    .card {
+        background-color: #ffffff;
+    }
+}
