@@ -62,6 +62,15 @@ const ConfigCard = (props: ConfigCardProps) => {
                     placeholder=""
                 />
             </>} />
+            <ToggleBox title="その他の設定" elem={<>
+                <label>
+                    <input type="checkbox"
+                        checked={config.ignoreSecretDice}
+                        onChange={e => setConf(config.changed(c => c.ignoreSecretDice = e.target.checked))}
+                    />
+                    シークレットダイスを無視する
+                </label>
+            </>} />
         </div>
     )
 }
