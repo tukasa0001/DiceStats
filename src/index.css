@@ -11,6 +11,14 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+
+    /* 変数 */
+    --input-background-color: #1a1a1a;
+    --input-active-color: #646cff;
+
+    @media (prefers-color-scheme: light) {
+        --input-background-color: #eeeeee;
+    }
 }
 
 a {
@@ -44,7 +52,7 @@ select:not([multiple]) {
     font-size: 1em;
     font-weight: 500;
     font-family: inherit;
-    background-color: #1a1a1a;
+    background-color: var(--input-background-color);
     cursor: pointer;
     transition: border-color 0.25s;
 
@@ -73,7 +81,7 @@ input[type="file"] {
         font-size: 1em;
         font-weight: 500;
         font-family: inherit;
-        background-color: #1a1a1a;
+        background-color: var(--input-background-color);
         cursor: pointer;
         transition: border-color 0.25s;
     }
@@ -86,7 +94,7 @@ input[type="file"] {
 input[type="text"] {
     border-radius: 4px;
     border: 1px solid white;
-    background-color: #1a1a1a;
+    background-color: var(--input-background-color);
     transition: border-color 0.25s;
 
     &:hover {
@@ -150,12 +158,6 @@ div.infoBlock {
 
     a:hover {
         color: #747bff;
-    }
-
-    button,
-    select:not([multiple]),
-    input[type="file"]::file-selector-button {
-        background-color: #eeeeee;
     }
 
     input[type="text"] {
