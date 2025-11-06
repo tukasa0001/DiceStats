@@ -63,7 +63,7 @@ const ConfigCard = (props: ConfigCardProps) => {
                 />
             </>} />
             <ToggleBox title="その他の設定" elem={<>
-                <label>
+                <label className="checkbox-label">
                     <input type="checkbox"
                         checked={config.ignoreSecretDice}
                         onChange={e => setConf(config.changed(c => c.ignoreSecretDice = e.target.checked))}
