@@ -8,6 +8,7 @@ footer.footer {
     justify-content: center;
 
     div {
+        width: 100%;
         margin: 0 2em;
     }
 }

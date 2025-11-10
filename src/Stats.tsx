@@ -112,7 +112,7 @@ const Stats = (props: StatsProps) => {
         if (sender === "") {
             continue;
         }
-        if (msg instanceof CoCSkillRollMessage) {
+        if (msg instanceof CoCSkillRollMessage && (!msg.isSecret || !props.config.ignoreSecretDice)) {
             const stat = getStat(skillStats, sender, SkillStat);
             stat.increment(msg);
             if (msg.skill === skillFilter) {

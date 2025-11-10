@@ -78,3 +78,8 @@ div.configCard {
         overflow-y: scroll;
     }
 }
+
+label.checkbox-label {
+    display: block;
+    margin: 1em 0;
+}

@@ -1,6 +1,7 @@
 export default class DisplayConfig {
     nameAliases: [string, string][] = [];
     startMessage: string = "";
+    ignoreSecretDice: boolean = true;
 
     clone(): DisplayConfig {
         const conf = new DisplayConfig();
