@@ -17,6 +17,25 @@ const ConfigCard = (props: ConfigCardProps) => {
     const [isPinned, setPinned] = useState(false);
     const log = props.log ?? [];
 
+    // 開始メッセージ・終了メッセージの有効性を確認
+    let isStartMessageValid = config.startMessage === "";
+    let isEndMessageValid = config.endMessage === "";
+    for (let msg of log) {
+        if (msg instanceof TalkMessage) {
+            if (!isStartMessageValid && msg.text === config.startMessage) {
+                isStartMessageValid = true;
+                isEndMessageValid = false; // ここからまた終了メッセージの検索を開始
+            }
+            if (!isEndMessageValid && msg.text === config.endMessage) {
+                isEndMessageValid = true;
+                // 全てのチェックが終わったらbreak
+                if (isStartMessageValid) {
+                    break;
+                }
+            }
+        }
+    }
+
     return (
         <div className={`card configCard ${isPinned ? "pinned" : ""}`}>
             <h2>詳細設定</h2>
@@ -63,12 +82,14 @@ const ConfigCard = (props: ConfigCardProps) => {
                 <div className="stats-range-config">
                     <span>範囲：</span>
                     <input type="text"
+                        className={isStartMessageValid ? "" : "error-text-box"}
                         value={props.config.startMessage}
                         onChange={e => setConf(props.config.withStartMessage(e.target.value.trim()))}
                         placeholder="最初から"
                     />
                     <span> ～ </span>
                     <input type="text"
+                        className={isEndMessageValid ? "" : "error-text-box"}
                         value={props.config.endMessage}
                         onChange={e => setConf(props.config.withEndMessage(e.target.value.trim()))}
                         placeholder="最後まで"
