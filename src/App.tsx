@@ -6,16 +6,17 @@ import Stats from './Stats';
 import ConfigCard from './config/ConfigCard';
 import DisplayConfig from './config/DisplayConfig';
 import Footer from './Footer';
+import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
 
 const App: FC = () => {
-    const [log, setLog] = useState<string | undefined>(undefined);
+    const [log, setLog] = useState<CcfoliaMessage[] | undefined>(undefined);
     const [config, setConfig] = useState(new DisplayConfig());
 
     return (
         <>
             <UploadForm onLogFileChanged={setLog} />
             {log !== undefined ? <Stats logFile={log} config={config} /> : ""}
-            <ConfigCard config={config} onConfigChanged={setConfig} />
+            <ConfigCard log={log} config={config} onConfigChanged={setConfig} />
             <Footer />
         </>
     )

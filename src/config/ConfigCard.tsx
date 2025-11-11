@@ -2,8 +2,11 @@ import { JSX, useEffect, useState } from "react";
 import DisplayConfig from "./DisplayConfig";
 import "./ConfigCard.css"
 import { PinIcon, Trash, X } from "lucide-react";
+import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage";
+import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge";
 
 type ConfigCardProps = {
+    log?: CcfoliaMessage[],
     config: DisplayConfig,
     onConfigChanged: (x: DisplayConfig) => void
 }
@@ -12,6 +15,7 @@ const ConfigCard = (props: ConfigCardProps) => {
     const config = props.config;
     const setConf = props.onConfigChanged;
     const [isPinned, setPinned] = useState(false);
+    const log = props.log ?? [];
 
     return (
         <div className={`card configCard ${isPinned ? "pinned" : ""}`}>
