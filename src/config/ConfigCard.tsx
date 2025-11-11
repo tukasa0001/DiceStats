@@ -37,19 +37,19 @@ const ConfigCard = (props: ConfigCardProps) => {
                             {config.nameAliases.map(([before, after], i) => <tr key={i}>
                                 <td><input type="text"
                                     value={before}
-                                    onChange={e => setConf(config.changed(c => c.nameAliases[i][0] = e.target.value))}
+                                    onChange={e => setConf(config.withNameAliases(arr => arr.map((tp, idx) => idx === i ? [e.target.value, tp[1]] : tp)))}
                                 /></td>
                                 <td><input type="text"
                                     value={after}
-                                    onChange={e => setConf(config.changed(c => c.nameAliases[i][1] = e.target.value))}
+                                    onChange={e => setConf(config.withNameAliases(arr => arr.map((tp, idx) => idx === i ? [tp[0], e.target.value] : tp)))}
                                     placeholder="（統計から除外）"
                                 /></td>
-                                <td className="del"><button onClick={() => setConf(config.changed(c => c.nameAliases.splice(i, 1)))}><Trash /></button></td>
+                                <td className="del"><button onClick={() => setConf(config.withNameAliases(arr => arr.filter((_, idx) => idx != i)))}><Trash /></button></td>
                             </tr>)}
                         </tbody>
                     </table>
                 }
-                <button onClick={() => setConf(config.changed(c => c.nameAliases.push(["", ""])))}>追加</button>
+                <button onClick={() => setConf(config.withNameAliases(arr => [...arr, ["", ""]]))}>追加</button>
             </>} />
 
             <ToggleBox title="特定の発言から開始" elem={<>
@@ -58,7 +58,7 @@ const ConfigCard = (props: ConfigCardProps) => {
                 </p>
                 <input type="text"
                     value={config.startMessage}
-                    onChange={e => setConf(config.changed(c => c.startMessage = e.target.value.trim()))}
+                    onChange={e => setConf(config.withStartMessage(e.target.value.trim()))}
                     placeholder=""
                 />
             </>} />
@@ -66,7 +66,7 @@ const ConfigCard = (props: ConfigCardProps) => {
                 <label className="checkbox-label">
                     <input type="checkbox"
                         checked={config.ignoreSecretDice}
-                        onChange={e => setConf(config.changed(c => c.ignoreSecretDice = e.target.checked))}
+                        onChange={e => setConf(config.withIgnoreSecretDice(e.target.checked))}
                     />
                     シークレットダイスを無視する
                 </label>
