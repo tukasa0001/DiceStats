@@ -7,6 +7,7 @@ import { TalkMessage } from './ccfoliaLog/message/TalkMessasge';
 import DisplayConfig from './config/DisplayConfig';
 import { SanityCheckMessage } from './ccfoliaLog/message/SanityCheckMessage';
 import { JSX, useState } from 'react';
+import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
 
 class SkillStat {
     // 技能関連
@@ -65,14 +66,14 @@ class OtherStat {
 };
 
 type StatsProps = {
-    logFile: string
+    logFile: CcfoliaMessage[]
     config: DisplayConfig
 }
 
 const Stats = (props: StatsProps) => {
     const [skillFilter, setSkillFinter] = useState("");
 
-    const log = parseCcfoliaLog(props.logFile);
+    const log = props.logFile;
 
     const skillStats = new Map<string, SkillStat>();
     const filteredSkillStats = new Map<string, SkillStat>();
@@ -99,6 +100,10 @@ const Stats = (props: StatsProps) => {
             statusStats.clear();
             sanityCheckStatus.clear();
             otherStats.clear();
+        }
+        // 終了メッセージが来たらbreak
+        else if (props.config.endMessage !== "" && msg instanceof TalkMessage && props.config.endMessage === msg.text) {
+            break;
         }
 
         let sender = msg.sender;

@@ -1,11 +1,15 @@
+import parseCcfoliaLog from "./ccfoliaLog/CcfoliaLog";
+import { CcfoliaMessage } from "./ccfoliaLog/message/CcfoliaMessage";
+
 type UploadFormProps = {
-    onLogFileChanged: (x: string) => void
+    onLogFileChanged: (x: CcfoliaMessage[]) => void
 };
 
 const UploadForm = (props: UploadFormProps) => {
     const onFileChanged = async (file: File) => {
         const str = await file.text();
-        props.onLogFileChanged(str);
+        const parsed = parseCcfoliaLog(str);
+        props.onLogFileChanged(parsed);
     }
 
     return (
