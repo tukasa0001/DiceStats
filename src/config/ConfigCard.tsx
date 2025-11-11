@@ -24,7 +24,7 @@ const ConfigCard = (props: ConfigCardProps) => {
         if (msg instanceof TalkMessage) {
             if (!isStartMessageValid && msg.text === config.startMessage) {
                 isStartMessageValid = true;
-                isEndMessageValid = false; // ここからまた終了メッセージの検索を開始
+                isEndMessageValid = config.endMessage === ""; // ここからまた終了メッセージの検索を開始
             }
             if (!isEndMessageValid && msg.text === config.endMessage) {
                 isEndMessageValid = true;
