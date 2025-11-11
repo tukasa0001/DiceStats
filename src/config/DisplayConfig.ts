@@ -12,7 +12,7 @@ export default class DisplayConfig {
         ignoreSecretDice: boolean = true) {
         this.nameAliases = nameAliases;
         this.startMessage = startMessage;
-        this.endMessage = "";
+        this.endMessage = endMessage;
         this.ignoreSecretDice = ignoreSecretDice;
     }
 
