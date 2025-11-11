@@ -101,6 +101,10 @@ const Stats = (props: StatsProps) => {
             sanityCheckStatus.clear();
             otherStats.clear();
         }
+        // 終了メッセージが来たらbreak
+        else if (props.config.endMessage !== "" && msg instanceof TalkMessage && props.config.endMessage === msg.text) {
+            break;
+        }
 
         let sender = msg.sender;
         for (let [before, after] of props.config.nameAliases) {
