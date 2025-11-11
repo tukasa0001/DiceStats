@@ -83,3 +83,9 @@ label.checkbox-label {
     display: block;
     margin: 1em 0;
 }
+
+div.stats-range-config {
+    * {
+        vertical-align: middle;
+    }
+}

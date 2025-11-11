@@ -56,15 +56,24 @@ const ConfigCard = (props: ConfigCardProps) => {
                 <button onClick={() => setConf(config.withNameAliases(arr => [...arr, ["", ""]]))}>追加</button>
             </>} />
 
-            <ToggleBox title="特定の発言から開始" elem={<>
+            <ToggleBox title="統計範囲を変更" elem={<>
                 <p>
-                    指定した発言から先の統計を取ります
+                    特定の発言をトリガーに、範囲内の統計を出力します
                 </p>
-                <input type="text"
-                    value={config.startMessage}
-                    onChange={e => setConf(config.withStartMessage(e.target.value.trim()))}
-                    placeholder=""
-                />
+                <div className="stats-range-config">
+                    <span>範囲：</span>
+                    <input type="text"
+                        value={props.config.startMessage}
+                        onChange={e => setConf(props.config.withStartMessage(e.target.value.trim()))}
+                        placeholder="最初から"
+                    />
+                    <span> ～ </span>
+                    <input type="text"
+                        value={props.config.endMessage}
+                        onChange={e => setConf(props.config.withEndMessage(e.target.value.trim()))}
+                        placeholder="最後まで"
+                    />
+                </div>
             </>} />
             <ToggleBox title="その他の設定" elem={<>
                 <label className="checkbox-label">
