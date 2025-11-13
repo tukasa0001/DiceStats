@@ -63,6 +63,8 @@ class OtherStat {
     // その他
     talkNum: number = 0;
     charNum: number = 0;
+    pcTalkNum = 0;
+    pcCharNum = 0;
 };
 
 type StatsProps = {
@@ -161,6 +163,11 @@ const Stats = (props: StatsProps) => {
             const stat = getStat(otherStats, sender, OtherStat);
             stat.talkNum++;
             stat.charNum += msg.text.length;
+            const regex = msg.text.match(/^「(.*)」/);
+            if (regex !== null) {
+                stat.pcTalkNum++;
+                stat.pcCharNum += regex[1].length;
+            }
         }
     }
 
@@ -274,6 +281,11 @@ const Stats = (props: StatsProps) => {
                     Data("発言数", others.map(tp => tp[1].talkNum)),
                     Data("発言文字数", others.map(tp => tp[1].charNum)),
                     Data("平均文字数", others.map(tp => avgFormatter.format(tp[1].charNum / tp[1].talkNum))),
+                    Data("PC発言のみ", others.map(tp => ""), { separate: true }),
+                    Data("発言数", others.map(tp => tp[1].pcTalkNum), { indent: true }),
+                    Data("発言文字数", others.map(tp => tp[1].pcCharNum), { indent: true }),
+                    Data("平均文字数", others.map(tp => avgFormatter.format(tp[1].pcCharNum / tp[1].pcTalkNum)), { indent: true }),
+                    Data("PC発言率", others.map(tp => percentageFormatter.format(tp[1].pcTalkNum / tp[1].talkNum)), { indent: true }),
                 ]} />
                 : <InfoBlock>記録なし</InfoBlock>}
         </div>
