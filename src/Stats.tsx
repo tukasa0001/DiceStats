@@ -8,6 +8,7 @@ import DisplayConfig from './config/DisplayConfig';
 import { SanityCheckMessage } from './ccfoliaLog/message/SanityCheckMessage';
 import { JSX, useState } from 'react';
 import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
+import { UnknownSecretDiceMessage } from './ccfoliaLog/message/UnknownSecretDiceMessage';
 
 class SkillStat {
     // 技能関連
@@ -60,12 +61,16 @@ class StatusStat {
     minSAN: number | undefined = undefined;
 }
 class TalkStat {
-    // その他
+    // 会話関連
     talkNum: number = 0;
     charNum: number = 0;
     pcTalkNum = 0;
     pcCharNum = 0;
 };
+class OtherStat {
+    // その他
+    secretDiceCount = 0;
+}
 
 type StatsProps = {
     logFile: CcfoliaMessage[]
@@ -82,6 +87,7 @@ const Stats = (props: StatsProps) => {
     const statusStats = new Map<string, StatusStat>();
     const sanityCheckStatus = new Map<string, SanityCheckStat>();
     const talkStats = new Map<string, TalkStat>();
+    const otherStats = new Map<string, OtherStat>();
     const allSkills = new Set<string>();
     const getStat = <T,>(map: Map<string, T>, name: string, factory: new () => T): T => {
         let stat = map.get(name);
@@ -102,6 +108,7 @@ const Stats = (props: StatsProps) => {
             statusStats.clear();
             sanityCheckStatus.clear();
             talkStats.clear();
+            otherStats.clear();
         }
         // 終了メッセージが来たらbreak
         else if (props.config.endMessage !== "" && msg instanceof TalkMessage && props.config.endMessage === msg.text) {
@@ -169,13 +176,18 @@ const Stats = (props: StatsProps) => {
                 stat.pcCharNum += regex[1].length;
             }
         }
+        else if (msg instanceof UnknownSecretDiceMessage) {
+            const stat = getStat(otherStats, sender, OtherStat);
+            stat.secretDiceCount++;
+        }
     }
 
     const skills = [...skillStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
     const filteredSkills = [...filteredSkillStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
     const status = [...statusStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
     const sanity = [...sanityCheckStatus].sort((a, b) => a[0].localeCompare(b[0], "ja"));
-    const others = [...talkStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
+    const talks = [...talkStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
+    const others = [...otherStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
 
     const avgFormatter = Intl.NumberFormat("ja-JP", {
         minimumFractionDigits: 2,
@@ -276,18 +288,25 @@ const Stats = (props: StatsProps) => {
             ]} /> : null}
 
             <h2>会話の統計</h2>
-            {0 < others.length ?
-                <StatTable characters={others.map(tp => tp[0])} data={[
-                    Data("発言数", others.map(tp => tp[1].talkNum)),
-                    Data("発言文字数", others.map(tp => tp[1].charNum)),
-                    Data("平均文字数", others.map(tp => avgFormatter.format(tp[1].charNum / tp[1].talkNum))),
-                    Data("PC発言のみ", others.map(tp => ""), { separate: true }),
-                    Data("発言数", others.map(tp => tp[1].pcTalkNum), { indent: true }),
-                    Data("発言文字数", others.map(tp => tp[1].pcCharNum), { indent: true }),
-                    Data("平均文字数", others.map(tp => avgFormatter.format(tp[1].pcCharNum / tp[1].pcTalkNum)), { indent: true }),
-                    Data("PC発言率", others.map(tp => percentageFormatter.format(tp[1].pcTalkNum / tp[1].talkNum)), { indent: true }),
+            {0 < talks.length ?
+                <StatTable characters={talks.map(tp => tp[0])} data={[
+                    Data("発言数", talks.map(tp => tp[1].talkNum)),
+                    Data("発言文字数", talks.map(tp => tp[1].charNum)),
+                    Data("平均文字数", talks.map(tp => avgFormatter.format(tp[1].charNum / tp[1].talkNum))),
+                    Data("PC発言のみ", talks.map(tp => ""), { separate: true }),
+                    Data("発言数", talks.map(tp => tp[1].pcTalkNum), { indent: true }),
+                    Data("発言文字数", talks.map(tp => tp[1].pcCharNum), { indent: true }),
+                    Data("平均文字数", talks.map(tp => avgFormatter.format(tp[1].pcCharNum / tp[1].pcTalkNum)), { indent: true }),
+                    Data("PC発言率", talks.map(tp => percentageFormatter.format(tp[1].pcTalkNum / tp[1].talkNum)), { indent: true }),
                 ]} />
                 : <InfoBlock>記録なし</InfoBlock>}
+
+            {/*<h2>その他の統計</h2>
+            {0 < others.length ?
+                <StatTable characters={others.map(tp => tp[0])} data={[
+                    Data("シークレットダイス", others.map(tp => tp[1].secretDiceCount)),
+                ]} />
+                : <InfoBlock>記録なし</InfoBlock>}*/}
         </div>
     );
 }

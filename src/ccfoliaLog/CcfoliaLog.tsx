@@ -3,6 +3,7 @@ import { CoCSkillRollMessage } from "./message/CoCSkillRollMessage";
 import { ParamChangeMessage } from "./message/ParamChangeMessage";
 import { SanityCheckMessage } from "./message/SanityCheckMessage";
 import { TalkMessage } from "./message/TalkMessasge";
+import { UnknownSecretDiceMessage } from "./message/UnknownSecretDiceMessage";
 
 const parseCcfoliaLog = (log: string): CcfoliaMessage[] => {
     const parser = new DOMParser();
@@ -18,7 +19,10 @@ const parseCcfoliaLog = (log: string): CcfoliaMessage[] => {
         const text = span[2].textContent.trim();
         let reg: RegExpMatchArray | null = null;
 
-        if (name === "system" && (reg = text.match(/\[ (.+) \] (.+) : ([+-]?\d+) → ([+-]?\d+)/))) {
+        if (text === "シークレットダイス ???") {
+            msgs.push(new UnknownSecretDiceMessage(channel, name));
+        }
+        else if (name === "system" && (reg = text.match(/\[ (.+) \] (.+) : ([+-]?\d+) → ([+-]?\d+)/))) {
             // [ {name} ] {param} : {prev} → {value}
             msgs.push(new ParamChangeMessage(channel, reg[1], reg[2], Number(reg[3]), Number(reg[4])));
         }
