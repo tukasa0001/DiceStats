@@ -59,7 +59,7 @@ class StatusStat {
     totalLostSAN: number = 0;
     minSAN: number | undefined = undefined;
 }
-class OtherStat {
+class TalkStat {
     // その他
     talkNum: number = 0;
     charNum: number = 0;
@@ -81,7 +81,7 @@ const Stats = (props: StatsProps) => {
     const filteredSkillStats = new Map<string, SkillStat>();
     const statusStats = new Map<string, StatusStat>();
     const sanityCheckStatus = new Map<string, SanityCheckStat>();
-    const otherStats = new Map<string, OtherStat>();
+    const talkStats = new Map<string, TalkStat>();
     const allSkills = new Set<string>();
     const getStat = <T,>(map: Map<string, T>, name: string, factory: new () => T): T => {
         let stat = map.get(name);
@@ -101,7 +101,7 @@ const Stats = (props: StatsProps) => {
             filteredSkillStats.clear();
             statusStats.clear();
             sanityCheckStatus.clear();
-            otherStats.clear();
+            talkStats.clear();
         }
         // 終了メッセージが来たらbreak
         else if (props.config.endMessage !== "" && msg instanceof TalkMessage && props.config.endMessage === msg.text) {
@@ -160,7 +160,7 @@ const Stats = (props: StatsProps) => {
             if (msg.isFumble()) stat.fumbleNum++;
         }
         else if (msg instanceof TalkMessage) {
-            const stat = getStat(otherStats, sender, OtherStat);
+            const stat = getStat(talkStats, sender, TalkStat);
             stat.talkNum++;
             stat.charNum += msg.text.length;
             const regex = msg.text.match(/^「(.*)」/);
@@ -175,7 +175,7 @@ const Stats = (props: StatsProps) => {
     const filteredSkills = [...filteredSkillStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
     const status = [...statusStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
     const sanity = [...sanityCheckStatus].sort((a, b) => a[0].localeCompare(b[0], "ja"));
-    const others = [...otherStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
+    const others = [...talkStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
 
     const avgFormatter = Intl.NumberFormat("ja-JP", {
         minimumFractionDigits: 2,
@@ -275,7 +275,7 @@ const Stats = (props: StatsProps) => {
                 Data("内100ファン", filteredSkills.map(tp => percentageFormatter.format(tp[1].spFumbleNum / tp[1].skillRollNum)), { indent: true })
             ]} /> : null}
 
-            <h2>その他の統計</h2>
+            <h2>会話の統計</h2>
             {0 < others.length ?
                 <StatTable characters={others.map(tp => tp[0])} data={[
                     Data("発言数", others.map(tp => tp[1].talkNum)),
