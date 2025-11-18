@@ -1,3 +1,4 @@
+import { Box, Container, Heading, Section, Text, Theme } from "@radix-ui/themes";
 import parseCcfoliaLog from "./ccfoliaLog/CcfoliaLog";
 import { CcfoliaMessage } from "./ccfoliaLog/message/CcfoliaMessage";
 
@@ -13,12 +14,11 @@ const UploadForm = (props: UploadFormProps) => {
     }
 
     return (
-        <div className="card">
-            <h1>TRPG統計ツール</h1>
-            <p>
+        <Box py="6">
+            <Text>
                 Ccfoliaのログからダイスロールなどの統計を取得します。<br />
                 CoC6版のみ対応しています。
-            </p>
+            </Text>
             <form>
                 <label>Ccfoliaのログをアップロードしてください： </label>
                 <input type="file" accept=".html,.htm" onChange={e => {
@@ -28,7 +28,7 @@ const UploadForm = (props: UploadFormProps) => {
                     }
                 }}></input>
             </form>
-        </div>
+        </Box>
     )
 }
 
