@@ -15,15 +15,19 @@ const App: FC = () => {
     const [config, setConfig] = useState(new DisplayConfig());
     const [isDropping, setDropping] = useState(false);
 
-    const onFileChanged = async (file: File) => {
-        const str = await file.text();
-        const parsed = parseCcfoliaLog(str);
-        setLog(parsed);
+    const onFileUploaded = async (files: File[]) => {
+        const msg: CcfoliaMessage[] = [];
+        for (let file of files) {
+            const str = await file.text();
+            const parsed = parseCcfoliaLog(str);
+            msg.splice(msg.length, 0, ...parsed); // = msg.addAll(parsed);
+        }
+        setLog(msg);
     }
 
     return <>
         <div onDrop={e => {
-            alert("dropped");
+            onFileUploaded([...e.dataTransfer.files]);
             setDropping(false);
             e.preventDefault();
         }}
@@ -32,7 +36,7 @@ const App: FC = () => {
             }}
             onDragEnter={e => setDropping(true)}
             onDragExit={e => setDropping(false)}>
-            <UploadForm onLogFileChanged={setLog} />
+            <UploadForm onLogFileChanged={onFileUploaded} />
             {log !== undefined ? <Stats logFile={log} config={config} /> : ""}
             <ConfigCard log={log} config={config} onConfigChanged={setConfig} />
             <Footer />
