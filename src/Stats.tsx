@@ -6,9 +6,10 @@ import { ParamChangeMessage } from './ccfoliaLog/message/ParamChangeMessage';
 import { TalkMessage } from './ccfoliaLog/message/TalkMessasge';
 import DisplayConfig from './config/DisplayConfig';
 import { SanityCheckMessage } from './ccfoliaLog/message/SanityCheckMessage';
-import { JSX, useState } from 'react';
+import { JSX, useContext, useState } from 'react';
 import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
 import { UnknownSecretDiceMessage } from './ccfoliaLog/message/UnknownSecretDiceMessage';
+import { configCtx } from './App';
 
 class SkillStat {
     // 技能関連
@@ -74,13 +75,13 @@ class OtherStat {
 
 type StatsProps = {
     logFile: CcfoliaMessage[]
-    config: DisplayConfig
 }
 
 const Stats = (props: StatsProps) => {
     const [skillFilter, setSkillFinter] = useState("");
 
     const log = props.logFile;
+    const config = useContext(configCtx);
 
     const skillStats = new Map<string, SkillStat>();
     const filteredSkillStats = new Map<string, SkillStat>();
@@ -98,10 +99,10 @@ const Stats = (props: StatsProps) => {
         return stat;
     }
 
-    let isStarted: boolean = props.config.startMessage === "";
+    let isStarted: boolean = config.startMessage === "";
     for (let msg of log) {
         // 開始メッセージまで無視
-        if (!isStarted && msg instanceof TalkMessage && props.config.startMessage === msg.text) {
+        if (!isStarted && msg instanceof TalkMessage && config.startMessage === msg.text) {
             isStarted = true;
             skillStats.clear();
             filteredSkillStats.clear();
@@ -111,12 +112,12 @@ const Stats = (props: StatsProps) => {
             otherStats.clear();
         }
         // 終了メッセージが来たらbreak
-        else if (props.config.endMessage !== "" && msg instanceof TalkMessage && props.config.endMessage === msg.text) {
+        else if (config.endMessage !== "" && msg instanceof TalkMessage && config.endMessage === msg.text) {
             break;
         }
 
         let sender = msg.sender;
-        for (let [before, after] of props.config.nameAliases) {
+        for (let [before, after] of config.nameAliases) {
             if (sender === before) {
                 sender = after;
                 break;
@@ -126,7 +127,7 @@ const Stats = (props: StatsProps) => {
         if (sender === "") {
             continue;
         }
-        if (msg instanceof CoCSkillRollMessage && (!msg.isSecret || !props.config.ignoreSecretDice)) {
+        if (msg instanceof CoCSkillRollMessage && (!msg.isSecret || !config.ignoreSecretDice)) {
             const stat = getStat(skillStats, sender, SkillStat);
             stat.increment(msg);
             if (msg.skill === skillFilter) {
