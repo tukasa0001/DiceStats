@@ -10,6 +10,7 @@ const UploadForm = (props: UploadFormProps) => {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.html,.htm';
+        input.multiple = true;
         input.onchange = () => {
             if (input.files != null) {
                 props.onLogFileChanged([...input.files]);
