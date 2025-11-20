@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 import type { FC } from 'react'
 import './App.css'
 import UploadForm from './UploadForm'
@@ -9,6 +9,9 @@ import Footer from './Footer';
 import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
 import parseCcfoliaLog from './ccfoliaLog/CcfoliaLog';
 import "./UploadArea.css";
+
+export const configCtx = createContext(new DisplayConfig());
+export const setConfigCtx = createContext((x: DisplayConfig) => { });
 
 const App: FC = () => {
     const [log, setLog] = useState<CcfoliaMessage[] | undefined>(undefined);
@@ -26,29 +29,33 @@ const App: FC = () => {
     }
 
     return <>
-        <div onDrop={e => {
-            onFileUploaded([...e.dataTransfer.files]);
-            setDropping(false);
-            e.preventDefault();
-        }}
-            onDragOver={e => {
-                e.preventDefault();
-            }}
-            onDragEnter={e => setDropping(true)}
-            onDragExit={e => setDropping(false)}>
-            <UploadForm onLogFileChanged={onFileUploaded} />
-            {log !== undefined ? <Stats logFile={log} config={config} /> : ""}
-            <ConfigCard log={log} config={config} onConfigChanged={setConfig} />
-            <Footer />
+        <configCtx.Provider value={config}>
+            <setConfigCtx.Provider value={setConfig}>
+                <div onDrop={e => {
+                    onFileUploaded([...e.dataTransfer.files]);
+                    setDropping(false);
+                    e.preventDefault();
+                }}
+                    onDragOver={e => {
+                        e.preventDefault();
+                    }}
+                    onDragEnter={e => setDropping(true)}
+                    onDragExit={e => setDropping(false)}>
+                    <UploadForm onLogFileChanged={onFileUploaded} />
+                    {log !== undefined ? <Stats logFile={log} config={config} /> : ""}
+                    <ConfigCard log={log} config={config} onConfigChanged={setConfig} />
+                    <Footer />
 
-            {isDropping ? <div className='upload_area'>
-                <div>
-                    <p>
-                        ファイルをドロップしてアップロード
-                    </p>
+                    {isDropping ? <div className='upload_area'>
+                        <div>
+                            <p>
+                                ファイルをドロップしてアップロード
+                            </p>
+                        </div>
+                    </div> : null}
                 </div>
-            </div> : null}
-        </div>
+            </setConfigCtx.Provider>
+        </configCtx.Provider>
     </>
 }
 
