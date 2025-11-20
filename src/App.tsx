@@ -42,8 +42,8 @@ const App: FC = () => {
                     onDragEnter={e => setDropping(true)}
                     onDragExit={e => setDropping(false)}>
                     <UploadForm onLogFileChanged={onFileUploaded} />
-                    {log !== undefined ? <Stats logFile={log} config={config} /> : ""}
-                    <ConfigCard log={log} config={config} onConfigChanged={setConfig} />
+                    {log !== undefined ? <Stats logFile={log} /> : ""}
+                    <ConfigCard log={log} />
                     <Footer />
 
                     {isDropping ? <div className='upload_area'>
