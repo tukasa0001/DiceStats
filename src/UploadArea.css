@@ -1,0 +1,62 @@
+div.upload_area {
+    animation: simpleFade 0.25s ease-out;
+
+    /* Position */
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    /* Background */
+    background-color: #0000007f;
+
+    /* Inner box */
+    div {
+        /* Centering */
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        justify-content: center;
+
+        /* Transition */
+        transition:
+            background-color 0.2s,
+            border-color 0.2s,
+            color 0.2s;
+
+        /* Color */
+        border: 5px dotted purple;
+
+        /* Position, Spacing */
+        position: absolute;
+        top: 1em;
+        bottom: 1em;
+        left: 1em;
+        right: 1em;
+    }
+
+    input {
+        font-size: 1em;
+        text-align: center;
+    }
+
+    input::file-selector-button {
+        opacity: 0;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+}
+
+@keyframes simpleFade {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}

@@ -2,14 +2,23 @@ import parseCcfoliaLog from "./ccfoliaLog/CcfoliaLog";
 import { CcfoliaMessage } from "./ccfoliaLog/message/CcfoliaMessage";
 
 type UploadFormProps = {
-    onLogFileChanged: (x: CcfoliaMessage[]) => void
+    onLogFileChanged: (files: File[]) => Promise<void>
 };
 
 const UploadForm = (props: UploadFormProps) => {
-    const onFileChanged = async (file: File) => {
-        const str = await file.text();
-        const parsed = parseCcfoliaLog(str);
-        props.onLogFileChanged(parsed);
+    const showUploadDialog = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.html,.htm';
+        input.multiple = true;
+        input.onchange = () => {
+            if (input.files != null) {
+                props.onLogFileChanged([...input.files]);
+            }
+            input.remove();
+        };
+        input.style = "display:none;";
+        input.click();
     }
 
     return (
@@ -17,18 +26,11 @@ const UploadForm = (props: UploadFormProps) => {
             <h1>TRPG統計ツール</h1>
             <p>
                 Ccfoliaのログからダイスロールなどの統計を取得します。<br />
-                CoC6版のみ対応しています。
+                CoC6版のみ対応しています。<br />
+                ログファイルをドラッグ&ドロップしてください。<br />
+                または、 <button onClick={showUploadDialog}>ファイルを選択</button>
             </p>
-            <form>
-                <label>Ccfoliaのログをアップロードしてください： </label>
-                <input type="file" accept=".html,.htm" onChange={e => {
-                    if (e.target.files != null) {
-                        const file = e.target.files[0];
-                        onFileChanged(file);
-                    }
-                }}></input>
-            </form>
-        </div>
+        </div >
     )
 }
 
