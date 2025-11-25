@@ -8,15 +8,17 @@ import ConfigCard from './config/ConfigCard';
 import DisplayConfig from './config/DisplayConfig';
 import Footer from './Footer';
 import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
-import { Grid, Container, Heading, Theme, Box, Flex, Tabs } from '@radix-ui/themes'
+import { Grid, Container, Heading, Theme, Box, Flex, Tabs, Button } from '@radix-ui/themes'
 import parseCcfoliaLog from './ccfoliaLog/CcfoliaLog';
 import "./UploadArea.css";
+import { MoonIcon, SunIcon } from 'lucide-react';
 
 export const configCtx = createContext(new DisplayConfig());
 export const setConfigCtx = createContext((x: DisplayConfig) => { });
 
 const App: FC = () => {
-    const [isDark, setIsDark] = useState(true);
+    // 初期値は端末の設定に依存する (TODO:状態をcookieに保存したい)
+    const [isDark, setIsDark] = useState(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     const [log, setLog] = useState<CcfoliaMessage[] | undefined>(undefined);
     const [config, setConfig] = useState(new DisplayConfig());
     const [isDropping, setDropping] = useState(false);
@@ -55,6 +57,11 @@ const App: FC = () => {
                                     <Flex align="center" justify="center">
                                         <Tabs.Trigger value="upload">ログ選択</Tabs.Trigger>
                                         <Tabs.Trigger value="stats">統計</Tabs.Trigger>
+                                    </Flex>
+                                    <Flex align="center" justify="end">
+                                        <Button variant="ghost" onClick={e => setIsDark(!isDark)}>
+                                            {isDark ? <SunIcon /> : <MoonIcon />}
+                                        </Button>
                                     </Flex>
                                 </Grid>
                             </Tabs.List>
