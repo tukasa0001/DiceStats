@@ -357,7 +357,7 @@ const StatTable = (props: StatTableProps) => {
                                     <ContextMenu.Content>
                                         {/*統合:既存のキャラの記録と統合する*/}
                                         <ContextMenu.Sub>
-                                            <ContextMenu.SubTrigger>統合</ContextMenu.SubTrigger>
+                                            <ContextMenu.SubTrigger disabled={props.characters.length < 2}>統合</ContextMenu.SubTrigger>
                                             <ContextMenu.SubContent>
                                                 {props.characters
                                                     .filter(name2 => name !== name2)
