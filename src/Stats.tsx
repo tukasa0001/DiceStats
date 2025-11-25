@@ -338,6 +338,12 @@ const StatTable = (props: StatTableProps) => {
         setConfig(config.withNameAliases(arr => [...arr, [before, after]]));
     }
 
+    const openChangeNameDialog = (name: string) => {
+        setChangingName(name);
+        setChangedName(name);
+        setNameChanging(true);
+    }
+
     return (
         <Flex>
             <Table.Root className='statsTable'>
@@ -349,7 +355,7 @@ const StatTable = (props: StatTableProps) => {
                                 {/*タイトル行:右クリックメニューを付ける*/}
                                 <ContextMenu.Root>
                                     <ContextMenu.Trigger>
-                                        <Table.ColumnHeaderCell justify="center">
+                                        <Table.ColumnHeaderCell justify="center" onDoubleClick={e => openChangeNameDialog(name)}>
                                             {name}
                                         </Table.ColumnHeaderCell>
                                     </ContextMenu.Trigger>
@@ -368,11 +374,7 @@ const StatTable = (props: StatTableProps) => {
                                             </ContextMenu.SubContent>
                                         </ContextMenu.Sub>
 
-                                        <ContextMenu.Item onClick={e => {
-                                            setChangingName(name);
-                                            setChangedName(name);
-                                            setNameChanging(true);
-                                        }}>
+                                        <ContextMenu.Item onClick={e => openChangeNameDialog(name)}>
                                             名前の変更
                                         </ContextMenu.Item>
 
