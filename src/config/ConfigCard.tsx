@@ -1,19 +1,18 @@
-import { JSX, useEffect, useState } from "react";
+import { JSX, useContext, useEffect, useState } from "react";
 import DisplayConfig from "./DisplayConfig";
 import "./ConfigCard.css"
 import { PinIcon, Trash, X } from "lucide-react";
 import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage";
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge";
+import { configCtx, setConfigCtx } from "../App";
 
 type ConfigCardProps = {
-    log?: CcfoliaMessage[],
-    config: DisplayConfig,
-    onConfigChanged: (x: DisplayConfig) => void
+    log?: CcfoliaMessage[]
 }
 
 const ConfigCard = (props: ConfigCardProps) => {
-    const config = props.config;
-    const setConf = props.onConfigChanged;
+    const config = useContext(configCtx);
+    const setConf = useContext(setConfigCtx);
     const [isPinned, setPinned] = useState(false);
     const log = props.log ?? [];
 
@@ -83,15 +82,15 @@ const ConfigCard = (props: ConfigCardProps) => {
                     <span>範囲：</span>
                     <input type="text"
                         className={isStartMessageValid ? "" : "error-text-box"}
-                        value={props.config.startMessage}
-                        onChange={e => setConf(props.config.withStartMessage(e.target.value.trim()))}
+                        value={config.startMessage}
+                        onChange={e => setConf(config.withStartMessage(e.target.value.trim()))}
                         placeholder="最初から"
                     />
                     <span> ～ </span>
                     <input type="text"
                         className={isEndMessageValid ? "" : "error-text-box"}
-                        value={props.config.endMessage}
-                        onChange={e => setConf(props.config.withEndMessage(e.target.value.trim()))}
+                        value={config.endMessage}
+                        onChange={e => setConf(config.withEndMessage(e.target.value.trim()))}
                         placeholder="最後まで"
                     />
                 </div>
