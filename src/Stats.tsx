@@ -7,7 +7,7 @@ import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
 import { UnknownSecretDiceMessage } from './ccfoliaLog/message/UnknownSecretDiceMessage';
 import { configCtx } from './App';
 import { ErrorQuote, InfoQuote } from './Utils';
-import { Box, Table } from '@radix-ui/themes';
+import { Box, Select, Table } from '@radix-ui/themes';
 import "./Stats.css"
 
 class SkillStat {
@@ -77,7 +77,7 @@ type StatsProps = {
 }
 
 const Stats = (props: StatsProps) => {
-    const [skillFilter, setSkillFinter] = useState("");
+    const [skillFilter, setSkillFinter] = useState("none");
 
     const log = props.logFile;
     const config = useContext(configCtx);
@@ -263,12 +263,17 @@ const Stats = (props: StatsProps) => {
                 : <InfoQuote>記録なし</InfoQuote>}
 
             <h2>技能当たりの統計</h2>
-            <select className='skillSelect' name="skill" defaultValue="未選択" onChange={e => setSkillFinter(e.target.value)}>
-                <option value="">未選択</option>
-                {[...allSkills].sort((a, b) => a[0].localeCompare(b[0], "ja"))
-                    .map((skill, i) => <option key={i} value={skill}>{skill}</option>)}
-            </select>
-            {skillFilter !== "" ? <StatTable characters={filteredSkills.map(tp => tp[0])} data={[
+            <Select.Root defaultValue="none" onValueChange={sel => setSkillFinter(sel)}>
+                <Select.Trigger />
+                <Select.Content>
+                    <Select.Group>
+                        <Select.Item value="none">未選択</Select.Item>
+                        {[...allSkills].sort((a, b) => a[0].localeCompare(b[0], "ja"))
+                            .map((skill, i) => <Select.Item key={i} value={skill}>{skill}</Select.Item>)}
+                    </Select.Group>
+                </Select.Content>
+            </Select.Root>
+            {skillFilter !== "none" ? <StatTable characters={filteredSkills.map(tp => tp[0])} data={[
                 Data("技能振り回数", filteredSkills.map(tp => tp[1].skillRollNum)),
                 Data("平均出目", filteredSkills.map(tp => tp[1].skillRollNum == 0 ? "N/A" : avgFormatter.format(tp[1].skillRollSum / tp[1].skillRollNum))),
 
