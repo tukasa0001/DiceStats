@@ -119,7 +119,6 @@ const Stats = (props: StatsProps) => {
         for (let [before, after] of config.nameAliases) {
             if (sender === before) {
                 sender = after;
-                break;
             }
         }
         // 送信者名が空文字列の場合は無視
