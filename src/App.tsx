@@ -8,7 +8,7 @@ import ConfigCard from './config/ConfigCard';
 import DisplayConfig from './config/DisplayConfig';
 import Footer from './Footer';
 import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
-import { Grid, Container, Heading, Theme, Box } from '@radix-ui/themes'
+import { Grid, Container, Heading, Theme, Box, Flex } from '@radix-ui/themes'
 import parseCcfoliaLog from './ccfoliaLog/CcfoliaLog';
 import "./UploadArea.css";
 
@@ -45,17 +45,17 @@ const App: FC = () => {
                         onDragEnter={e => setDropping(true)}
                         onDragExit={e => setDropping(false)}>
 
-                        <Grid rows="1" columns="4" style={{ textWrap: "nowrap" }}>
+                        <Grid mx="4" rows="1" columns="4" style={{ textWrap: "nowrap" }}>
                             <Box>
                                 <Heading size="7">TRPG統計ツール</Heading>
                             </Box>
                         </Grid>
-                        <Container align="center">
+                        <Flex direction="column" mx="4">
                             <UploadForm onLogFileChanged={onFileUploaded} />
-                            {log !== undefined ? <Stats logFile={log} /> : ""}
+                            <Stats logFile={log ?? []} />
                             <ConfigCard log={log} />
                             <Footer />
-                        </Container>
+                        </Flex>
 
                         {isDropping ? <div className='upload_area'>
                             <div>
