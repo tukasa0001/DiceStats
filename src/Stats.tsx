@@ -9,6 +9,7 @@ import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
 import { UnknownSecretDiceMessage } from './ccfoliaLog/message/UnknownSecretDiceMessage';
 import { configCtx } from './App';
 import { ErrorQuote, InfoQuote } from './Utils';
+import { Box } from '@radix-ui/themes';
 
 class SkillStat {
     // 技能関連
@@ -201,7 +202,7 @@ const Stats = (props: StatsProps) => {
     });
 
     return (
-        <div className="card stats_card">
+        <Box my="2">
             {isStarted ? "" : <ErrorQuote>
                 <>
                     開始メッセージが見つかりませんでした<br />
@@ -307,7 +308,7 @@ const Stats = (props: StatsProps) => {
                     Data("シークレットダイス", others.map(tp => tp[1].secretDiceCount)),
                 ]} />
                 : <InfoQuote>記録なし</InfoQuote>}*/}
-        </div>
+        </Box>
     );
 }
 
