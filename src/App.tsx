@@ -8,7 +8,7 @@ import ConfigCard from './config/ConfigCard';
 import DisplayConfig from './config/DisplayConfig';
 import Footer from './Footer';
 import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
-import { Grid, Container, Heading, Theme, Box, Flex } from '@radix-ui/themes'
+import { Grid, Container, Heading, Theme, Box, Flex, Tabs } from '@radix-ui/themes'
 import parseCcfoliaLog from './ccfoliaLog/CcfoliaLog';
 import "./UploadArea.css";
 
@@ -44,18 +44,34 @@ const App: FC = () => {
                         }}
                         onDragEnter={e => setDropping(true)}
                         onDragExit={e => setDropping(false)}>
+                        <Tabs.Root defaultValue='upload'>
+                            <Tabs.List>
+                                <Grid mx="4" rows="1" columns="3" width="100%" style={{ textWrap: "nowrap" }}>
+                                    <Box>
+                                        <Heading size="7">TRPG統計ツール</Heading>
+                                    </Box>
+                                    <Flex align="center" justify="center">
+                                        <Tabs.Trigger value="upload">ログ選択</Tabs.Trigger>
+                                        <Tabs.Trigger value="stats">統計</Tabs.Trigger>
+                                    </Flex>
+                                </Grid>
+                            </Tabs.List>
 
-                        <Grid mx="4" rows="1" columns="4" style={{ textWrap: "nowrap" }}>
-                            <Box>
-                                <Heading size="7">TRPG統計ツール</Heading>
-                            </Box>
-                        </Grid>
-                        <Flex direction="column" mx="4">
-                            <UploadForm onLogFileChanged={onFileUploaded} />
-                            <Stats logFile={log ?? []} />
-                            <ConfigCard log={log} />
-                            <Footer />
-                        </Flex>
+                            <Tabs.Content value="upload">
+                                <Flex direction="column" mx="4">
+                                    <UploadForm onLogFileChanged={onFileUploaded} />
+                                </Flex>
+                            </Tabs.Content>
+                            <Tabs.Content value="stats">
+                                <Flex direction="column" mx="4">
+                                    <Stats logFile={log ?? []} />
+                                    <ConfigCard log={log} />
+                                </Flex>
+                            </Tabs.Content>
+                            <Flex direction="column" mx="4">
+                                <Footer />
+                            </Flex>
+                        </Tabs.Root>
 
                         {isDropping ? <div className='upload_area'>
                             <div>
