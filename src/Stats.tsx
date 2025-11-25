@@ -355,6 +355,20 @@ const StatTable = (props: StatTableProps) => {
                                         </Table.ColumnHeaderCell>
                                     </ContextMenu.Trigger>
                                     <ContextMenu.Content>
+                                        {/*統合:既存のキャラの記録と統合する*/}
+                                        <ContextMenu.Sub>
+                                            <ContextMenu.SubTrigger>統合</ContextMenu.SubTrigger>
+                                            <ContextMenu.SubContent>
+                                                {props.characters
+                                                    .filter(name2 => name !== name2)
+                                                    .map(name2 => <ContextMenu.Item
+                                                        key={name2}
+                                                        onClick={e => addNameAlias(name, name2)}>
+                                                        {name2}
+                                                    </ContextMenu.Item>)}
+                                            </ContextMenu.SubContent>
+                                        </ContextMenu.Sub>
+
                                         <ContextMenu.Item onClick={e => {
                                             setChangingName(name);
                                             setChangedName(name);
