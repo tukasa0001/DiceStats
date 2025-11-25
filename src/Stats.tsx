@@ -5,9 +5,9 @@ import { SanityCheckMessage } from './ccfoliaLog/message/SanityCheckMessage';
 import { JSX, useContext, useState } from 'react';
 import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
 import { UnknownSecretDiceMessage } from './ccfoliaLog/message/UnknownSecretDiceMessage';
-import { configCtx } from './App';
+import { configCtx, setConfigCtx } from './App';
 import { ErrorBlock, InfoBlock } from './Utils';
-import { Box, Flex, Select, Table } from '@radix-ui/themes';
+import { Box, Button, ContextMenu, Dialog, Flex, Select, Table, Text, TextField } from '@radix-ui/themes';
 import "./Stats.css"
 
 class SkillStat {
@@ -329,14 +329,68 @@ type StatTableData = {
 };
 
 const StatTable = (props: StatTableProps) => {
+    const config = useContext(configCtx);
+    const setConfig = useContext(setConfigCtx);
+    const [changedName, setChangedName] = useState("");
+
     return (
         <Flex>
             <Table.Root className='statsTable'>
                 <Table.Header>
                     <Table.Row>
                         <Table.ColumnHeaderCell className='value_title' justify="center">-</Table.ColumnHeaderCell>
-                        {props.characters.map(name => <Table.ColumnHeaderCell key={name} justify="center">{name}</Table.ColumnHeaderCell>)}
-                    </Table.Row>
+                        {props.characters.map(name =>
+                            <>
+                                {/*タイトル行:右クリックメニューを付ける*/}
+                                <Dialog.Root key={name} onOpenChange={open => {
+                                    if (open) {
+                                        setChangedName(name);
+                                    }
+                                }}>
+                                    <ContextMenu.Root>
+                                        <ContextMenu.Trigger>
+                                            <Table.ColumnHeaderCell justify="center">
+                                                {name}
+                                            </Table.ColumnHeaderCell>
+                                        </ContextMenu.Trigger>
+                                        <ContextMenu.Content>
+                                            <Dialog.Trigger>
+                                                <ContextMenu.Item>
+                                                    名前の変更
+                                                </ContextMenu.Item>
+                                            </Dialog.Trigger>
+
+                                            <ContextMenu.Item color="red">
+                                                削除
+                                            </ContextMenu.Item>
+                                        </ContextMenu.Content>
+                                    </ContextMenu.Root>
+                                    <Dialog.Content>
+                                        <Dialog.Title>名前の変更</Dialog.Title>
+                                        <Dialog.Description></Dialog.Description>
+                                        <TextField.Root
+                                            value={changedName}
+                                            onChange={e => setChangedName(e.target.value)}
+                                            placeholder='名前'
+                                        />
+
+                                        <Flex gap="3" mt="4" justify="end">
+                                            <Dialog.Close>
+                                                <Button variant="soft" color="gray">
+                                                    キャンセル
+                                                </Button>
+                                            </Dialog.Close>
+                                            <Dialog.Close>
+                                                <Button onClick={e => setConfig(config.withNameAliases(arr => [...arr, [name, changedName]]))}>
+                                                    適用
+                                                </Button>
+                                            </Dialog.Close>
+                                        </Flex>
+                                    </Dialog.Content>
+                                </Dialog.Root>
+                            </>
+                        )}
+                    </Table.Row >
                 </Table.Header>
                 <Table.Body>
                     {props.data.map((data, i) => {
