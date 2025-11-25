@@ -6,7 +6,7 @@ import { JSX, useContext, useState } from 'react';
 import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
 import { UnknownSecretDiceMessage } from './ccfoliaLog/message/UnknownSecretDiceMessage';
 import { configCtx } from './App';
-import { ErrorQuote, InfoQuote } from './Utils';
+import { ErrorBlock, InfoBlock } from './Utils';
 import { Box, Select, Table } from '@radix-ui/themes';
 import "./Stats.css"
 
@@ -202,12 +202,12 @@ const Stats = (props: StatsProps) => {
 
     return (
         <Box my="2">
-            {isStarted ? "" : <ErrorQuote>
+            {isStarted ? "" : <ErrorBlock>
                 <>
                     開始メッセージが見つかりませんでした<br />
                     ログの最初からの統計を表示します
                 </>
-            </ErrorQuote>}
+            </ErrorBlock>}
             <h2>技能振り統計</h2>
             {0 < skills.length ?
                 <StatTable characters={skills.map(tp => tp[0])} data={[
@@ -239,7 +239,7 @@ const Stats = (props: StatsProps) => {
                     Data("ファンブル率", skills.map(tp => percentageFormatter.format(tp[1].fumbleNum / tp[1].skillRollNum))),
                     Data("内100ファン", skills.map(tp => percentageFormatter.format(tp[1].spFumbleNum / tp[1].skillRollNum)), { indent: true })
                 ]} />
-                : <InfoQuote>記録なし</InfoQuote>}
+                : <InfoBlock>記録なし</InfoBlock>}
 
             <h2>ステータス統計</h2>
             {0 < status.length ?
@@ -249,7 +249,7 @@ const Stats = (props: StatsProps) => {
                     Data("合計喪失SAN", status.map(tp => tp[1].totalLostSAN)),
                     Data("最低SAN", status.map(tp => tp[1].minSAN ?? "N/A"))
                 ]} />
-                : <InfoQuote>記録なし</InfoQuote>}
+                : <InfoBlock>記録なし</InfoBlock>}
             <h2>SANチェック統計</h2>
             {0 < sanity.length ?
                 <StatTable characters={sanity.map(tp => tp[0])} data={[
@@ -260,7 +260,7 @@ const Stats = (props: StatsProps) => {
                     Data("クリティカル回数", sanity.map(tp => tp[1].criticalNum), { separate: true }),
                     Data("ファンブル回数", sanity.map(tp => tp[1].fumbleNum))
                 ]} />
-                : <InfoQuote>記録なし</InfoQuote>}
+                : <InfoBlock>記録なし</InfoBlock>}
 
             <h2>技能当たりの統計</h2>
             <Select.Root defaultValue="none" onValueChange={sel => setSkillFinter(sel)}>
@@ -304,7 +304,7 @@ const Stats = (props: StatsProps) => {
                     Data("平均文字数", talks.map(tp => avgFormatter.format(tp[1].pcCharNum / tp[1].pcTalkNum)), { indent: true }),
                     Data("PC発言率", talks.map(tp => percentageFormatter.format(tp[1].pcTalkNum / tp[1].talkNum)), { indent: true }),
                 ]} />
-                : <InfoQuote>記録なし</InfoQuote>}
+                : <InfoBlock>記録なし</InfoBlock>}
 
             {/*<h2>その他の統計</h2>
             {0 < others.length ?
