@@ -385,7 +385,7 @@ const StatTable = (props: StatTableProps) => {
             <Dialog.Root open={isNameChanging} onOpenChange={value => setNameChanging(value)}>
                 <Dialog.Content>
                     <Dialog.Title>名前の変更</Dialog.Title>
-                    <Dialog.Description></Dialog.Description>
+                    <Dialog.Description>元の名前: {changingName}</Dialog.Description>
                     <TextField.Root
                         value={changedName}
                         onChange={e => setChangedName(e.target.value)}
