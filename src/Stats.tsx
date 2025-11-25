@@ -331,7 +331,9 @@ type StatTableData = {
 const StatTable = (props: StatTableProps) => {
     const config = useContext(configCtx);
     const setConfig = useContext(setConfigCtx);
-    const [changedName, setChangedName] = useState("");
+    const [isNameChanging, setNameChanging] = useState(false);
+    const [changingName, setChangingName] = useState(""); // 変更中の名前
+    const [changedName, setChangedName] = useState(""); // 変更後の名前
 
     return (
         <Flex>
@@ -342,52 +344,27 @@ const StatTable = (props: StatTableProps) => {
                         {props.characters.map(name =>
                             <>
                                 {/*タイトル行:右クリックメニューを付ける*/}
-                                <Dialog.Root key={name} onOpenChange={open => {
-                                    if (open) {
-                                        setChangedName(name);
-                                    }
-                                }}>
-                                    <ContextMenu.Root>
-                                        <ContextMenu.Trigger>
-                                            <Table.ColumnHeaderCell justify="center">
-                                                {name}
-                                            </Table.ColumnHeaderCell>
-                                        </ContextMenu.Trigger>
-                                        <ContextMenu.Content>
-                                            <Dialog.Trigger>
-                                                <ContextMenu.Item>
-                                                    名前の変更
-                                                </ContextMenu.Item>
-                                            </Dialog.Trigger>
+                                <ContextMenu.Root>
+                                    <ContextMenu.Trigger>
+                                        <Table.ColumnHeaderCell justify="center">
+                                            {name}
+                                        </Table.ColumnHeaderCell>
+                                    </ContextMenu.Trigger>
+                                    <ContextMenu.Content>
+                                        <ContextMenu.Item onClick={e => {
+                                            setChangingName(name);
+                                            setChangedName(name);
+                                            setNameChanging(true);
+                                        }}>
+                                            名前の変更
+                                        </ContextMenu.Item>
 
-                                            <ContextMenu.Item color="red">
-                                                削除
-                                            </ContextMenu.Item>
-                                        </ContextMenu.Content>
-                                    </ContextMenu.Root>
-                                    <Dialog.Content>
-                                        <Dialog.Title>名前の変更</Dialog.Title>
-                                        <Dialog.Description></Dialog.Description>
-                                        <TextField.Root
-                                            value={changedName}
-                                            onChange={e => setChangedName(e.target.value)}
-                                            placeholder='名前'
-                                        />
+                                        <ContextMenu.Item color="red">
+                                            削除
+                                        </ContextMenu.Item>
+                                    </ContextMenu.Content>
+                                </ContextMenu.Root>
 
-                                        <Flex gap="3" mt="4" justify="end">
-                                            <Dialog.Close>
-                                                <Button variant="soft" color="gray">
-                                                    キャンセル
-                                                </Button>
-                                            </Dialog.Close>
-                                            <Dialog.Close>
-                                                <Button onClick={e => setConfig(config.withNameAliases(arr => [...arr, [name, changedName]]))}>
-                                                    適用
-                                                </Button>
-                                            </Dialog.Close>
-                                        </Flex>
-                                    </Dialog.Content>
-                                </Dialog.Root>
                             </>
                         )}
                     </Table.Row >
@@ -403,6 +380,36 @@ const StatTable = (props: StatTableProps) => {
                     })}
                 </Table.Body>
             </Table.Root>
+
+            {/*名前変更ダイアログ*/}
+            <Dialog.Root open={isNameChanging} onOpenChange={value => setNameChanging(value)}>
+                <Dialog.Content>
+                    <Dialog.Title>名前の変更</Dialog.Title>
+                    <Dialog.Description></Dialog.Description>
+                    <TextField.Root
+                        value={changedName}
+                        onChange={e => setChangedName(e.target.value)}
+                        placeholder='名前'
+                    />
+
+                    <Flex gap="3" mt="4" justify="end">
+                        <Dialog.Close>
+                            <Button variant="soft" color="gray">
+                                キャンセル
+                            </Button>
+                        </Dialog.Close>
+                        <Dialog.Close>
+                            <Button onClick={e => {
+                                if (changingName !== changedName) {
+                                    setConfig(config.withNameAliases(arr => [...arr, [changingName, changedName]]));
+                                }
+                            }}>
+                                適用
+                            </Button>
+                        </Dialog.Close>
+                    </Flex>
+                </Dialog.Content>
+            </Dialog.Root>
         </Flex>
     )
 }
