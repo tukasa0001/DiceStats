@@ -16,6 +16,7 @@ export const configCtx = createContext(new DisplayConfig());
 export const setConfigCtx = createContext((x: DisplayConfig) => { });
 
 const App: FC = () => {
+    const [isDark, setIsDark] = useState(true);
     const [log, setLog] = useState<CcfoliaMessage[] | undefined>(undefined);
     const [config, setConfig] = useState(new DisplayConfig());
     const [isDropping, setDropping] = useState(false);
@@ -43,7 +44,7 @@ const App: FC = () => {
                     }}
                     onDragEnter={e => setDropping(true)}
                     onDragExit={e => setDropping(false)}>
-                    <Theme accentColor="amber" radius='large'>
+                    <Theme accentColor="indigo" radius='large' appearance={isDark ? "dark" : "light"}>
 
                         <Tabs.Root defaultValue='upload'>
                             <Tabs.List>
