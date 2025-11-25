@@ -1,13 +1,12 @@
-div.statsTable {
+.statsTable {
     overflow-x: auto;
     max-width: 100%;
 
     td:not(:first-child) {
-        text-align: right;
         padding-right: 2em;
     }
 
-    tr.indent1 td:first-child {
+    tr.indent1 th {
         padding-left: 2em;
     }
 
@@ -15,29 +14,10 @@ div.statsTable {
     td.value_title {
         white-space: nowrap;
     }
-}
 
-@keyframes card_fade {
-    0% {
-        max-height: 0;
-        opacity: 0;
-        overflow: hidden;
+    tr:hover {
+        background-color: var(--accent-7);
     }
-
-    25% {
-        opacity: 1;
-        overflow: hidden;
-    }
-
-    100% {
-        max-height: 500vh;
-        opacity: 1;
-        overflow: visible;
-    }
-}
-
-.stats_card {
-    animation: card_fade 1.5s ease-in forwards;
 }
 
 select.skillSelect {

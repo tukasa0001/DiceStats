@@ -1,8 +1,6 @@
-import parseCcfoliaLog from './ccfoliaLog/CcfoliaLog';
 import { CoCSkillRollMessage } from './ccfoliaLog/message/CoCSkillRollMessage';
 import { ParamChangeMessage } from './ccfoliaLog/message/ParamChangeMessage';
 import { TalkMessage } from './ccfoliaLog/message/TalkMessasge';
-import DisplayConfig from './config/DisplayConfig';
 import { SanityCheckMessage } from './ccfoliaLog/message/SanityCheckMessage';
 import { JSX, useContext, useState } from 'react';
 import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
@@ -10,6 +8,7 @@ import { UnknownSecretDiceMessage } from './ccfoliaLog/message/UnknownSecretDice
 import { configCtx } from './App';
 import { ErrorQuote, InfoQuote } from './Utils';
 import { Box, Table } from '@radix-ui/themes';
+import "./Stats.css"
 
 class SkillStat {
     // 技能関連
@@ -326,7 +325,7 @@ type StatTableData = {
 
 const StatTable = (props: StatTableProps) => {
     return (
-        <Table.Root>
+        <Table.Root className='statsTable'>
             <Table.Header>
                 <Table.Row>
                     <Table.ColumnHeaderCell className='value_title' justify="center">-</Table.ColumnHeaderCell>
