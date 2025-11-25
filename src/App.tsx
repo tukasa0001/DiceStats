@@ -33,17 +33,18 @@ const App: FC = () => {
     return (
         <configCtx.Provider value={config}>
             <setConfigCtx.Provider value={setConfig}>
-                <Theme accentColor='purple' radius='large'>
-                    <div onDrop={e => {
-                        onFileUploaded([...e.dataTransfer.files]);
-                        setDropping(false);
+                <div onDrop={e => {
+                    onFileUploaded([...e.dataTransfer.files]);
+                    setDropping(false);
+                    e.preventDefault();
+                }}
+                    onDragOver={e => {
                         e.preventDefault();
                     }}
-                        onDragOver={e => {
-                            e.preventDefault();
-                        }}
-                        onDragEnter={e => setDropping(true)}
-                        onDragExit={e => setDropping(false)}>
+                    onDragEnter={e => setDropping(true)}
+                    onDragExit={e => setDropping(false)}>
+                    <Theme accentColor='purple' radius='large'>
+
                         <Tabs.Root defaultValue='upload'>
                             <Tabs.List>
                                 <Grid mx="4" rows="1" columns="3" width="100%" style={{ textWrap: "nowrap" }}>
@@ -80,8 +81,8 @@ const App: FC = () => {
                                 </p>
                             </div>
                         </div> : null}
-                    </div>
-                </Theme>
+                    </Theme>
+                </div>
             </setConfigCtx.Provider>
         </configCtx.Provider >
     );
