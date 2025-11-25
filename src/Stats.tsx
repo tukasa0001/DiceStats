@@ -8,6 +8,7 @@ import { JSX, useContext, useState } from 'react';
 import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
 import { UnknownSecretDiceMessage } from './ccfoliaLog/message/UnknownSecretDiceMessage';
 import { configCtx } from './App';
+import { ErrorQuote, InfoQuote } from './Utils';
 
 class SkillStat {
     // 技能関連
@@ -201,12 +202,12 @@ const Stats = (props: StatsProps) => {
 
     return (
         <div className="card stats_card">
-            {isStarted ? "" : <ErrorBlock>
+            {isStarted ? "" : <ErrorQuote>
                 <>
                     開始メッセージが見つかりませんでした<br />
                     ログの最初からの統計を表示します
                 </>
-            </ErrorBlock>}
+            </ErrorQuote>}
             <h2>技能振り統計</h2>
             {0 < skills.length ?
                 <StatTable characters={skills.map(tp => tp[0])} data={[
@@ -238,7 +239,7 @@ const Stats = (props: StatsProps) => {
                     Data("ファンブル率", skills.map(tp => percentageFormatter.format(tp[1].fumbleNum / tp[1].skillRollNum))),
                     Data("内100ファン", skills.map(tp => percentageFormatter.format(tp[1].spFumbleNum / tp[1].skillRollNum)), { indent: true })
                 ]} />
-                : <InfoBlock>記録なし</InfoBlock>}
+                : <InfoQuote>記録なし</InfoQuote>}
 
             <h2>ステータス統計</h2>
             {0 < status.length ?
@@ -248,7 +249,7 @@ const Stats = (props: StatsProps) => {
                     Data("合計喪失SAN", status.map(tp => tp[1].totalLostSAN)),
                     Data("最低SAN", status.map(tp => tp[1].minSAN ?? "N/A"))
                 ]} />
-                : <InfoBlock>記録なし</InfoBlock>}
+                : <InfoQuote>記録なし</InfoQuote>}
             <h2>SANチェック統計</h2>
             {0 < sanity.length ?
                 <StatTable characters={sanity.map(tp => tp[0])} data={[
@@ -259,7 +260,7 @@ const Stats = (props: StatsProps) => {
                     Data("クリティカル回数", sanity.map(tp => tp[1].criticalNum), { separate: true }),
                     Data("ファンブル回数", sanity.map(tp => tp[1].fumbleNum))
                 ]} />
-                : <InfoBlock>記録なし</InfoBlock>}
+                : <InfoQuote>記録なし</InfoQuote>}
 
             <h2>技能当たりの統計</h2>
             <select className='skillSelect' name="skill" defaultValue="未選択" onChange={e => setSkillFinter(e.target.value)}>
@@ -298,14 +299,14 @@ const Stats = (props: StatsProps) => {
                     Data("平均文字数", talks.map(tp => avgFormatter.format(tp[1].pcCharNum / tp[1].pcTalkNum)), { indent: true }),
                     Data("PC発言率", talks.map(tp => percentageFormatter.format(tp[1].pcTalkNum / tp[1].talkNum)), { indent: true }),
                 ]} />
-                : <InfoBlock>記録なし</InfoBlock>}
+                : <InfoQuote>記録なし</InfoQuote>}
 
             {/*<h2>その他の統計</h2>
             {0 < others.length ?
                 <StatTable characters={others.map(tp => tp[0])} data={[
                     Data("シークレットダイス", others.map(tp => tp[1].secretDiceCount)),
                 ]} />
-                : <InfoBlock>記録なし</InfoBlock>}*/}
+                : <InfoQuote>記録なし</InfoQuote>}*/}
         </div>
     );
 }
@@ -345,18 +346,6 @@ const StatTable = (props: StatTableProps) => {
             </table>
         </div>
     )
-}
-
-const InfoBlock = (props: { children: JSX.Element | string }) => {
-    return <div className="infoBlock">
-        {props.children}
-    </div>
-}
-
-const ErrorBlock = (props: { children: JSX.Element | string }) => {
-    return <div className="errorBlock">
-        {props.children}
-    </div>
 }
 
 const Data = (title: string, values: (string | number)[], props: { indent?: boolean, separate?: boolean } = {}): StatTableData => {
