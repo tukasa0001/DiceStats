@@ -335,6 +335,10 @@ const StatTable = (props: StatTableProps) => {
     const [changingName, setChangingName] = useState(""); // 変更中の名前
     const [changedName, setChangedName] = useState(""); // 変更後の名前
 
+    const addNameAlias = (before: string, after: string) => {
+        setConfig(config.withNameAliases(arr => [...arr, [before, after]]));
+    }
+
     return (
         <Flex>
             <Table.Root className='statsTable'>
@@ -359,7 +363,9 @@ const StatTable = (props: StatTableProps) => {
                                             名前の変更
                                         </ContextMenu.Item>
 
-                                        <ContextMenu.Item color="red">
+                                        <ContextMenu.Item color="red" onClick={e => {
+                                            addNameAlias(name, "");
+                                        }}>
                                             削除
                                         </ContextMenu.Item>
                                     </ContextMenu.Content>
@@ -401,7 +407,7 @@ const StatTable = (props: StatTableProps) => {
                         <Dialog.Close>
                             <Button onClick={e => {
                                 if (changingName !== changedName) {
-                                    setConfig(config.withNameAliases(arr => [...arr, [changingName, changedName]]));
+                                    addNameAlias(changingName, changedName);
                                 }
                             }}>
                                 適用
