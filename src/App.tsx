@@ -43,7 +43,7 @@ const App: FC = () => {
                     }}
                     onDragEnter={e => setDropping(true)}
                     onDragExit={e => setDropping(false)}>
-                    <Theme accentColor='purple' radius='large'>
+                    <Theme accentColor="amber" radius='large'>
 
                         <Tabs.Root defaultValue='upload'>
                             <Tabs.List>
