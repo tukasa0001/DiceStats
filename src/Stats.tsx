@@ -9,7 +9,7 @@ import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
 import { UnknownSecretDiceMessage } from './ccfoliaLog/message/UnknownSecretDiceMessage';
 import { configCtx } from './App';
 import { ErrorQuote, InfoQuote } from './Utils';
-import { Box } from '@radix-ui/themes';
+import { Box, Table } from '@radix-ui/themes';
 
 class SkillStat {
     // 技能関連
@@ -326,26 +326,24 @@ type StatTableData = {
 
 const StatTable = (props: StatTableProps) => {
     return (
-        <div className='statsTable'>
-            <table>
-                <thead>
-                    <tr>
-                        <th className='value_title'>-</th>
-                        {props.characters.map(name => <th key={name}>{name}</th>)}
-                    </tr>
-                </thead>
-                <tbody>
-                    {props.data.map((data, i) => {
-                        return (
-                            <tr key={`${data.title}-${i}`} className={`${data.indent ? "indent1" : ""} ${data.separate || i === 0 ? "separate" : ""}`}>
-                                <td className='value_title'>{data.title}</td>
-                                {data.values.map((val, i) => <td key={`${props.characters[i]}-${data.title}`}>{val}</td>)}
-                            </tr>
-                        )
-                    })}
-                </tbody>
-            </table>
-        </div>
+        <Table.Root>
+            <Table.Header>
+                <Table.Row>
+                    <Table.ColumnHeaderCell className='value_title' justify="center">-</Table.ColumnHeaderCell>
+                    {props.characters.map(name => <Table.ColumnHeaderCell key={name} justify="center">{name}</Table.ColumnHeaderCell>)}
+                </Table.Row>
+            </Table.Header>
+            <Table.Body>
+                {props.data.map((data, i) => {
+                    return (
+                        <Table.Row key={`${data.title}-${i}`} className={`${data.indent ? "indent1" : ""} ${data.separate || i === 0 ? "separate" : ""}`}>
+                            <Table.RowHeaderCell className='value_title'>{data.title}</Table.RowHeaderCell>
+                            {data.values.map((val, i) => <Table.Cell key={`${props.characters[i]}-${data.title}`} justify="end">{val}</Table.Cell>)}
+                        </Table.Row>
+                    )
+                })}
+            </Table.Body>
+        </Table.Root>
     )
 }
 
