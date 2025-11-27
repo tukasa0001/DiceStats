@@ -1,3 +1,4 @@
+import { Box, Button, Container, Heading, Section, Text, Theme } from "@radix-ui/themes";
 import parseCcfoliaLog from "./ccfoliaLog/CcfoliaLog";
 import { CcfoliaMessage } from "./ccfoliaLog/message/CcfoliaMessage";
 
@@ -22,15 +23,14 @@ const UploadForm = (props: UploadFormProps) => {
     }
 
     return (
-        <div className="card">
-            <h1>TRPG統計ツール</h1>
-            <p>
+        <Box py="6">
+            <Text>
                 Ccfoliaのログからダイスロールなどの統計を取得します。<br />
                 CoC6版のみ対応しています。<br />
-                ログファイルをドラッグ&ドロップしてください。<br />
-                または、 <button onClick={showUploadDialog}>ファイルを選択</button>
-            </p>
-        </div >
+                ログファイルをドラッグ&ドロップするか、ファイルを選択してください<br />
+                <Button mt="2" onClick={showUploadDialog}>ファイルを選択</Button>
+            </Text>
+        </Box>
     )
 }
 
