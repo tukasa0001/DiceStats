@@ -3,7 +3,7 @@ import { InfoIcon, TriangleAlert } from "lucide-react";
 import { JSX } from "react";
 
 export const ErrorBlock = (props: { children: JSX.Element | string }) => {
-    return <Callout.Root color="red">
+    return <Callout.Root color="red" my="2">
         <Callout.Icon>
             <TriangleAlert />
         </Callout.Icon>
@@ -14,7 +14,7 @@ export const ErrorBlock = (props: { children: JSX.Element | string }) => {
 }
 
 export const InfoBlock = (props: { children: JSX.Element | string }) => {
-    return <Callout.Root>
+    return <Callout.Root my="2">
         <Callout.Icon>
             <InfoIcon />
         </Callout.Icon>
