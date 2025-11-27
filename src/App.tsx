@@ -20,6 +20,7 @@ const App: FC = () => {
     const [isDark, setIsDark] = useState(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     const [log, setLog] = useState<CcfoliaMessage[] | undefined>(undefined);
     const [config, setConfig] = useState(new DisplayConfig());
+    const [tab, setTab] = useState("upload");
     const [isDropping, setDropping] = useState(false);
 
     const onFileUploaded = async (files: File[]) => {
@@ -30,6 +31,7 @@ const App: FC = () => {
             msg.splice(msg.length, 0, ...parsed); // = msg.addAll(parsed);
         }
         setLog(msg);
+        setTab("stats");
     }
 
     return (
@@ -46,8 +48,7 @@ const App: FC = () => {
                     onDragEnter={e => setDropping(true)}
                     onDragExit={e => setDropping(false)}>
                     <Theme accentColor="indigo" radius='large' appearance={isDark ? "dark" : "light"}>
-
-                        <Tabs.Root defaultValue='upload'>
+                        <Tabs.Root value={tab} onValueChange={tab => setTab(tab)}>
                             <Tabs.List>
                                 <Grid mx="4" rows="1" columns="3" width="100%" style={{ textWrap: "nowrap" }}>
                                     <Box>
