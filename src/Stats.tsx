@@ -7,7 +7,7 @@ import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
 import { UnknownSecretDiceMessage } from './ccfoliaLog/message/UnknownSecretDiceMessage';
 import { configCtx, setConfigCtx } from './App';
 import { ErrorBlock, InfoBlock } from './Utils';
-import { Box, Button, ContextMenu, Dialog, Flex, Select, Table, Text, TextField } from '@radix-ui/themes';
+import { Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField } from '@radix-ui/themes';
 import "./Stats.css"
 
 class SkillStat {
@@ -207,7 +207,7 @@ const Stats = (props: StatsProps) => {
                     ログの最初からの統計を表示します
                 </>
             </ErrorBlock>}
-            <h2>技能振り統計</h2>
+            <Heading my="4">技能振り統計</Heading>
             {0 < skills.length ?
                 <StatTable characters={skills.map(tp => tp[0])} data={[
                     Data("技能振り回数", skills.map(tp => tp[1].skillRollNum)),
@@ -240,7 +240,7 @@ const Stats = (props: StatsProps) => {
                 ]} />
                 : <InfoBlock>記録なし</InfoBlock>}
 
-            <h2>ステータス統計</h2>
+            <Heading my="4">ステータス統計</Heading>
             {0 < status.length ?
                 <StatTable characters={status.map(tp => tp[0])} data={[
                     Data("合計被ダメージ", status.map(tp => tp[1].totalDamage)),
@@ -249,7 +249,8 @@ const Stats = (props: StatsProps) => {
                     Data("最低SAN", status.map(tp => tp[1].minSAN ?? "N/A"))
                 ]} />
                 : <InfoBlock>記録なし</InfoBlock>}
-            <h2>SANチェック統計</h2>
+
+            <Heading my="4">SANチェック統計</Heading>
             {0 < sanity.length ?
                 <StatTable characters={sanity.map(tp => tp[0])} data={[
                     Data("合計回数", sanity.map(tp => tp[1].checkNum)),
@@ -261,7 +262,7 @@ const Stats = (props: StatsProps) => {
                 ]} />
                 : <InfoBlock>記録なし</InfoBlock>}
 
-            <h2>技能当たりの統計</h2>
+            <Heading my="4">技能当たりの統計</Heading>
             <Select.Root defaultValue="none" onValueChange={sel => setSkillFinter(sel)}>
                 <Select.Trigger />
                 <Select.Content>
@@ -291,7 +292,7 @@ const Stats = (props: StatsProps) => {
                 Data("内100ファン", filteredSkills.map(tp => percentageFormatter.format(tp[1].spFumbleNum / tp[1].skillRollNum)), { indent: true })
             ]} /> : null}
 
-            <h2>会話の統計</h2>
+            <Heading my="4">会話の統計</Heading>
             {0 < talks.length ?
                 <StatTable characters={talks.map(tp => tp[0])} data={[
                     Data("発言数", talks.map(tp => tp[1].talkNum)),
@@ -305,7 +306,7 @@ const Stats = (props: StatsProps) => {
                 ]} />
                 : <InfoBlock>記録なし</InfoBlock>}
 
-            {/*<h2>その他の統計</h2>
+            {/*<Heading my="4">その他の統計</Heading>
             {0 < others.length ?
                 <StatTable characters={others.map(tp => tp[0])} data={[
                     Data("シークレットダイス", others.map(tp => tp[1].secretDiceCount)),
