@@ -1,7 +1,7 @@
 import { JSX, useContext, useEffect, useState } from "react";
 import DisplayConfig from "./DisplayConfig";
 import "./ConfigCard.css"
-import { PinIcon, Trash, X } from "lucide-react";
+import { Trash } from "lucide-react";
 import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage";
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge";
 import { configCtx, setConfigCtx } from "../App";
@@ -39,9 +39,6 @@ const ConfigCard = (props: ConfigCardProps) => {
     return (
         <div className={`card configCard ${isPinned ? "pinned" : ""}`}>
             <h2>詳細設定</h2>
-            <button className="pin" onClick={() => setPinned(!isPinned)}>
-                {isPinned ? <X /> : <PinIcon />}
-            </button>
             <ToggleBox title="名前の変換設定" elem={<>
                 <p>
                     指定した名前を別の名前に変換します。<br />
