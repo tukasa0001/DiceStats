@@ -21,33 +21,6 @@ div.toggleBox {
     }
 }
 
-table.nameAliasTable {
-
-    margin-bottom: 1em;
-
-    th {
-        padding: 0 1em;
-    }
-
-    td:not(.del) {
-        padding: 0;
-        width: 15em;
-
-        input {
-            width: 90%;
-            margin: 0 5%;
-        }
-    }
-
-    td.del {
-        padding: 0;
-
-        button {
-            margin: 0.25em;
-        }
-
-        button:hover svg {
-            stroke: rgb(255, 102, 102);
-        }
-    }
+.del button:hover svg {
+    stroke: rgb(255, 102, 102);
 }
