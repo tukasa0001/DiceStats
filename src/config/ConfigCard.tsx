@@ -5,7 +5,7 @@ import { PinIcon, Trash, X } from "lucide-react";
 import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage";
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge";
 import { configCtx, setConfigCtx } from "../App";
-import { Box, Button, Flex, IconButton, Table, TextField, Text } from "@radix-ui/themes";
+import { Box, Button, Flex, IconButton, Table, TextField, Text, Checkbox, Switch } from "@radix-ui/themes";
 
 type ConfigCardProps = {
     log?: CcfoliaMessage[]
@@ -109,13 +109,12 @@ const ConfigCard = (props: ConfigCardProps) => {
                 </div>
             </>} />
             <ToggleBox title="その他の設定" elem={<>
-                <label className="checkbox-label">
-                    <input type="checkbox"
-                        checked={config.ignoreSecretDice}
-                        onChange={e => setConf(config.withIgnoreSecretDice(e.target.checked))}
-                    />
-                    シークレットダイスを無視する
-                </label>
+                <Text as="label">
+                    <Flex align="center" gap="2" my="2">
+                        <Switch checked={config.ignoreSecretDice} onCheckedChange={state => setConf(config.withIgnoreSecretDice(state))} />
+                        シークレットダイスを無視する
+                    </Flex>
+                </Text>
             </>} />
         </div>
     )
