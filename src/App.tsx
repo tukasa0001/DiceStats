@@ -1,6 +1,5 @@
 import { createContext, useContext, useState } from 'react'
 import type { FC } from 'react'
-//import './App.css'
 import "@radix-ui/themes/styles.css"
 import UploadForm from './UploadForm'
 import Stats from './Stats';
