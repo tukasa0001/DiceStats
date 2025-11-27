@@ -5,6 +5,7 @@ import { PinIcon, Trash, X } from "lucide-react";
 import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage";
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge";
 import { configCtx, setConfigCtx } from "../App";
+import { Box, Button } from "@radix-ui/themes";
 
 type ConfigCardProps = {
     log?: CcfoliaMessage[]
@@ -112,10 +113,10 @@ const ToggleBox = (props: { title: string, elem: JSX.Element }) => {
     const [show, setShow] = useState(false);
 
     return (
-        <div className={`toggleBox ${show ? "active" : "inactive"}`}>
-            <button className="toggleButton" onClick={() => setShow(!show)}>{`${show ? "▼" : "▶"} ${props.title}`}</button>
+        <Box className={`toggleBox ${show ? "active" : "inactive"}`}>
+            <Button size="3" variant="surface" highContrast={true} className="toggleButton" onClick={() => setShow(!show)}>{`${show ? "▼" : "▶"} ${props.title}`}</Button>
             <div className="toggleElement"><div>{props.elem}</div></div>
-        </div>
+        </Box>
     );
 }
 
