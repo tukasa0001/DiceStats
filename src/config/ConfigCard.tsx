@@ -5,7 +5,7 @@ import { PinIcon, Trash, X } from "lucide-react";
 import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage";
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge";
 import { configCtx, setConfigCtx } from "../App";
-import { Box, Button, IconButton, Table, TextField } from "@radix-ui/themes";
+import { Box, Button, Flex, IconButton, Table, TextField, Text } from "@radix-ui/themes";
 
 type ConfigCardProps = {
     log?: CcfoliaMessage[]
@@ -90,20 +90,22 @@ const ConfigCard = (props: ConfigCardProps) => {
                     特定の発言をトリガーに、範囲内の統計を出力します
                 </p>
                 <div className="stats-range-config">
-                    <span>範囲：</span>
-                    <input type="text"
-                        className={isStartMessageValid ? "" : "error-text-box"}
-                        value={config.startMessage}
-                        onChange={e => setConf(config.withStartMessage(e.target.value.trim()))}
-                        placeholder="最初から"
-                    />
-                    <span> ～ </span>
-                    <input type="text"
-                        className={isEndMessageValid ? "" : "error-text-box"}
-                        value={config.endMessage}
-                        onChange={e => setConf(config.withEndMessage(e.target.value.trim()))}
-                        placeholder="最後まで"
-                    />
+                    <Flex align="center" py="1">
+                        <Text>範囲：</Text>
+                        <TextField.Root
+                            value={config.startMessage}
+                            onChange={e => setConf(config.withStartMessage(e.target.value.trim()))}
+                            placeholder="最初から">
+                            <TextField.Slot />
+                        </TextField.Root>
+                        <Text mx="2"> ～ </Text>
+                        <TextField.Root
+                            value={config.endMessage}
+                            onChange={e => setConf(config.withEndMessage(e.target.value.trim()))}
+                            placeholder="最後まで">
+                            <TextField.Slot />
+                        </TextField.Root>
+                    </Flex>
                 </div>
             </>} />
             <ToggleBox title="その他の設定" elem={<>

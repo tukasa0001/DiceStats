@@ -83,14 +83,3 @@ label.checkbox-label {
     display: block;
     margin: 1em 0;
 }
-
-div.stats-range-config {
-    * {
-        vertical-align: middle;
-    }
-}
-
-input.error-text-box:not(:focus) {
-    border-width: 2px;
-    border-color: rgb(255, 44, 44);
-}
