@@ -1,15 +1,14 @@
-import './App.css'
-import parseCcfoliaLog from './ccfoliaLog/CcfoliaLog';
 import { CoCSkillRollMessage } from './ccfoliaLog/message/CoCSkillRollMessage';
-import "./Stats.css"
 import { ParamChangeMessage } from './ccfoliaLog/message/ParamChangeMessage';
 import { TalkMessage } from './ccfoliaLog/message/TalkMessasge';
-import DisplayConfig from './config/DisplayConfig';
 import { SanityCheckMessage } from './ccfoliaLog/message/SanityCheckMessage';
 import { JSX, useContext, useState } from 'react';
 import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
 import { UnknownSecretDiceMessage } from './ccfoliaLog/message/UnknownSecretDiceMessage';
-import { configCtx } from './App';
+import { configCtx, setConfigCtx } from './App';
+import { ErrorBlock, InfoBlock } from './Utils';
+import { Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField } from '@radix-ui/themes';
+import "./Stats.css"
 
 class SkillStat {
     // 技能関連
@@ -78,7 +77,7 @@ type StatsProps = {
 }
 
 const Stats = (props: StatsProps) => {
-    const [skillFilter, setSkillFinter] = useState("");
+    const [skillFilter, setSkillFinter] = useState("none");
 
     const log = props.logFile;
     const config = useContext(configCtx);
@@ -120,7 +119,6 @@ const Stats = (props: StatsProps) => {
         for (let [before, after] of config.nameAliases) {
             if (sender === before) {
                 sender = after;
-                break;
             }
         }
         // 送信者名が空文字列の場合は無視
@@ -202,14 +200,14 @@ const Stats = (props: StatsProps) => {
     });
 
     return (
-        <div className="card stats_card">
+        <Box my="2">
             {isStarted ? "" : <ErrorBlock>
                 <>
                     開始メッセージが見つかりませんでした<br />
                     ログの最初からの統計を表示します
                 </>
             </ErrorBlock>}
-            <h2>技能振り統計</h2>
+            <Heading my="4">技能振り統計</Heading>
             {0 < skills.length ?
                 <StatTable characters={skills.map(tp => tp[0])} data={[
                     Data("技能振り回数", skills.map(tp => tp[1].skillRollNum)),
@@ -242,7 +240,7 @@ const Stats = (props: StatsProps) => {
                 ]} />
                 : <InfoBlock>記録なし</InfoBlock>}
 
-            <h2>ステータス統計</h2>
+            <Heading my="4">ステータス統計</Heading>
             {0 < status.length ?
                 <StatTable characters={status.map(tp => tp[0])} data={[
                     Data("合計被ダメージ", status.map(tp => tp[1].totalDamage)),
@@ -251,7 +249,8 @@ const Stats = (props: StatsProps) => {
                     Data("最低SAN", status.map(tp => tp[1].minSAN ?? "N/A"))
                 ]} />
                 : <InfoBlock>記録なし</InfoBlock>}
-            <h2>SANチェック統計</h2>
+
+            <Heading my="4">SANチェック統計</Heading>
             {0 < sanity.length ?
                 <StatTable characters={sanity.map(tp => tp[0])} data={[
                     Data("合計回数", sanity.map(tp => tp[1].checkNum)),
@@ -263,13 +262,18 @@ const Stats = (props: StatsProps) => {
                 ]} />
                 : <InfoBlock>記録なし</InfoBlock>}
 
-            <h2>技能当たりの統計</h2>
-            <select className='skillSelect' name="skill" defaultValue="未選択" onChange={e => setSkillFinter(e.target.value)}>
-                <option value="">未選択</option>
-                {[...allSkills].sort((a, b) => a[0].localeCompare(b[0], "ja"))
-                    .map((skill, i) => <option key={i} value={skill}>{skill}</option>)}
-            </select>
-            {skillFilter !== "" ? <StatTable characters={filteredSkills.map(tp => tp[0])} data={[
+            <Heading my="4">技能当たりの統計</Heading>
+            <Select.Root defaultValue="none" onValueChange={sel => setSkillFinter(sel)}>
+                <Select.Trigger />
+                <Select.Content>
+                    <Select.Group>
+                        <Select.Item value="none">未選択</Select.Item>
+                        {[...allSkills].sort((a, b) => a[0].localeCompare(b[0], "ja"))
+                            .map((skill, i) => <Select.Item key={i} value={skill}>{skill}</Select.Item>)}
+                    </Select.Group>
+                </Select.Content>
+            </Select.Root>
+            {skillFilter !== "none" ? <StatTable characters={filteredSkills.map(tp => tp[0])} data={[
                 Data("技能振り回数", filteredSkills.map(tp => tp[1].skillRollNum)),
                 Data("平均出目", filteredSkills.map(tp => tp[1].skillRollNum == 0 ? "N/A" : avgFormatter.format(tp[1].skillRollSum / tp[1].skillRollNum))),
 
@@ -288,7 +292,7 @@ const Stats = (props: StatsProps) => {
                 Data("内100ファン", filteredSkills.map(tp => percentageFormatter.format(tp[1].spFumbleNum / tp[1].skillRollNum)), { indent: true })
             ]} /> : null}
 
-            <h2>会話の統計</h2>
+            <Heading my="4">会話の統計</Heading>
             {0 < talks.length ?
                 <StatTable characters={talks.map(tp => tp[0])} data={[
                     Data("発言数", talks.map(tp => tp[1].talkNum)),
@@ -302,13 +306,13 @@ const Stats = (props: StatsProps) => {
                 ]} />
                 : <InfoBlock>記録なし</InfoBlock>}
 
-            {/*<h2>その他の統計</h2>
+            {/*<Heading my="4">その他の統計</Heading>
             {0 < others.length ?
                 <StatTable characters={others.map(tp => tp[0])} data={[
                     Data("シークレットダイス", others.map(tp => tp[1].secretDiceCount)),
                 ]} />
-                : <InfoBlock>記録なし</InfoBlock>}*/}
-        </div>
+                : <InfoQuote>記録なし</InfoQuote>}*/}
+        </Box>
     );
 }
 
@@ -325,40 +329,111 @@ type StatTableData = {
 };
 
 const StatTable = (props: StatTableProps) => {
+    const config = useContext(configCtx);
+    const setConfig = useContext(setConfigCtx);
+    const [isNameChanging, setNameChanging] = useState(false);
+    const [changingName, setChangingName] = useState(""); // 変更中の名前
+    const [changedName, setChangedName] = useState(""); // 変更後の名前
+
+    const addNameAlias = (before: string, after: string) => {
+        setConfig(config.withNameAliases(arr => [...arr, [before, after]]));
+    }
+
+    const openChangeNameDialog = (name: string) => {
+        setChangingName(name);
+        setChangedName(name);
+        setNameChanging(true);
+    }
+
     return (
-        <div className='statsTable'>
-            <table>
-                <thead>
-                    <tr>
-                        <th className='value_title'>-</th>
-                        {props.characters.map(name => <th key={name}>{name}</th>)}
-                    </tr>
-                </thead>
-                <tbody>
+        <Flex>
+            <Table.Root className='statsTable'>
+                <Table.Header>
+                    <Table.Row>
+                        <Table.ColumnHeaderCell className='value_title' justify="center">-</Table.ColumnHeaderCell>
+                        {props.characters.map(name =>
+                            <>
+                                {/*タイトル行:右クリックメニューを付ける*/}
+                                <ContextMenu.Root>
+                                    <ContextMenu.Trigger>
+                                        <Table.ColumnHeaderCell justify="center" onDoubleClick={e => openChangeNameDialog(name)}>
+                                            {name}
+                                        </Table.ColumnHeaderCell>
+                                    </ContextMenu.Trigger>
+                                    <ContextMenu.Content>
+                                        {/*統合:既存のキャラの記録と統合する*/}
+                                        <ContextMenu.Sub>
+                                            <ContextMenu.SubTrigger disabled={props.characters.length < 2}>統合</ContextMenu.SubTrigger>
+                                            <ContextMenu.SubContent>
+                                                {props.characters
+                                                    .filter(name2 => name !== name2)
+                                                    .map(name2 => <ContextMenu.Item
+                                                        key={name2}
+                                                        onClick={e => addNameAlias(name, name2)}>
+                                                        {name2}
+                                                    </ContextMenu.Item>)}
+                                            </ContextMenu.SubContent>
+                                        </ContextMenu.Sub>
+
+                                        <ContextMenu.Item onClick={e => openChangeNameDialog(name)}>
+                                            名前の変更
+                                        </ContextMenu.Item>
+
+                                        <ContextMenu.Item color="red" onClick={e => {
+                                            addNameAlias(name, "");
+                                        }}>
+                                            削除
+                                        </ContextMenu.Item>
+                                    </ContextMenu.Content>
+                                </ContextMenu.Root>
+
+                            </>
+                        )}
+                    </Table.Row >
+                </Table.Header>
+                <Table.Body>
                     {props.data.map((data, i) => {
                         return (
-                            <tr key={`${data.title}-${i}`} className={`${data.indent ? "indent1" : ""} ${data.separate || i === 0 ? "separate" : ""}`}>
-                                <td className='value_title'>{data.title}</td>
-                                {data.values.map((val, i) => <td key={`${props.characters[i]}-${data.title}`}>{val}</td>)}
-                            </tr>
+                            <Table.Row key={`${data.title}-${i}`} className={`${data.indent ? "indent1" : ""} ${data.separate || i === 0 ? "separate" : ""}`}>
+                                <Table.RowHeaderCell className='value_title'>{data.title}</Table.RowHeaderCell>
+                                {data.values.map((val, i) => <Table.Cell key={`${props.characters[i]}-${data.title}`} justify="end">{val}</Table.Cell>)}
+                            </Table.Row>
                         )
                     })}
-                </tbody>
-            </table>
-        </div>
+                </Table.Body>
+            </Table.Root>
+
+            {/*名前変更ダイアログ*/}
+            <Dialog.Root open={isNameChanging} onOpenChange={value => setNameChanging(value)}>
+                <Dialog.Content>
+                    <Dialog.Title>名前の変更</Dialog.Title>
+                    <Dialog.Description>元の名前: {changingName}</Dialog.Description>
+                    <TextField.Root
+                        value={changedName}
+                        onChange={e => setChangedName(e.target.value)}
+                        placeholder='名前'
+                    />
+
+                    <Flex gap="3" mt="4" justify="end">
+                        <Dialog.Close>
+                            <Button variant="soft" color="gray">
+                                キャンセル
+                            </Button>
+                        </Dialog.Close>
+                        <Dialog.Close>
+                            <Button onClick={e => {
+                                if (changingName !== changedName) {
+                                    addNameAlias(changingName, changedName);
+                                }
+                            }}>
+                                適用
+                            </Button>
+                        </Dialog.Close>
+                    </Flex>
+                </Dialog.Content>
+            </Dialog.Root>
+        </Flex>
     )
-}
-
-const InfoBlock = (props: { children: JSX.Element | string }) => {
-    return <div className="infoBlock">
-        {props.children}
-    </div>
-}
-
-const ErrorBlock = (props: { children: JSX.Element | string }) => {
-    return <div className="errorBlock">
-        {props.children}
-    </div>
 }
 
 const Data = (title: string, values: (string | number)[], props: { indent?: boolean, separate?: boolean } = {}): StatTableData => {
