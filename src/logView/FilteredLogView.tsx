@@ -3,6 +3,14 @@ import { useContext, useState } from "react"
 import { LogView } from "./LogView"
 import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage";
 
+const ccfoliaMessageTypeTexts = new Map<string, string>([
+    ["CoCSkillRollMessage", "技能判定"],
+    ["ParamChangeMessage", "パラメータ変動"],
+    ["SanityCheckMessage", "SANチェック"],
+    ["TalkMessage", "会話"],
+    ["UnknownSecretDiceMessage", "不明なシークレットダイス"],
+]);
+
 type FilteredLogViewProps = {
     logs: CcfoliaMessage[]
 };
@@ -12,11 +20,23 @@ export const FilteredLogView = (props: FilteredLogViewProps) => {
 
     const { logs } = props;
     const [searchText, setSearchText] = useState("");
+    const [messageType, setMessageType] = useState<string>(UNFILTERED);
     const [selectedCharacter, setSelectedCharacter] = useState<string>(UNFILTERED);
 
     return <Flex direction="column">
         <Flex my="2" gap="2" justify="center">
             {/*種類フィルター*/}
+            <Select.Root defaultValue={UNFILTERED} onValueChange={sel => setMessageType(sel)}>
+                <Select.Trigger />
+                <Select.Content position="popper">
+                    <Select.Group>
+                        <Select.Item value={UNFILTERED}>全種類</Select.Item>
+                        {[...new Set([...logs].map(msg => msg.constructor.name))]
+                            .sort((a, b) => a[0].localeCompare(b[0], "ja"))
+                            .map((name, i) => <Select.Item key={i} value={name}>{ccfoliaMessageTypeTexts.get(name) || name}</Select.Item>)}
+                    </Select.Group>
+                </Select.Content>
+            </Select.Root>
             {/*発言者フィルター*/}
             <Select.Root defaultValue={UNFILTERED} onValueChange={sel => setSelectedCharacter(sel)}>
                 <Select.Trigger />
@@ -36,6 +56,9 @@ export const FilteredLogView = (props: FilteredLogViewProps) => {
             {/*フィルタークリア*/}
         </Flex>
         <LogView logs={logs} filter={msg => {
+            if (messageType !== UNFILTERED && msg.constructor.name !== messageType) {
+                return false;
+            }
             if (selectedCharacter !== UNFILTERED && msg.sender !== selectedCharacter) {
                 return false;
             }
