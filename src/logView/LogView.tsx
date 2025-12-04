@@ -10,10 +10,10 @@ type LogViewProps = {
 export const LogView = (props: LogViewProps) => {
     const { logs } = props;
 
-    return <Flex gap="3" direction="column">
+    return <Flex gap="4" direction="column">
         {logs.map((msg, i) => <Card key={i}>
             <Heading size="4">{msg.sender}</Heading>
-            {msg instanceof TalkMessage ? <Text>{msg.text}</Text> : null}
+            <Text>{msg.toDisplayText()}</Text>
         </Card>)}
 
     </Flex>
