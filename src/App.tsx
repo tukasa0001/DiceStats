@@ -12,6 +12,7 @@ import parseCcfoliaLog from './ccfoliaLog/CcfoliaLog';
 import "./UploadArea.css";
 import { MoonIcon, SunIcon } from 'lucide-react';
 import { LogView } from './logView/LogView';
+import { FilteredLogView } from './logView/FilteredLogView';
 
 export const configCtx = createContext(new DisplayConfig());
 export const setConfigCtx = createContext((x: DisplayConfig) => { });
@@ -81,7 +82,7 @@ const App: FC = () => {
                             </Tabs.Content>
                             <Tabs.Content value="logView">
                                 <Flex direction="column" mx="4">
-                                    <LogView logs={log ?? []} />
+                                    <FilteredLogView logs={log ?? []} />
                                 </Flex>
                             </Tabs.Content>
                             <Flex direction="column" mx="4">
