@@ -1,4 +1,4 @@
-import { Badge, Card, Flex } from "@radix-ui/themes";
+import { Badge, Card, Code, Flex } from "@radix-ui/themes";
 import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage";
 import { Heading, Text } from "@radix-ui/themes";
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge";
@@ -38,8 +38,11 @@ export const LogView = (props: LogViewProps) => {
                     {msg instanceof SanityCheckMessage ? <Badge color="ruby">SANチェック</Badge> : null}
                     {msg instanceof ParamChangeMessage ? <Badge color="blue">{msg.paramName}変動</Badge> : null}
                 </Flex>
-                <Text>{msg.toDisplayText()}</Text>
+                {filter.searchText === "" ? <Text>{msg.toDisplayText()}</Text> : <Text>
+                    {msg.toDisplayText().split(filter.searchText)
+                        .map((text, i) => i === 0 ? text : <><Code color="lime">{filter.searchText}</Code>{text}</>
+                        )}
+                </Text>}
             </Card>)}
-
     </Flex>
 };
