@@ -54,17 +54,6 @@ export const FilteredLogView = (props: FilteredLogViewProps) => {
             </TextField.Root>
             {/*フィルタークリア*/}
         </Flex>
-        <LogView logs={logs} filter={msg => {
-            if (filter.hiddenMessageTypes.includes(msg.constructor.name)) {
-                return false;
-            }
-            if (filter.hiddenCharacters.includes(msg.sender)) {
-                return false;
-            }
-            if (filter.searchText !== "" && !msg.toDisplayText().includes(filter.searchText)) {
-                return false;
-            }
-            return true;
-        }} />
+        <LogView logs={logs} filter={filter} />
     </Flex>
 }

@@ -5,17 +5,32 @@ import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge";
 import { CoCSkillRollMessage } from "../ccfoliaLog/message/CoCSkillRollMessage";
 import { SanityCheckMessage } from "../ccfoliaLog/message/SanityCheckMessage";
 import { ParamChangeMessage } from "../ccfoliaLog/message/ParamChangeMessage";
+import LogViewFilter, { EMPTY_FILTER } from "./LogViewFilter";
 
 type LogViewProps = {
     logs: CcfoliaMessage[]
-    filter?: (msg: CcfoliaMessage) => boolean
+    filter?: LogViewFilter
 };
 
 export const LogView = (props: LogViewProps) => {
-    const { logs, filter } = props;
+    const { logs } = props;
+    const filter = props.filter ?? EMPTY_FILTER;
+
+    const testFilter = (msg: CcfoliaMessage) => {
+        if (filter.hiddenMessageTypes.includes(msg.constructor.name)) {
+            return false;
+        }
+        if (filter.hiddenCharacters.includes(msg.sender)) {
+            return false;
+        }
+        if (filter.searchText !== "" && !msg.toDisplayText().includes(filter.searchText)) {
+            return false;
+        }
+        return true;
+    }
 
     return <Flex gap="4" direction="column" mt="4">
-        {logs.map((msg, i) => filter !== undefined && !filter(msg) ? null :
+        {logs.map((msg, i) => !testFilter(msg) ? null :
             <Card key={i}>
                 <Flex gap="2" direction="row">
                     <Heading size="4">{msg.sender}</Heading>
