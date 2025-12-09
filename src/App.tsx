@@ -1,5 +1,6 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useState } from 'react'
 import type { FC } from 'react'
+import "primereact/resources/themes/lara-light-cyan/theme.css";
 import "@radix-ui/themes/styles.css"
 import UploadForm from './UploadForm'
 import Stats from './Stats';
@@ -11,8 +12,8 @@ import { Grid, Container, Heading, Theme, Box, Flex, Tabs, Button } from '@radix
 import parseCcfoliaLog from './ccfoliaLog/CcfoliaLog';
 import "./UploadArea.css";
 import { MoonIcon, SunIcon } from 'lucide-react';
-import { LogView } from './logView/LogView';
 import { FilteredLogView } from './logView/FilteredLogView';
+import { PrimeReactProvider, PrimeReactContext } from 'primereact/api';
 
 export const configCtx = createContext(new DisplayConfig());
 export const setConfigCtx = createContext((x: DisplayConfig) => { });
@@ -39,70 +40,72 @@ const App: FC = () => {
     }
 
     return (
-        <configCtx.Provider value={config}>
-            <setConfigCtx.Provider value={setConfig}>
-                <div onDrop={e => {
-                    onFileUploaded([...e.dataTransfer.files]);
-                    setDropping(false);
-                    e.preventDefault();
-                }}
-                    onDragOver={e => {
+        <PrimeReactProvider>
+            <configCtx.Provider value={config}>
+                <setConfigCtx.Provider value={setConfig}>
+                    <div onDrop={e => {
+                        onFileUploaded([...e.dataTransfer.files]);
+                        setDropping(false);
                         e.preventDefault();
                     }}
-                    onDragEnter={e => setDropping(true)}
-                    onDragExit={e => setDropping(false)}>
-                    <Theme accentColor="indigo" radius='large' appearance={isDark ? "dark" : "light"}>
-                        <Tabs.Root value={tab} onValueChange={tab => setTab(tab)}>
-                            <Tabs.List>
-                                <Grid mx="4" rows="1" columns="3" width="100%" style={{ textWrap: "nowrap" }}>
-                                    <Box>
-                                        <Heading size="7">TRPG統計ツール</Heading>
-                                    </Box>
-                                    <Flex align="center" justify="center">
-                                        <Tabs.Trigger value="upload">ログ選択</Tabs.Trigger>
-                                        <Tabs.Trigger value="stats">統計</Tabs.Trigger>
-                                        <Tabs.Trigger value="logView">表示</Tabs.Trigger>
-                                    </Flex>
-                                    <Flex align="center" justify="end">
-                                        <Button variant="ghost" onClick={e => setIsDark(!isDark)}>
-                                            {isDark ? <SunIcon /> : <MoonIcon />}
-                                        </Button>
-                                    </Flex>
-                                </Grid>
-                            </Tabs.List>
+                        onDragOver={e => {
+                            e.preventDefault();
+                        }}
+                        onDragEnter={e => setDropping(true)}
+                        onDragExit={e => setDropping(false)}>
+                        <Theme accentColor="indigo" radius='large' appearance={isDark ? "dark" : "light"}>
+                            <Tabs.Root value={tab} onValueChange={tab => setTab(tab)}>
+                                <Tabs.List>
+                                    <Grid mx="4" rows="1" columns="3" width="100%" style={{ textWrap: "nowrap" }}>
+                                        <Box>
+                                            <Heading size="7">TRPG統計ツール</Heading>
+                                        </Box>
+                                        <Flex align="center" justify="center">
+                                            <Tabs.Trigger value="upload">ログ選択</Tabs.Trigger>
+                                            <Tabs.Trigger value="stats">統計</Tabs.Trigger>
+                                            <Tabs.Trigger value="logView">表示</Tabs.Trigger>
+                                        </Flex>
+                                        <Flex align="center" justify="end">
+                                            <Button variant="ghost" onClick={e => setIsDark(!isDark)}>
+                                                {isDark ? <SunIcon /> : <MoonIcon />}
+                                            </Button>
+                                        </Flex>
+                                    </Grid>
+                                </Tabs.List>
 
-                            <Tabs.Content value="upload">
+                                <Tabs.Content value="upload">
+                                    <Flex direction="column" mx="4">
+                                        <UploadForm onLogFileChanged={onFileUploaded} />
+                                    </Flex>
+                                </Tabs.Content>
+                                <Tabs.Content value="stats">
+                                    <Flex direction="column" mx="4">
+                                        <Stats logFile={log ?? []} />
+                                        <ConfigCard log={log} />
+                                    </Flex>
+                                </Tabs.Content>
+                                <Tabs.Content value="logView">
+                                    <Flex direction="column" mx="4">
+                                        <FilteredLogView logs={log ?? []} />
+                                    </Flex>
+                                </Tabs.Content>
                                 <Flex direction="column" mx="4">
-                                    <UploadForm onLogFileChanged={onFileUploaded} />
+                                    <Footer />
                                 </Flex>
-                            </Tabs.Content>
-                            <Tabs.Content value="stats">
-                                <Flex direction="column" mx="4">
-                                    <Stats logFile={log ?? []} />
-                                    <ConfigCard log={log} />
-                                </Flex>
-                            </Tabs.Content>
-                            <Tabs.Content value="logView">
-                                <Flex direction="column" mx="4">
-                                    <FilteredLogView logs={log ?? []} />
-                                </Flex>
-                            </Tabs.Content>
-                            <Flex direction="column" mx="4">
-                                <Footer />
-                            </Flex>
-                        </Tabs.Root>
+                            </Tabs.Root>
 
-                        {isDropping ? <div className='upload_area'>
-                            <div>
-                                <p>
-                                    ファイルをドロップしてアップロード
-                                </p>
-                            </div>
-                        </div> : null}
-                    </Theme>
-                </div>
-            </setConfigCtx.Provider>
-        </configCtx.Provider >
+                            {isDropping ? <div className='upload_area'>
+                                <div>
+                                    <p>
+                                        ファイルをドロップしてアップロード
+                                    </p>
+                                </div>
+                            </div> : null}
+                        </Theme>
+                    </div>
+                </setConfigCtx.Provider>
+            </configCtx.Provider >
+        </PrimeReactProvider>
     );
 }
 
