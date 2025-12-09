@@ -32,7 +32,8 @@ export const FilteredLogView = (props: FilteredLogViewProps) => {
                 <Select.Content position="popper">
                     <Select.Group>
                         <Select.Item value={UNFILTERED}>全種類</Select.Item>
-                        {allMessageTypes.sort((a, b) => a[0].localeCompare(b[0], "ja"))
+                        {allMessageTypes
+                            .sort((a, b) => a[0].localeCompare(b[0], "ja"))
                             .map((name, i) => <Select.Item key={i} value={name}>{ccfoliaMessageTypeTexts.get(name) || name}</Select.Item>)}
                     </Select.Group>
                 </Select.Content>
@@ -43,7 +44,9 @@ export const FilteredLogView = (props: FilteredLogViewProps) => {
                 <Select.Content position="popper">
                     <Select.Group>
                         <Select.Item value={UNFILTERED}>全員を表示</Select.Item>
-                        {allCharacters.sort((a, b) => a[0].localeCompare(b[0], "ja"))
+                        {allCharacters
+                            .map(str => str === "" ? "noname" : str)
+                            .sort((a, b) => a.localeCompare(b, "ja"))
                             .map((name, i) => <Select.Item key={i} value={name}>{name}</Select.Item>)}
                     </Select.Group>
                 </Select.Content>
