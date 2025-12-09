@@ -33,7 +33,9 @@ const App: FC = () => {
             msg.splice(msg.length, 0, ...parsed); // = msg.addAll(parsed);
         }
         setLog(msg);
-        setTab("stats");
+        if (tab === "upload") {
+            setTab("stats");
+        }
     }
 
     return (
