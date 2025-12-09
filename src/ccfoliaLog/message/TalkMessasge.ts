@@ -14,4 +14,8 @@ export class TalkMessage implements CcfoliaMessage {
     toString() {
         return `[${this.channel}] ${this.sender} : ${this.text}`;
     }
+
+    toDisplayText(): string {
+        return this.text;
+    }
 }

@@ -11,6 +11,8 @@ import { Grid, Container, Heading, Theme, Box, Flex, Tabs, Button } from '@radix
 import parseCcfoliaLog from './ccfoliaLog/CcfoliaLog';
 import "./UploadArea.css";
 import { MoonIcon, SunIcon } from 'lucide-react';
+import { LogView } from './logView/LogView';
+import { FilteredLogView } from './logView/FilteredLogView';
 
 export const configCtx = createContext(new DisplayConfig());
 export const setConfigCtx = createContext((x: DisplayConfig) => { });
@@ -31,7 +33,9 @@ const App: FC = () => {
             msg.splice(msg.length, 0, ...parsed); // = msg.addAll(parsed);
         }
         setLog(msg);
-        setTab("stats");
+        if (tab === "upload") {
+            setTab("stats");
+        }
     }
 
     return (
@@ -57,6 +61,7 @@ const App: FC = () => {
                                     <Flex align="center" justify="center">
                                         <Tabs.Trigger value="upload">ログ選択</Tabs.Trigger>
                                         <Tabs.Trigger value="stats">統計</Tabs.Trigger>
+                                        <Tabs.Trigger value="logView">表示</Tabs.Trigger>
                                     </Flex>
                                     <Flex align="center" justify="end">
                                         <Button variant="ghost" onClick={e => setIsDark(!isDark)}>
@@ -75,6 +80,11 @@ const App: FC = () => {
                                 <Flex direction="column" mx="4">
                                     <Stats logFile={log ?? []} />
                                     <ConfigCard log={log} />
+                                </Flex>
+                            </Tabs.Content>
+                            <Tabs.Content value="logView">
+                                <Flex direction="column" mx="4">
+                                    <FilteredLogView logs={log ?? []} />
                                 </Flex>
                             </Tabs.Content>
                             <Flex direction="column" mx="4">

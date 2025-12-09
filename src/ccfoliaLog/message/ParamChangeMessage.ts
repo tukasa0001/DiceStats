@@ -18,4 +18,8 @@ export class ParamChangeMessage implements CcfoliaMessage {
     toString() {
         return `[${this.channel}] ${this.sender} : ${this.paramName} ${this.prevValue} => ${this.value}`;
     }
+
+    toDisplayText(): string {
+        return `${this.paramName}変動: ${this.prevValue} => ${this.value}`;
+    }
 }
