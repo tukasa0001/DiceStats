@@ -3,6 +3,7 @@ import { useContext, useState } from "react"
 import { LogView } from "./LogView"
 import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage";
 import { EMPTY_FILTER } from "./LogViewFilter";
+import { MultiSelect } from "primereact/multiselect";
 
 const ccfoliaMessageTypeTexts = new Map<string, string>([
     ["CoCSkillRollMessage", "技能判定"],
@@ -24,9 +25,31 @@ export const FilteredLogView = (props: FilteredLogViewProps) => {
     const allMessageTypes = [...new Set([...logs].map(msg => msg.constructor.name))];
     const allCharacters = [...new Set([...logs].map(msg => msg.sender))];
 
+    function reverseArray<T>(arr: readonly T[], all: readonly T[]): readonly T[] {
+        return all.filter(val => !arr.includes(val));
+    }
+
     return <Flex direction="column">
         <Flex my="2" gap="2" justify="center">
             {/*種類フィルター*/}
+            <MultiSelect
+                value={reverseArray(filter.hiddenMessageTypes, allMessageTypes)}
+                onChange={(e) => setFilter({ ...filter, hiddenMessageTypes: reverseArray(e.value, allMessageTypes) })}
+                options={allMessageTypes
+                    .sort((a, b) => a[0].localeCompare(b[0], "ja"))
+                    .map(str => {
+                        return {
+                            name: ccfoliaMessageTypeTexts.get(str) || str,
+                            value: str.length === 0 ? "EMPTY" : str
+                        }
+                    })}
+                optionLabel="name"
+                optionValue="value"
+                placeholder="選択してください"
+                selectAllLabel="全て表示"
+                emptyMessage="選択肢なし"
+                selectedItemsLabel="{0}個選択"
+                maxSelectedLabels={2} />
             <Select.Root defaultValue={UNFILTERED} onValueChange={sel => setFilter({ ...filter, hiddenMessageTypes: sel === UNFILTERED ? [] : allMessageTypes.filter(val => val !== sel) })}>
                 <Select.Trigger />
                 <Select.Content position="popper">
