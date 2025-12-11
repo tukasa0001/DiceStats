@@ -1,8 +1,10 @@
-import { Flex, Select, TextField } from "@radix-ui/themes"
+import { Flex, Select, TextField, ThickCheckIcon } from "@radix-ui/themes"
 import { useContext, useState } from "react"
 import { LogView } from "./LogView"
 import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage";
 import { EMPTY_FILTER } from "./LogViewFilter";
+import { Select as SelectPrimitive } from "radix-ui";
+import { MultiSelectRoot, MultiSelectItem, MultiSelectAllItem } from "../MultiSelect/MultiSelect"
 
 const ccfoliaMessageTypeTexts = new Map<string, string>([
     ["CoCSkillRollMessage", "技能判定"],
@@ -24,20 +26,30 @@ export const FilteredLogView = (props: FilteredLogViewProps) => {
     const allMessageTypes = [...new Set([...logs].map(msg => msg.constructor.name))];
     const allCharacters = [...new Set([...logs].map(msg => msg.sender))];
 
+    function reverseArray<T>(arr: readonly T[], all: readonly T[]): readonly T[] {
+        return all.filter(val => !arr.includes(val));
+    }
+
     return <Flex direction="column">
         <Flex my="2" gap="2" justify="center">
             {/*種類フィルター*/}
-            <Select.Root defaultValue={UNFILTERED} onValueChange={sel => setFilter({ ...filter, hiddenMessageTypes: sel === UNFILTERED ? [] : allMessageTypes.filter(val => val !== sel) })}>
-                <Select.Trigger />
+            <MultiSelectRoot
+                value={reverseArray(filter.hiddenMessageTypes, allMessageTypes)}
+                onValueChange={sel => setFilter({ ...filter, hiddenMessageTypes: reverseArray(sel, allMessageTypes) })}
+                allValues={allMessageTypes}
+                valueText={arr => arr.length === 0 ? "表示なし"
+                    : arr.length === 1 ? ccfoliaMessageTypeTexts.get(arr[0]) || arr[0]
+                        : arr.length === allMessageTypes.length ? "全て表示"
+                            : `${arr.length}個選択`}>
                 <Select.Content position="popper">
                     <Select.Group>
-                        <Select.Item value={UNFILTERED}>全種類</Select.Item>
+                        <MultiSelectAllItem>全て表示</MultiSelectAllItem>
                         {allMessageTypes
                             .sort((a, b) => a[0].localeCompare(b[0], "ja"))
-                            .map((name, i) => <Select.Item key={i} value={name}>{ccfoliaMessageTypeTexts.get(name) || name}</Select.Item>)}
+                            .map((name, i) => <MultiSelectItem key={i} value={name}>{ccfoliaMessageTypeTexts.get(name) || name}</MultiSelectItem>)}
                     </Select.Group>
                 </Select.Content>
-            </Select.Root>
+            </MultiSelectRoot>
             {/*発言者フィルター*/}
             <Select.Root defaultValue={UNFILTERED} onValueChange={sel => setFilter({ ...filter, hiddenCharacters: sel === UNFILTERED ? [] : allCharacters.filter(val => val !== sel) })}>
                 <Select.Trigger />
