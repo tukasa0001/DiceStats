@@ -1,0 +1,41 @@
+.p-multiselect {
+    position: relative;
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    background-color: var(--gray-1);
+    border: 1px solid var(--gray-6);
+    border-radius: var(--radius-2);
+    padding: 0 0.5em;
+}
+
+.p-multiselect-panel {
+    background-color: var(--gray-2);
+    width: 10em;
+    min-width: none;
+}
+
+.p-multiselect-select-all {
+    display: flex;
+}
+
+.p-multiselect-item {
+    display: flex;
+    height: 1.5em;
+    margin: 0.5em 0;
+
+    &:hover {
+        background-color: var(--accent-9);
+    }
+}
+
+.p-multiselect-checkbox,
+.p-multiselect-select-all {
+    .p-checkbox-input {
+        display: none;
+    }
+
+    .p-checkbox-box {
+        width: 1em;
+    }
+}

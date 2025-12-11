@@ -49,7 +49,8 @@ export const FilteredLogView = (props: FilteredLogViewProps) => {
                 selectAllLabel="全て表示"
                 emptyMessage="選択肢なし"
                 selectedItemsLabel="{0}個選択"
-                maxSelectedLabels={2} />
+                maxSelectedLabels={2}
+                appendTo="self" />
             <Select.Root defaultValue={UNFILTERED} onValueChange={sel => setFilter({ ...filter, hiddenMessageTypes: sel === UNFILTERED ? [] : allMessageTypes.filter(val => val !== sel) })}>
                 <Select.Trigger />
                 <Select.Content position="popper">

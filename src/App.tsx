@@ -1,6 +1,6 @@
 import { createContext, useState } from 'react'
 import type { FC } from 'react'
-import "primereact/resources/themes/lara-light-cyan/theme.css";
+import "./MultiSelectStyle.css"
 import "@radix-ui/themes/styles.css"
 import UploadForm from './UploadForm'
 import Stats from './Stats';
