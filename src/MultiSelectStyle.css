@@ -1,28 +1,31 @@
 .p-multiselect {
     position: relative;
-    display: flex;
-    text-align: center;
-    justify-content: center;
     background-color: var(--gray-1);
     border: 1px solid var(--gray-6);
     border-radius: var(--radius-2);
     padding: 0 0.5em;
 }
 
+.p-multiselect-label-container {
+    display: flex;
+    text-align: center;
+    align-items: center;
+}
+
 .p-multiselect-panel {
     background-color: var(--gray-2);
-    width: 10em;
+    border: 1px solid var(--gray-6);
+    border-radius: var(--radius-2);
     min-width: none;
+    padding: 0.5em;
 }
 
+.p-multiselect-item,
 .p-multiselect-select-all {
     display: flex;
-}
-
-.p-multiselect-item {
-    display: flex;
     height: 1.5em;
-    margin: 0.5em 0;
+    border-radius: var(--radius-2);
+    padding: 1em 0.5em;
 
     &:hover {
         background-color: var(--accent-9);
@@ -38,4 +41,8 @@
     .p-checkbox-box {
         width: 1em;
     }
+}
+
+.p-multiselect-close {
+    display: none;
 }
