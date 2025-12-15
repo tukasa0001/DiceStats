@@ -4,12 +4,14 @@
     border: 1px solid var(--gray-6);
     border-radius: var(--radius-2);
     padding: 0 0.5em;
+    font-size: var(--font-size-2);
 }
 
 .p-multiselect-label-container {
     display: flex;
     text-align: center;
     align-items: center;
+    margin-right: 0.2em;
 }
 
 .p-multiselect-panel {
