@@ -22,8 +22,8 @@ export const FilteredLogView = (props: FilteredLogViewProps) => {
 
     const { logs } = props;
     const [filter, setFilter] = useState(EMPTY_FILTER);
-    const allMessageTypes = [...new Set([...logs].map(msg => msg.constructor.name))];
-    const allCharacters = [...new Set([...logs].map(msg => msg.sender))];
+    const allMessageTypes = [...new Set([...logs].map(msg => msg.constructor.name))].sort((a, b) => a[0].localeCompare(b[0], "ja"));
+    const allCharacters = [...new Set([...logs].map(msg => msg.sender))].sort((a, b) => a[0].localeCompare(b[0], "ja"));
 
     function reverseArray<T>(arr: readonly T[], all: readonly T[]): readonly T[] {
         return all.filter(val => !arr.includes(val));
@@ -36,7 +36,6 @@ export const FilteredLogView = (props: FilteredLogViewProps) => {
                 value={reverseArray(filter.hiddenMessageTypes, allMessageTypes)}
                 onChange={(e) => setFilter({ ...filter, hiddenMessageTypes: reverseArray(e.value, allMessageTypes) })}
                 options={allMessageTypes
-                    .sort((a, b) => a[0].localeCompare(b[0], "ja"))
                     .map(str => {
                         return {
                             name: ccfoliaMessageTypeTexts.get(str) || str,
