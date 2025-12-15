@@ -22,8 +22,12 @@ export const FilteredLogView = (props: FilteredLogViewProps) => {
 
     const { logs } = props;
     const [filter, setFilter] = useState(EMPTY_FILTER);
-    const allMessageTypes = [...new Set([...logs].map(msg => msg.constructor.name))].sort((a, b) => a[0].localeCompare(b[0], "ja"));
-    const allCharacters = [...new Set([...logs].map(msg => msg.sender))].sort((a, b) => a[0].localeCompare(b[0], "ja"));
+    const allMessageTypes = [...new Set([...logs].map(msg => msg.constructor.name))]
+        .filter(str => str !== undefined && str !== null && str !== "")
+        .sort((a, b) => a[0].localeCompare(b[0], "ja"));
+    const allCharacters = [...new Set([...logs].map(msg => msg.sender))]
+        .filter(str => str !== undefined && str !== null && str !== "")
+        .sort((a, b) => a[0].localeCompare(b[0], "ja"));
 
     function reverseArray<T>(arr: readonly T[], all: readonly T[]): readonly T[] {
         return all.filter(val => !arr.includes(val));
