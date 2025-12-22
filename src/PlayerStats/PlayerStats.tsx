@@ -7,7 +7,7 @@ import { CcfoliaMessage } from '../ccfoliaLog/message/CcfoliaMessage';
 import { UnknownSecretDiceMessage } from '../ccfoliaLog/message/UnknownSecretDiceMessage';
 import { configCtx, setConfigCtx } from '../App';
 import { ErrorBlock, InfoBlock } from '../Utils';
-import { Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField, CheckboxCards, Text, Theme, Grid, Spinner, Separator } from '@radix-ui/themes';
+import { Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField, CheckboxCards, Text, Theme, Grid, Spinner, Separator, Switch } from '@radix-ui/themes';
 import "./PlayerStats.css"
 import domtoimage from "dom-to-image"
 
@@ -66,9 +66,11 @@ type StatsProps = {
 }
 
 const PlayerStats = (props: StatsProps) => {
+    const generalSkills = ["目星", "聞き耳", "図書館", "知識", "アイデア", "幸運"];
     const [selectedCharacters, setSelectedCharacters] = useState<string[]>([]);
     const [playerName, setPlayerName] = useState("");
     const [isSaving, setSaving] = useState(false);
+    const [unrankedSkills, setUnrankedSkills] = useState<string[]>(generalSkills);
 
     const wait = async (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
     const saveImg = async () => {
@@ -188,8 +190,11 @@ const PlayerStats = (props: StatsProps) => {
         }
     }
 
-    const allCharacterList = [...allCharacters].sort((a, b) => a[0].localeCompare(b[0], "ja"));
-    const skillRanking = [...skillStats].sort((a, b) => b[1].skillRollNum - a[1].skillRollNum)
+    const allCharacterList = [...allCharacters]
+        .sort((a, b) => a[0].localeCompare(b[0], "ja"));
+    const skillRanking = [...skillStats]
+        .filter(skill => !unrankedSkills.includes(skill[0]))
+        .sort((a, b) => b[1].skillRollNum - a[1].skillRollNum)
 
     const avgFormatter = Intl.NumberFormat("ja-JP", {
         minimumFractionDigits: 2,
@@ -220,6 +225,24 @@ const PlayerStats = (props: StatsProps) => {
                         </Flex>
                     </CheckboxCards.Item>)}
                 </CheckboxCards.Root>
+                <Heading my="2">オプションを選択してください</Heading>
+                <Flex direction="column" gap="2">
+                    {generalSkills.map(skill => (
+                        <Text as="label">
+                            <Flex gap="1" align="center">
+                                <Switch checked={unrankedSkills.includes(skill)} onCheckedChange={val => {
+                                    if (val) {
+                                        setUnrankedSkills([...unrankedSkills, skill]);
+                                    }
+                                    else {
+                                        setUnrankedSkills(unrankedSkills.filter(s => s !== skill));
+                                    }
+                                }} />
+                                {skill}をランキングから除外
+                            </Flex>
+                        </Text>
+                    ))}
+                </Flex>
                 <Flex id="playerStats" py="2" gap="5" minHeight="100vh" direction="column" align="stretch" justify="center" position="relative" style={{
                     backgroundColor: "var(--gray-1)",
                     overflowX: "auto",
@@ -242,7 +265,10 @@ const PlayerStats = (props: StatsProps) => {
                     </Flex>
                     <Flex justify="center" gap="9">
                         <Box>
-                            <Heading align="left">技能別成績</Heading>
+                            <Flex align="baseline" gap="1">
+                                <Heading align="left">技能別成績</Heading>
+                                {0 < unrankedSkills.length ? <Text size="1">{unrankedSkills.reduce((a, b) => a + "," + b)}を除く</Text> : null}
+                            </Flex>
                             <Table.Root>
                                 <Table.Body>
                                     <SkillRankingRow stats={skillRanking} rank={1} />
