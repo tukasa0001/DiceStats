@@ -2,12 +2,12 @@ import { CoCSkillRollMessage } from '../ccfoliaLog/message/CoCSkillRollMessage';
 import { ParamChangeMessage } from '../ccfoliaLog/message/ParamChangeMessage';
 import { TalkMessage } from '../ccfoliaLog/message/TalkMessasge';
 import { SanityCheckMessage } from '../ccfoliaLog/message/SanityCheckMessage';
-import { JSX, useContext, useState } from 'react';
+import React, { JSX, ReactNode, useContext, useState } from 'react';
 import { CcfoliaMessage } from '../ccfoliaLog/message/CcfoliaMessage';
 import { UnknownSecretDiceMessage } from '../ccfoliaLog/message/UnknownSecretDiceMessage';
 import { configCtx, setConfigCtx } from '../App';
 import { ErrorBlock, InfoBlock } from '../Utils';
-import { Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField, CheckboxCards, Text, Theme } from '@radix-ui/themes';
+import { Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField, CheckboxCards, Text, Theme, Grid } from '@radix-ui/themes';
 import "./PlayerStats.css"
 
 class SkillStat {
@@ -195,7 +195,7 @@ const PlayerStats = (props: StatsProps) => {
                     <Button asChild={true}><a href="#playerStats">表示</a></Button>
                 </Flex>
 
-                <Flex id="playerStats" mt="9" py="2" gap="5" width="100%" height="100vh" direction="column" align="stretch" justify="center">
+                <Flex id="playerStats" mt="9" py="2" gap="5" width="100%" minHeight="100vh" direction="column" align="stretch" justify="center">
                     <Heading size="8" align="center">TRPG成績表</Heading>
                     <Flex align="center" justify="center">
                         <Table.Root>
@@ -213,7 +213,7 @@ const PlayerStats = (props: StatsProps) => {
                     </Flex>
                     <Flex justify="center" gap="9">
                         <Box>
-                            <Heading align="center">技能別成績</Heading>
+                            <Heading align="left">技能別成績</Heading>
                             <Table.Root>
                                 <Table.Body>
                                     <SkillRankingRow stats={skillRanking} rank={1} />
@@ -223,65 +223,76 @@ const PlayerStats = (props: StatsProps) => {
                             </Table.Root>
                         </Box>
                         <Box>
-                            <Heading align="center">全技能成績</Heading>
+                            <Heading align="left">全技能成績</Heading>
                             <Table.Root>
-                                <Table.Body>
+                                <Table.Body style={{ verticalAlign: "bottom" }}>
                                     <Table.Row>
                                         <Table.RowHeaderCell><Text size="4">技能成功</Text></Table.RowHeaderCell>
-                                        <Table.Cell><Text size="4">{sumOf(skillRanking.map(elem => elem[1].successNum))}回</Text></Table.Cell>
-                                        <Table.Cell><Text size="4">{percentageFormatter.format(
-                                            sumOf(skillRanking.map(elem => elem[1].successNum)) / sumOf(skillRanking.map(elem => elem[1].skillRollNum))
-                                        )}</Text></Table.Cell>
+                                        <Table.Cell>
+                                            <ValueCell title="回数">
+                                                {sumOf(skillRanking.map(elem => elem[1].successNum))}回
+                                            </ValueCell>
+                                        </Table.Cell>
+                                        <Table.Cell>
+                                            <ValueCell title="確率">
+                                                {percentageFormatter.format(sumOf(skillRanking.map(elem => elem[1].successNum)) / sumOf(skillRanking.map(elem => elem[1].skillRollNum)))}
+                                            </ValueCell>
+                                        </Table.Cell>
                                     </Table.Row>
                                     <Table.Row>
                                         <Table.RowHeaderCell><Text size="4">クリティカル</Text></Table.RowHeaderCell>
-                                        <Table.Cell><Text size="4">{sumOf(skillRanking.map(elem => elem[1].criticalNum))}回</Text></Table.Cell>
-                                        <Table.Cell><Text size="4">{percentageFormatter.format(
-                                            sumOf(skillRanking.map(elem => elem[1].criticalNum)) / sumOf(skillRanking.map(elem => elem[1].skillRollNum))
-                                        )}</Text></Table.Cell>
+                                        <Table.Cell>
+                                            <ValueCell title="回数">
+                                                {sumOf(skillRanking.map(elem => elem[1].criticalNum))}回
+                                            </ValueCell>
+                                        </Table.Cell>
+                                        <Table.Cell>
+                                            <ValueCell title="確率">
+                                                {percentageFormatter.format(sumOf(skillRanking.map(elem => elem[1].criticalNum)) / sumOf(skillRanking.map(elem => elem[1].skillRollNum)))}
+                                            </ValueCell>
+                                        </Table.Cell>
                                     </Table.Row>
                                     <Table.Row>
                                         <Table.RowHeaderCell><Text size="4">ファンブル</Text></Table.RowHeaderCell>
-                                        <Table.Cell><Text size="4">{sumOf(skillRanking.map(elem => elem[1].fumbleNum))}回</Text></Table.Cell>
-                                        <Table.Cell><Text size="4">{percentageFormatter.format(
-                                            sumOf(skillRanking.map(elem => elem[1].fumbleNum)) / sumOf(skillRanking.map(elem => elem[1].skillRollNum))
-                                        )}</Text></Table.Cell>
+                                        <Table.Cell>
+                                            <ValueCell title="回数">
+                                                {sumOf(skillRanking.map(elem => elem[1].fumbleNum))}回
+                                            </ValueCell>
+                                        </Table.Cell>
+                                        <Table.Cell>
+                                            <ValueCell title="確率">
+                                                {percentageFormatter.format(sumOf(skillRanking.map(elem => elem[1].fumbleNum)) / sumOf(skillRanking.map(elem => elem[1].skillRollNum)))}
+                                            </ValueCell>
+                                        </Table.Cell>
                                     </Table.Row>
                                 </Table.Body>
                             </Table.Root>
                         </Box>
                     </Flex>
-                    <Flex justify="between" gap="4">
-                        <Flex direction="column">
-                            <Box className='valueBox'>
-                                <Text as="div" size="1" mr="2">発言数</Text>
-                                <Text as="div" align="right">{talkStat.talkNum}回</Text>
-                            </Box>
-                            <Box className='valueBox'>
-                                <Text as="div" size="1" mr="2">キャラ発言数</Text>
-                                <Text as="div" align="right">{talkStat.pcTalkNum}回</Text>
-                            </Box>
-                        </Flex>
-                        <Flex direction="column">
-                            <Box className='valueBox'>
-                                <Text as="div" size="1" mr="2">総喪失HP</Text>
-                                <Text as="div" align="right">{statusStat.totalDamage}回</Text>
-                            </Box>
-                            <Box className='valueBox'>
-                                <Text as="div" size="1" mr="2">総喪失SAN</Text>
-                                <Text as="div" align="right">{statusStat.totalLostSAN}回</Text>
-                            </Box>
-                        </Flex>
-                        <Flex direction="column">
-                            <Box className='valueBox'>
-                                <Text as="div" size="1" mr="2">SANチェック回数</Text>
-                                <Text as="div" align="right">{sanityCheckStat.checkNum}回</Text>
-                            </Box>
-                            <Box className='valueBox'>
-                                <Text as="div" size="1" mr="2">SANチェック成功率</Text>
-                                <Text as="div" align="right">{percentageFormatter.format(sanityCheckStat.successNum / sanityCheckStat.checkNum)}</Text>
-                            </Box>
-                        </Flex>
+                    <Flex justify="center" gap="9">
+                        <Box>
+                            <Heading align="left">その他の成績</Heading>
+                            <Grid columns="6">
+                                <ValueBlock title="発言数">
+                                    {talkStat.talkNum}回
+                                </ValueBlock>
+                                <ValueBlock title="キャラ発言数">
+                                    {talkStat.pcTalkNum}回
+                                </ValueBlock>
+                                <ValueBlock title="総喪失HP">
+                                    {statusStat.totalDamage}pt
+                                </ValueBlock>
+                                <ValueBlock title="総喪失SAN">
+                                    {statusStat.totalLostSAN}pt
+                                </ValueBlock>
+                                <ValueBlock title="SANチェック回数">
+                                    {sanityCheckStat.checkNum}回
+                                </ValueBlock>
+                                <ValueBlock title="SANチェック成功率">
+                                    {percentageFormatter.format(sanityCheckStat.successNum / sanityCheckStat.checkNum)}
+                                </ValueBlock>
+                            </Grid>
+                        </Box>
                     </Flex>
                 </Flex>
             </Box>
@@ -315,12 +326,52 @@ const SkillRankingRow = (props: {
         return null;
     }
 
-    return (<Table.Row>
-        <Table.RowHeaderCell><Text size="4">{localeHanidec.format(rank)}位</Text></Table.RowHeaderCell>
-        <Table.Cell><Text size="4">{stat[0]}</Text></Table.Cell>
-        <Table.Cell><Text size="4">{stat[1].skillRollNum}回</Text></Table.Cell>
-        <Table.Cell><Text size="1">成功率</Text><Text size="4">{percentageFormatter.format(stat[1].successNum / stat[1].skillRollNum)}</Text></Table.Cell>
-    </Table.Row>)
+    return (
+        <Table.Row style={{ verticalAlign: "bottom" }}>
+            <Table.RowHeaderCell>
+                <Text size="4">{localeHanidec.format(rank)}位</Text>
+            </Table.RowHeaderCell>
+            <Table.Cell>
+                <Text size="4">{stat[0]}</Text>
+            </Table.Cell>
+            <Table.Cell>
+                <ValueCell title="使用回数">
+                    {stat[1].skillRollNum}回
+                </ValueCell>
+            </Table.Cell>
+            <Table.Cell>
+                <ValueCell title="成功回数">
+                    {stat[1].successNum}回
+                </ValueCell>
+            </Table.Cell>
+            <Table.Cell>
+                <ValueCell title="成功率">
+                    {percentageFormatter.format(stat[1].successNum / stat[1].skillRollNum)}
+                </ValueCell>
+            </Table.Cell>
+        </Table.Row >)
+}
+
+const ValueCell = (props: {
+    title: string
+    children: ReactNode
+}) => {
+    return <Box>
+        <Text as="div" size="2" mr="2">{props.title}</Text>
+        <Text as="div" size="4" align="right">{props.children}</Text>
+    </Box>
+}
+
+const ValueBlock = (props: {
+    title: string
+    children: ReactNode
+}) => {
+    return <Box m="2" style={{
+        borderBottom: "1px solid var(--gray-6)"
+    }}>
+        <Text as="div" size="2" mr="2">{props.title}</Text>
+        <Text as="div" size="4" align="right">{props.children}</Text>
+    </Box>
 }
 
 const sumOf = (array: number[]) => {
