@@ -213,7 +213,7 @@ const PlayerStats = (props: StatsProps) => {
                     </Flex>
                     <Flex justify="center" gap="9">
                         <Box>
-                            <Heading align="center">多く振った技能</Heading>
+                            <Heading align="center">技能別成績</Heading>
                             <Table.Root>
                                 <Table.Body>
                                     <SkillRankingRow stats={skillRanking} rank={1} />
@@ -223,7 +223,7 @@ const PlayerStats = (props: StatsProps) => {
                             </Table.Root>
                         </Box>
                         <Box>
-                            <Heading align="center">全ての技能</Heading>
+                            <Heading align="center">全技能成績</Heading>
                             <Table.Root>
                                 <Table.Body>
                                     <Table.Row>
