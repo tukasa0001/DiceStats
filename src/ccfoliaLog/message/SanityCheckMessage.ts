@@ -32,4 +32,9 @@ export class SanityCheckMessage implements CcfoliaMessage {
                     : "Fail"
         return `[${this.channel}] ${this.sender} : SANチェック > ${this.diceValue} > ${result}`;
     }
+
+    toDisplayText(): string {
+        const result = this.isSuccess() ? "成功" : "失敗"
+        return `SANチェック(${this.successValue}): ${this.diceValue} > ${result}`;
+    }
 }

@@ -36,4 +36,12 @@ export class CoCSkillRollMessage implements CcfoliaMessage {
                     : "Fail"
         return `[${this.channel}] ${this.sender} : 技能判定 [${this.skill}] > ${this.diceValue} > ${result}`;
     }
+
+    toDisplayText(): string {
+        const result = this.isCritical() ? "クリティカル"
+            : this.isFumble() ? "ファンブル"
+                : this.isSuccess() ? "成功"
+                    : "失敗"
+        return `技能判定[${this.skill}](${this.successValue}): ${this.diceValue} > ${result}`
+    }
 }

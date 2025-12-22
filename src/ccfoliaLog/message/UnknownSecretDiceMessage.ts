@@ -12,4 +12,8 @@ export class UnknownSecretDiceMessage implements CcfoliaMessage {
     toString() {
         return `[${this.channel}] ${this.sender} : Secret Dice`;
     }
+
+    toDisplayText(): string {
+        return "【シークレットダイス】"
+    }
 }
