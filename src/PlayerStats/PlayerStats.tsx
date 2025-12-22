@@ -176,7 +176,7 @@ const PlayerStats = (props: StatsProps) => {
     });
 
     return (
-        <Theme scaling="110%">
+        <Theme>
             <Box my="2">
                 <Heading my="2">あなたの名前を入力してください</Heading>
                 <TextField.Root value={playerName} onChange={e => setPlayerName(e.target.value)} placeholder="名無しの探索者">
@@ -195,11 +195,24 @@ const PlayerStats = (props: StatsProps) => {
                     <Button asChild={true}><a href="#playerStats">表示</a></Button>
                 </Flex>
 
-                <Flex id="playerStats" mt="9" py="2" gap="5" width="100%" height="100vh" direction="column" align="center" justify="center">
-                    <Heading size="7">成績表</Heading>
-                    <Text><Text size="1">名前 </Text>{playerName === "" ? "名無しの探索者" : playerName}</Text>
-                    <Flex justify="between">
-                        <Box flexGrow="1">
+                <Flex id="playerStats" mt="9" py="2" gap="5" width="100%" height="100vh" direction="column" align="stretch" justify="center">
+                    <Heading size="8" align="center">TRPG成績表</Heading>
+                    <Flex align="center" justify="center">
+                        <Table.Root>
+                            <Table.Body>
+                                <Table.Row>
+                                    <Table.RowHeaderCell><Text size="4">名前</Text></Table.RowHeaderCell>
+                                    <Table.Cell><Text size="4">{playerName === "" ? "名無しの探索者" : playerName}</Text></Table.Cell>
+                                </Table.Row>
+                                <Table.Row>
+                                    <Table.RowHeaderCell><Text size="4">技能判定総数</Text></Table.RowHeaderCell>
+                                    <Table.Cell><Text size="4">{sumOf(skillRanking.map(elem => elem[1].skillRollNum))}回</Text></Table.Cell>
+                                </Table.Row>
+                            </Table.Body>
+                        </Table.Root>
+                    </Flex>
+                    <Flex justify="center" gap="9">
+                        <Box>
                             <Heading align="center">多く振った技能</Heading>
                             <Table.Root>
                                 <Table.Body>
@@ -209,31 +222,31 @@ const PlayerStats = (props: StatsProps) => {
                                 </Table.Body>
                             </Table.Root>
                         </Box>
-                        <Box flexGrow="1">
-                            <Heading align="center">全技能</Heading>
+                        <Box>
+                            <Heading align="center">全ての技能</Heading>
                             <Table.Root>
                                 <Table.Body>
                                     <Table.Row>
-                                        <Table.RowHeaderCell>技能振り回数</Table.RowHeaderCell>
-                                        <Table.Cell>{sumOf(skillRanking.map(elem => elem[1].skillRollNum))}</Table.Cell>
+                                        <Table.RowHeaderCell><Text size="4">判定回数</Text></Table.RowHeaderCell>
+                                        <Table.Cell><Text size="4">{sumOf(skillRanking.map(elem => elem[1].skillRollNum))}</Text></Table.Cell>
                                     </Table.Row>
                                     <Table.Row>
-                                        <Table.RowHeaderCell>成功率</Table.RowHeaderCell>
-                                        <Table.Cell>{percentageFormatter.format(
+                                        <Table.RowHeaderCell><Text size="4">成功率</Text></Table.RowHeaderCell>
+                                        <Table.Cell><Text size="4">{percentageFormatter.format(
                                             sumOf(skillRanking.map(elem => elem[1].successNum)) / sumOf(skillRanking.map(elem => elem[1].skillRollNum))
-                                        )}</Table.Cell>
+                                        )}</Text></Table.Cell>
                                     </Table.Row>
                                     <Table.Row>
-                                        <Table.RowHeaderCell>クリティカル率</Table.RowHeaderCell>
-                                        <Table.Cell>{percentageFormatter.format(
+                                        <Table.RowHeaderCell><Text size="4">クリティカル率</Text></Table.RowHeaderCell>
+                                        <Table.Cell><Text size="4">{percentageFormatter.format(
                                             sumOf(skillRanking.map(elem => elem[1].criticalNum)) / sumOf(skillRanking.map(elem => elem[1].skillRollNum))
-                                        )}</Table.Cell>
+                                        )}</Text></Table.Cell>
                                     </Table.Row>
                                     <Table.Row>
-                                        <Table.RowHeaderCell>ファンブル率</Table.RowHeaderCell>
-                                        <Table.Cell>{percentageFormatter.format(
+                                        <Table.RowHeaderCell><Text size="4">ファンブル率</Text></Table.RowHeaderCell>
+                                        <Table.Cell><Text size="4">{percentageFormatter.format(
                                             sumOf(skillRanking.map(elem => elem[1].fumbleNum)) / sumOf(skillRanking.map(elem => elem[1].skillRollNum))
-                                        )}</Table.Cell>
+                                        )}</Text></Table.Cell>
                                     </Table.Row>
                                 </Table.Body>
                             </Table.Root>
@@ -304,10 +317,10 @@ const SkillRankingRow = (props: {
     }
 
     return (<Table.Row>
-        <Table.RowHeaderCell>{localeHanidec.format(rank)}位</Table.RowHeaderCell>
-        <Table.Cell>{stat[0]}</Table.Cell>
-        <Table.Cell>{stat[1].skillRollNum}回</Table.Cell>
-        <Table.Cell><Text size="1">成功率</Text>{percentageFormatter.format(stat[1].successNum / stat[1].skillRollNum)}</Table.Cell>
+        <Table.RowHeaderCell><Text size="4">{localeHanidec.format(rank)}位</Text></Table.RowHeaderCell>
+        <Table.Cell><Text size="4">{stat[0]}</Text></Table.Cell>
+        <Table.Cell><Text size="4">{stat[1].skillRollNum}回</Text></Table.Cell>
+        <Table.Cell><Text size="1">成功率</Text><Text size="4">{percentageFormatter.format(stat[1].successNum / stat[1].skillRollNum)}</Text></Table.Cell>
     </Table.Row>)
 }
 
