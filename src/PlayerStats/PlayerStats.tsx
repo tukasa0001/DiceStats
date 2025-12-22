@@ -227,23 +227,22 @@ const PlayerStats = (props: StatsProps) => {
                             <Table.Root>
                                 <Table.Body>
                                     <Table.Row>
-                                        <Table.RowHeaderCell><Text size="4">判定回数</Text></Table.RowHeaderCell>
-                                        <Table.Cell><Text size="4">{sumOf(skillRanking.map(elem => elem[1].skillRollNum))}</Text></Table.Cell>
-                                    </Table.Row>
-                                    <Table.Row>
-                                        <Table.RowHeaderCell><Text size="4">成功率</Text></Table.RowHeaderCell>
+                                        <Table.RowHeaderCell><Text size="4">技能成功</Text></Table.RowHeaderCell>
+                                        <Table.Cell><Text size="4">{sumOf(skillRanking.map(elem => elem[1].successNum))}回</Text></Table.Cell>
                                         <Table.Cell><Text size="4">{percentageFormatter.format(
                                             sumOf(skillRanking.map(elem => elem[1].successNum)) / sumOf(skillRanking.map(elem => elem[1].skillRollNum))
                                         )}</Text></Table.Cell>
                                     </Table.Row>
                                     <Table.Row>
-                                        <Table.RowHeaderCell><Text size="4">クリティカル率</Text></Table.RowHeaderCell>
+                                        <Table.RowHeaderCell><Text size="4">クリティカル</Text></Table.RowHeaderCell>
+                                        <Table.Cell><Text size="4">{sumOf(skillRanking.map(elem => elem[1].criticalNum))}回</Text></Table.Cell>
                                         <Table.Cell><Text size="4">{percentageFormatter.format(
                                             sumOf(skillRanking.map(elem => elem[1].criticalNum)) / sumOf(skillRanking.map(elem => elem[1].skillRollNum))
                                         )}</Text></Table.Cell>
                                     </Table.Row>
                                     <Table.Row>
-                                        <Table.RowHeaderCell><Text size="4">ファンブル率</Text></Table.RowHeaderCell>
+                                        <Table.RowHeaderCell><Text size="4">ファンブル</Text></Table.RowHeaderCell>
+                                        <Table.Cell><Text size="4">{sumOf(skillRanking.map(elem => elem[1].fumbleNum))}回</Text></Table.Cell>
                                         <Table.Cell><Text size="4">{percentageFormatter.format(
                                             sumOf(skillRanking.map(elem => elem[1].fumbleNum)) / sumOf(skillRanking.map(elem => elem[1].skillRollNum))
                                         )}</Text></Table.Cell>
