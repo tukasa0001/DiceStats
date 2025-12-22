@@ -219,9 +219,10 @@ const PlayerStats = (props: StatsProps) => {
                         </Flex>
                     </CheckboxCards.Item>)}
                 </CheckboxCards.Root>
-                <Separator />
-                <Flex id="playerStats" py="2" gap="5" width="100%" minHeight="100vh" direction="column" align="stretch" justify="center" position="relative" style={{
-                    backgroundColor: "var(--gray-1)"
+                <Flex id="playerStats" py="2" gap="5" minHeight="100vh" direction="column" align="stretch" justify="center" position="relative" style={{
+                    backgroundColor: "var(--gray-1)",
+                    overflowX: "auto",
+                    textWrap: "nowrap"
                 }}>
                     <Heading size="8" align="center">TRPG成績表</Heading>
                     <Flex align="center" justify="center">
@@ -403,7 +404,8 @@ const ValueBlock = (props: {
     children: ReactNode
 }) => {
     return <Box m="2" style={{
-        borderBottom: "1px solid var(--gray-6)"
+        borderBottom: "1px solid var(--gray-6)",
+        textWrap: "wrap"
     }}>
         <Text as="div" size="2" mr="2">{props.title}</Text>
         <Text as="div" size="4" ml="2" align="right">{props.children}</Text>
