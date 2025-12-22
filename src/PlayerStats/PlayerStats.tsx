@@ -190,11 +190,9 @@ const PlayerStats = (props: StatsProps) => {
         }
     }
 
-    const allCharacterList = [...allCharacters]
-        .sort((a, b) => a[0].localeCompare(b[0], "ja"));
-    const skillRanking = [...skillStats]
-        .filter(skill => !unrankedSkills.includes(skill[0]))
-        .sort((a, b) => b[1].skillRollNum - a[1].skillRollNum)
+    const allCharacterList = [...allCharacters].sort((a, b) => a[0].localeCompare(b[0], "ja"));
+    const skillRanking = [...skillStats].sort((a, b) => b[1].skillRollNum - a[1].skillRollNum)
+    const skillRankingFiltered = skillRanking.filter(skill => !unrankedSkills.includes(skill[0]))
 
     const avgFormatter = Intl.NumberFormat("ja-JP", {
         minimumFractionDigits: 2,
@@ -271,9 +269,9 @@ const PlayerStats = (props: StatsProps) => {
                             </Flex>
                             <Table.Root>
                                 <Table.Body>
-                                    <SkillRankingRow stats={skillRanking} rank={1} />
-                                    <SkillRankingRow stats={skillRanking} rank={2} />
-                                    <SkillRankingRow stats={skillRanking} rank={3} />
+                                    <SkillRankingRow stats={skillRankingFiltered} rank={1} />
+                                    <SkillRankingRow stats={skillRankingFiltered} rank={2} />
+                                    <SkillRankingRow stats={skillRankingFiltered} rank={3} />
                                 </Table.Body>
                             </Table.Root>
                         </Box>
