@@ -205,7 +205,7 @@ const PlayerStats = (props: StatsProps) => {
                                     <Table.Cell><Text size="4">{playerName === "" ? "名無しの探索者" : playerName}</Text></Table.Cell>
                                 </Table.Row>
                                 <Table.Row>
-                                    <Table.RowHeaderCell><Text size="4">技能判定総数</Text></Table.RowHeaderCell>
+                                    <Table.RowHeaderCell><Text size="4">技能振り総数</Text></Table.RowHeaderCell>
                                     <Table.Cell><Text size="4">{sumOf(skillRanking.map(elem => elem[1].skillRollNum))}回</Text></Table.Cell>
                                 </Table.Row>
                             </Table.Body>
