@@ -188,6 +188,7 @@ const PlayerStats = (props: StatsProps) => {
         }
     }
 
+    const allCharacterList = [...allCharacters].sort((a, b) => a[0].localeCompare(b[0], "ja"));
     const skillRanking = [...skillStats].sort((a, b) => b[1].skillRollNum - a[1].skillRollNum)
 
     const avgFormatter = Intl.NumberFormat("ja-JP", {
@@ -213,7 +214,7 @@ const PlayerStats = (props: StatsProps) => {
                 <Heading my="2">あなたのキャラを選択してください</Heading>
                 <CheckboxCards.Root value={selectedCharacters}
                     onValueChange={val => setSelectedCharacters(val)}>
-                    {[...allCharacters].map(name => <CheckboxCards.Item key={name} value={name}>
+                    {[...allCharacterList].map(name => <CheckboxCards.Item key={name} value={name}>
                         <Flex direction="column" width="100%">
                             <Text weight="bold">{name}</Text>
                         </Flex>
