@@ -191,10 +191,13 @@ const PlayerStats = (props: StatsProps) => {
                         </Flex>
                     </CheckboxCards.Item>)}
                 </CheckboxCards.Root>
-                <Flex id="playerStats" mt="9" py="2" gap="5" width="100%" height="100vh" direction="column" align="center">
-                    <Heading size="7">TRPG証書</Heading>
-                    <Text>{playerName === "" ? "名無しの探索者" : playerName} 殿</Text>
-                    <Text>上記の者は、TRPGにおいて以下の成績を修めたことを証する。</Text>
+                <Flex my="2" direction="column" align="center">
+                    <Button asChild={true}><a href="#playerStats">表示</a></Button>
+                </Flex>
+
+                <Flex id="playerStats" mt="9" py="2" gap="5" width="100%" height="100vh" direction="column" align="center" justify="center">
+                    <Heading size="7">成績表</Heading>
+                    <Text><Text size="1">名前 </Text>{playerName === "" ? "名無しの探索者" : playerName}</Text>
                     <Flex justify="between">
                         <Box flexGrow="1">
                             <Heading align="center">多く振った技能</Heading>
@@ -236,34 +239,34 @@ const PlayerStats = (props: StatsProps) => {
                             </Table.Root>
                         </Box>
                     </Flex>
-                    <Flex justify="between">
+                    <Flex justify="between" gap="4">
                         <Flex direction="column">
                             <Box className='valueBox'>
-                                <Text as="div" size="1">発言数</Text>
+                                <Text as="div" size="1" mr="2">発言数</Text>
                                 <Text as="div" align="right">{talkStat.talkNum}回</Text>
                             </Box>
                             <Box className='valueBox'>
-                                <Text as="div" size="1">キャラ発言数</Text>
+                                <Text as="div" size="1" mr="2">キャラ発言数</Text>
                                 <Text as="div" align="right">{talkStat.pcTalkNum}回</Text>
                             </Box>
                         </Flex>
                         <Flex direction="column">
                             <Box className='valueBox'>
-                                <Text as="div" size="1">総喪失HP</Text>
+                                <Text as="div" size="1" mr="2">総喪失HP</Text>
                                 <Text as="div" align="right">{statusStat.totalDamage}回</Text>
                             </Box>
                             <Box className='valueBox'>
-                                <Text as="div" size="1">総喪失SAN</Text>
+                                <Text as="div" size="1" mr="2">総喪失SAN</Text>
                                 <Text as="div" align="right">{statusStat.totalLostSAN}回</Text>
                             </Box>
                         </Flex>
                         <Flex direction="column">
                             <Box className='valueBox'>
-                                <Text as="div" size="1">SANチェック回数</Text>
+                                <Text as="div" size="1" mr="2">SANチェック回数</Text>
                                 <Text as="div" align="right">{sanityCheckStat.checkNum}回</Text>
                             </Box>
                             <Box className='valueBox'>
-                                <Text as="div" size="1">SANチェック成功率</Text>
+                                <Text as="div" size="1" mr="2">SANチェック成功率</Text>
                                 <Text as="div" align="right">{percentageFormatter.format(sanityCheckStat.successNum / sanityCheckStat.checkNum)}</Text>
                             </Box>
                         </Flex>
