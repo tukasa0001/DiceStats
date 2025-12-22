@@ -13,6 +13,7 @@ import "./UploadArea.css";
 import { MoonIcon, SunIcon } from 'lucide-react';
 import { LogView } from './logView/LogView';
 import { FilteredLogView } from './logView/FilteredLogView';
+import PlayerStats from './PlayerStats/playerStats';
 
 export const configCtx = createContext(new DisplayConfig());
 export const setConfigCtx = createContext((x: DisplayConfig) => { });
@@ -62,6 +63,7 @@ const App: FC = () => {
                                         <Tabs.Trigger value="upload">ログ選択</Tabs.Trigger>
                                         <Tabs.Trigger value="stats">統計</Tabs.Trigger>
                                         <Tabs.Trigger value="logView">表示</Tabs.Trigger>
+                                        <Tabs.Trigger value="plStats">PL統計</Tabs.Trigger>
                                     </Flex>
                                     <Flex align="center" justify="end">
                                         <Button variant="ghost" onClick={e => setIsDark(!isDark)}>
@@ -85,6 +87,11 @@ const App: FC = () => {
                             <Tabs.Content value="logView">
                                 <Flex direction="column" mx="4">
                                     <FilteredLogView logs={log ?? []} />
+                                </Flex>
+                            </Tabs.Content>
+                            <Tabs.Content value="plStats">
+                                <Flex direction="column" mx="4">
+                                    <PlayerStats logFile={log ?? []} />
                                 </Flex>
                             </Tabs.Content>
                             <Flex direction="column" mx="4">
