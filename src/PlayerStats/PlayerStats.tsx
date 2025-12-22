@@ -195,7 +195,7 @@ const PlayerStats = (props: StatsProps) => {
                     <Button asChild={true}><a href="#playerStats">表示</a></Button>
                 </Flex>
 
-                <Flex id="playerStats" mt="9" py="2" gap="5" width="100%" minHeight="100vh" direction="column" align="stretch" justify="center">
+                <Flex id="playerStats" mt="9" py="2" gap="5" width="100%" minHeight="100vh" direction="column" align="stretch" justify="center" position="relative">
                     <Heading size="8" align="center">TRPG成績表</Heading>
                     <Flex align="center" justify="center">
                         <Table.Root>
@@ -294,6 +294,11 @@ const PlayerStats = (props: StatsProps) => {
                             </Grid>
                         </Box>
                     </Flex>
+                    <Text size="1" style={{
+                        position: "absolute",
+                        left: "1em",
+                        bottom: "1em"
+                    }}>DiceStats: https://tukasa0001.github.io/DiceStats/</Text>
                 </Flex>
             </Box>
         </Theme>
