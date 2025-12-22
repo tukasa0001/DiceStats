@@ -7,8 +7,9 @@ import { CcfoliaMessage } from '../ccfoliaLog/message/CcfoliaMessage';
 import { UnknownSecretDiceMessage } from '../ccfoliaLog/message/UnknownSecretDiceMessage';
 import { configCtx, setConfigCtx } from '../App';
 import { ErrorBlock, InfoBlock } from '../Utils';
-import { Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField, CheckboxCards, Text, Theme, Grid } from '@radix-ui/themes';
+import { Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField, CheckboxCards, Text, Theme, Grid, Spinner, Separator } from '@radix-ui/themes';
 import "./PlayerStats.css"
+import domtoimage from "dom-to-image"
 
 class SkillStat {
     // 技能ごとの統計
@@ -67,6 +68,31 @@ type StatsProps = {
 const PlayerStats = (props: StatsProps) => {
     const [selectedCharacters, setSelectedCharacters] = useState<string[]>([]);
     const [playerName, setPlayerName] = useState("");
+    const [isSaving, setSaving] = useState(false);
+
+    const wait = async (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+    const saveImg = async () => {
+        if (isSaving) return;
+        const node = document.getElementById("playerStats");
+        if (node !== null) {
+            setSaving(true);
+            try {
+                await wait(1); // 一瞬待機することでロードマークを付ける
+                const url = await domtoimage.toPng(node)
+                const link = document.createElement('a');
+                link.download = 'TRPG成績表.png';
+                link.href = url;
+                link.click();
+                link.remove();
+            }
+            catch (error) {
+                alert("画像の保存に失敗しました\n詳細情報:" + error)
+            }
+            finally {
+                setSaving(false);
+            }
+        }
+    }
 
     const log = props.logFile;
     const config = useContext(configCtx);
@@ -177,7 +203,9 @@ const PlayerStats = (props: StatsProps) => {
 
     return (
         <Theme>
-            <Box my="2">
+            <Box my="2" style={{
+                backgroundColor: "var(--gray-1)"
+            }}>
                 <Heading my="2">あなたの名前を入力してください</Heading>
                 <TextField.Root value={playerName} onChange={e => setPlayerName(e.target.value)} placeholder="名無しの探索者">
                     <TextField.Slot />
@@ -191,11 +219,10 @@ const PlayerStats = (props: StatsProps) => {
                         </Flex>
                     </CheckboxCards.Item>)}
                 </CheckboxCards.Root>
-                <Flex my="2" direction="column" align="center">
-                    <Button asChild={true}><a href="#playerStats">表示</a></Button>
-                </Flex>
-
-                <Flex id="playerStats" mt="9" py="2" gap="5" width="100%" minHeight="100vh" direction="column" align="stretch" justify="center" position="relative">
+                <Separator />
+                <Flex id="playerStats" py="2" gap="5" width="100%" minHeight="100vh" direction="column" align="stretch" justify="center" position="relative" style={{
+                    backgroundColor: "var(--gray-1)"
+                }}>
                     <Heading size="8" align="center">TRPG成績表</Heading>
                     <Flex align="center" justify="center">
                         <Table.Root>
@@ -299,6 +326,10 @@ const PlayerStats = (props: StatsProps) => {
                         left: "1em",
                         bottom: "1em"
                     }}>DiceStats: https://tukasa0001.github.io/DiceStats/</Text>
+                </Flex>
+
+                <Flex mt="5" direction="column" align="center">
+                    <Button onClick={saveImg}>画像として保存{isSaving ? <Spinner /> : null}</Button>
                 </Flex>
             </Box>
         </Theme>
