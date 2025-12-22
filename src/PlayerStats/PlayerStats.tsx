@@ -357,8 +357,8 @@ const ValueCell = (props: {
     children: ReactNode
 }) => {
     return <Box>
-        <Text as="div" size="2" mr="2">{props.title}</Text>
-        <Text as="div" size="4" align="right">{props.children}</Text>
+        <Text as="div" size="2" mr="1">{props.title}</Text>
+        <Text as="div" size="4" ml="2" align="right">{props.children}</Text>
     </Box>
 }
 
@@ -370,7 +370,7 @@ const ValueBlock = (props: {
         borderBottom: "1px solid var(--gray-6)"
     }}>
         <Text as="div" size="2" mr="2">{props.title}</Text>
-        <Text as="div" size="4" align="right">{props.children}</Text>
+        <Text as="div" size="4" ml="2" align="right">{props.children}</Text>
     </Box>
 }
 
