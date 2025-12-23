@@ -43,15 +43,23 @@ const App: FC = () => {
         <configCtx.Provider value={config}>
             <setConfigCtx.Provider value={setConfig}>
                 <div onDrop={e => {
+                    if (!e.dataTransfer.types.includes("Files")) return;
                     onFileUploaded([...e.dataTransfer.files]);
                     setDropping(false);
                     e.preventDefault();
                 }}
                     onDragOver={e => {
+                        if (!e.dataTransfer.types.includes("Files")) return;
                         e.preventDefault();
                     }}
-                    onDragEnter={e => setDropping(true)}
-                    onDragExit={e => setDropping(false)}>
+                    onDragEnter={e => {
+                        if (!e.dataTransfer.types.includes("Files")) return;
+                        setDropping(true)
+                    }}
+                    onDragExit={e => {
+                        if (!e.dataTransfer.types.includes("Files")) return;
+                        setDropping(false)
+                    }}>
                     <Theme accentColor="indigo" radius='large' appearance={isDark ? "dark" : "light"}>
                         <Tabs.Root value={tab} onValueChange={tab => setTab(tab)}>
                             <Tabs.List>
