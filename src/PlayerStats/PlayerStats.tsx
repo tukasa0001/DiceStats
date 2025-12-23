@@ -145,7 +145,9 @@ const PlayerStats = (props: StatsProps) => {
             continue;
         }
         // 全キャラリストを作成
-        allCharacters.add(sender);
+        if (msg instanceof CoCSkillRollMessage) {
+            allCharacters.add(sender);
+        }
         // 未選択のキャラは除外
         if (!selectedCharacters.includes(sender)) {
             continue;
