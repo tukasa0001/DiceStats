@@ -17,7 +17,9 @@ class SkillStat {
     successNum: number = 0;
     failNum: number = 0;
     criticalNum: number = 0;
+    spCriticalNum: number = 0;
     fumbleNum: number = 0;
+    spFumbleNum: number = 0
 
     increment(msg: CoCSkillRollMessage) {
         this.skillRollNum++;
@@ -25,12 +27,18 @@ class SkillStat {
             this.successNum++;
             if (msg.isCritical()) {
                 this.criticalNum++;
+                if (msg.diceValue === 1) {
+                    this.spCriticalNum++;
+                }
             }
         }
         else {
             this.failNum++;
             if (msg.isFumble()) {
                 this.fumbleNum++;
+                if (msg.diceValue === 100) {
+                    this.spFumbleNum++;
+                }
             }
         }
     }
@@ -324,6 +332,21 @@ const PlayerStats = (props: StatsProps) => {
                                     </Table.Row>
                                 </Table.Body>
                             </Table.Root>
+
+                            <Grid columns="2">
+                                <Flex mt="1" gap="2" style={{
+                                    borderBottom: "1px solid var(--gray-6)"
+                                }}>
+                                    <Text size="2">1クリ</Text>
+                                    <Text size="2">{sumOf(skillRanking.map(elem => elem[1].spCriticalNum))}回/{percentageFormatter.format(sumOf(skillRanking.map(elem => elem[1].spCriticalNum)) / sumOf(skillRanking.map(elem => elem[1].skillRollNum)))}</Text>
+                                </Flex>
+                                <Flex mt="1" gap="2" style={{
+                                    borderBottom: "1px solid var(--gray-6)"
+                                }}>
+                                    <Text size="2">100ファン</Text>
+                                    <Text size="2">{sumOf(skillRanking.map(elem => elem[1].spFumbleNum))}回/{percentageFormatter.format(sumOf(skillRanking.map(elem => elem[1].spFumbleNum)) / sumOf(skillRanking.map(elem => elem[1].skillRollNum)))}</Text>
+                                </Flex>
+                            </Grid>
                         </Box>
                     </Flex>
                     <Flex justify="center" gap="9">
