@@ -274,6 +274,10 @@ const PlayerStats = (props: StatsProps) => {
                                     <SkillRankingRow stats={skillRankingFiltered} rank={3} />
                                 </Table.Body>
                             </Table.Root>
+                            <Grid columns="2">
+                                <MiniSkillRankingRow stats={skillRankingFiltered} rank={4} />
+                                <MiniSkillRankingRow stats={skillRankingFiltered} rank={5} />
+                            </Grid>
                         </Box>
                         <Box>
                             <Heading align="left">全技能成績</Heading>
@@ -412,6 +416,44 @@ const SkillRankingRow = (props: {
                 </ValueCell>
             </Table.Cell>
         </Table.Row >)
+}
+
+const MiniSkillRankingRow = (props: {
+    stats: [string, SkillStat][],
+    rank: number
+}) => {
+    const percentageFormatter = Intl.NumberFormat("ja-JP", {
+        style: "percent",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
+    const localeHanidec = Intl.NumberFormat(new Intl.Locale(
+        'ja-jp',
+        {
+            numberingSystem: "hanidec"
+        }
+    ));
+
+    const { stats, rank } = props;
+    if (rank < 1) {
+        return "Invalid rank: " + rank;
+    }
+
+    const stat = stats[rank - 1];
+    if (stat === undefined) {
+        return null;
+    }
+
+    return (
+        <Flex mt="1" gap="2" style={{
+            borderBottom: "1px solid var(--gray-6)"
+        }}>
+            <Text size="2">{localeHanidec.format(rank)}位</Text>
+            <Text size="2">{stat[0]}</Text>
+            <Text size="2">
+                {stat[1].skillRollNum}回/{stat[1].successNum}回/{percentageFormatter.format(stat[1].successNum / stat[1].skillRollNum)}
+            </Text>
+        </Flex>)
 }
 
 const ValueCell = (props: {
