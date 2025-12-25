@@ -13,7 +13,7 @@ import domtoimage from "dom-to-image"
 import cocstats, { SkillStat } from '../StatsCalculator/CoCStats';
 
 type StatsProps = {
-    logFile: CcfoliaMessage[]
+    logs: CcfoliaMessage[]
 }
 
 const PlayerStats = (props: StatsProps) => {
@@ -47,7 +47,7 @@ const PlayerStats = (props: StatsProps) => {
         }
     }
 
-    const log = props.logFile;
+    const log = props.logs;
     const config = useContext(configCtx);
 
     const allCharacters = new Set<string>();

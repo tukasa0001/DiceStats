@@ -12,13 +12,13 @@ import "./Stats.css"
 import cocstats from './StatsCalculator/CoCStats';
 
 type StatsProps = {
-    logFile: CcfoliaMessage[]
+    logs: CcfoliaMessage[]
 }
 
 const Stats = (props: StatsProps) => {
     const [skillFilter, setSkillFinter] = useState("none");
 
-    const log = props.logFile;
+    const log = props.logs;
     const config = useContext(configCtx);
 
     const jpnTextComparer = (a: readonly [string, any], b: readonly [string, any]) => a[0].localeCompare(b[0], "ja");
