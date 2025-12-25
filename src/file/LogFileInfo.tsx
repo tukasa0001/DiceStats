@@ -3,6 +3,7 @@ import { LogFile } from "./LogFile"
 import { useState } from "react"
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge"
 import { TriangleAlert } from "lucide-react"
+import { FilteredLogView } from "../logView/FilteredLogView"
 
 type LogFileInfoProps = {
     log: LogFile,
@@ -13,6 +14,8 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
     const { log, setLog } = props;
     const [startMsg, setStartMsg] = useState("");
     const [endMsg, setEndMsg] = useState("");
+
+    const [selectMode, setSelectMode] = useState<"none" | "start" | "end">("none");
 
     const textToIndex = (text: string) => {
         if (text === "") {
@@ -46,7 +49,7 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
                         <TextField.Slot />
                     </TextField.Root>
                     {log.startIdx === 0 && startMsg !== "" ? <TriangleAlert /> : null}
-                    <Button variant="outline">選択</Button>
+                    <Button variant="outline" onClick={() => setSelectMode("start")}>選択</Button>
                 </Flex>
                 <Flex gap="2" align="center">
                     <Text>
@@ -63,9 +66,37 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
                         <TextField.Slot />
                     </TextField.Root>
                     {log.endIdx === log.log.length && endMsg !== "" ? <TriangleAlert /> : null}
-                    <Button variant="outline">選択</Button>
+                    <Button variant="outline" onClick={() => setSelectMode("end")}>選択</Button>
                 </Flex>
             </Flex>
         </Card>
+        {selectMode === "none" ? null : <>
+            <Card style={{
+                zIndex: "100",
+                position: "fixed",
+                top: "2.5vh",
+                right: "0",
+                margin: "0 1em",
+                maxWidth: "900px",
+                height: "95vh"
+            }}>
+                <Box style={{
+                    overflowY: "scroll",
+                    height: "100%"
+                }}>
+                    <FilteredLogView logs={log} onClick={(msg, i) => {
+                        if (selectMode === "start") {
+                            setStartMsg(msg.toDisplayText())
+                            setLog({ ...log, startIdx: i })
+                        }
+                        else {
+                            setEndMsg(msg.toDisplayText())
+                            setLog({ ...log, endIdx: i })
+                        }
+                        setSelectMode("none")
+                    }} />
+                </Box>
+            </Card>
+        </>}
     </Box>
 }
