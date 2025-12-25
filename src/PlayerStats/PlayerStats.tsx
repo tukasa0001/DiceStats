@@ -1,5 +1,5 @@
 
-import React, { JSX, ReactNode, useContext, useMemo, useState } from 'react';
+import React, { JSX, ReactNode, useContext, useMemo, useRef, useState } from 'react';
 import { configCtx } from '../App';
 import { Box, Button, Flex, Table, Heading, TextField, CheckboxCards, Text, Theme, Grid, Spinner, Switch } from '@radix-ui/themes';
 import "./PlayerStats.css"
@@ -18,7 +18,7 @@ const PlayerStats = (props: StatsProps) => {
     }
 
     const generalSkills = ["目星", "聞き耳", "図書館", "知識", "アイデア", "幸運"];
-    const [selectedCharacters, setSelectedCharacters] = useState<string[]>([]);
+    const selectedCharacters = useRef<string[]>([]);
     const [playerName, setPlayerName] = useState("");
     const [isSaving, setSaving] = useState(false);
     const [unrankedSkills, setUnrankedSkills] = useState<string[]>(generalSkills);
@@ -58,7 +58,7 @@ const PlayerStats = (props: StatsProps) => {
                 ...config,
                 startIdx: file.startIdx,
                 endIdx: file.endIdx,
-                filter: msg => selectedCharacters.includes(msg.sender)
+                filter: msg => selectedCharacters.current.includes(msg.sender)
             }))
             .reduce((a, b) => a.merge(b)));
     }
@@ -75,8 +75,8 @@ const PlayerStats = (props: StatsProps) => {
                     <TextField.Slot />
                 </TextField.Root>
                 <Heading my="2">あなたのキャラを選択してください</Heading>
-                <CheckboxCards.Root value={selectedCharacters}
-                    onValueChange={val => setSelectedCharacters(val)}>
+                <CheckboxCards.Root defaultValue={[]}
+                    onValueChange={val => selectedCharacters.current = val}>
                     {[...allCharacterList].map(name => <CheckboxCards.Item key={name} value={name}>
                         <Flex direction="column" width="100%">
                             <Text weight="bold">{name}</Text>
