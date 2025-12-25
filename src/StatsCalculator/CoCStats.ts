@@ -163,7 +163,7 @@ export type CoCStat = {
     perCharacter: Map<string, CharacterStat>
 };
 
-type CharacterStat = {
+export type CharacterStat = {
     skillRoll: SkillStat & {
         perSkill: Map<string, SkillStat>
     },
@@ -182,7 +182,7 @@ type CharacterStat = {
     }
 }
 
-type SkillStat = {
+export type SkillStat = {
     rollNum: number
     valueSum: number
     successNum: number
