@@ -15,12 +15,13 @@ const ccfoliaMessageTypeTexts = new Map<string, string>([
 
 type FilteredLogViewProps = {
     logs: LogFile
+    onClick?: (msg: CcfoliaMessage, i: number) => void
 };
 
 export const FilteredLogView = (props: FilteredLogViewProps) => {
     const UNFILTERED = "$unfiltered";
 
-    const { logs } = props;
+    const { logs, onClick } = props;
     const [filter, setFilter] = useState(EMPTY_FILTER);
     const allMessageTypes = [...new Set([...logs.log].map(msg => msg.constructor.name))];
     const allCharacters = [...new Set([...logs.log].map(msg => msg.sender))];
@@ -58,6 +59,6 @@ export const FilteredLogView = (props: FilteredLogViewProps) => {
             </TextField.Root>
             {/*フィルタークリア*/}
         </Flex>
-        <LogView logs={logs} filter={filter} />
+        <LogView logs={logs} filter={filter} onClick={onClick} />
     </Flex>
 }
