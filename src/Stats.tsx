@@ -119,7 +119,7 @@ const Stats = (props: StatsProps) => {
         .map(([name, stat]) => [name, stat!] as const) // statがundefinedの項目は上のfilterで除去されている
     const status = [...stats.perCharacter]
         .map(([name, stat]) => [name, stat.status] as const)
-        .filter(([name, stat]) => !isNaN(stat.minHealth) || !isNaN(stat.minSAN) || 0 < stat.totalDamage || 0 < stat.totalLostSAN)
+        .filter(([name, stat]) => stat.minHealth !== undefined || stat.minSAN !== undefined || 0 < stat.totalDamage || 0 < stat.totalLostSAN)
         .sort(jpnTextComparer);
     const sanity = [...stats.perCharacter]
         .map(([name, stat]) => [name, stat.sanityCheck] as const)

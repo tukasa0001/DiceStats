@@ -26,9 +26,9 @@ class CoCStatsCounter {
         sanityCheck: this.createSkillStat(),
         status: {
             totalDamage: 0,
-            minHealth: NaN,
+            minHealth: undefined,
             totalLostSAN: 0,
-            minSAN: NaN,
+            minSAN: undefined,
         },
         talk: {
             talkNum: 0,
@@ -167,9 +167,9 @@ type CharacterStat = {
     sanityCheck: SkillStat,
     status: {
         totalDamage: number
-        minHealth: number
+        minHealth: number | undefined
         totalLostSAN: number
-        minSAN: number
+        minSAN: number | undefined
     },
     talk: {
         talkNum: number
