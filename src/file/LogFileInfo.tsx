@@ -1,4 +1,4 @@
-import { Box, Button, Card, Flex, Text, TextField } from "@radix-ui/themes"
+import { Box, Button, Card, Flex, Text, TextField, Tooltip } from "@radix-ui/themes"
 import { LogFile } from "./LogFile"
 import { useState } from "react"
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge"
@@ -48,7 +48,7 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
                         placeholder="最初から">
                         <TextField.Slot />
                     </TextField.Root>
-                    {log.startIdx === 0 && startMsg !== "" ? <TriangleAlert /> : null}
+                    {log.startIdx === 0 && startMsg !== "" ? <Tooltip content="メッセージが存在しません"><TriangleAlert /></Tooltip> : null}
                     <Button variant="outline" onClick={() => setSelectMode("start")}>選択</Button>
                 </Flex>
                 <Flex gap="2" align="center">
@@ -65,7 +65,7 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
                         placeholder="最後まで">
                         <TextField.Slot />
                     </TextField.Root>
-                    {log.endIdx === log.log.length && endMsg !== "" ? <TriangleAlert /> : null}
+                    {log.endIdx === log.log.length && endMsg !== "" ? <Tooltip content="メッセージが存在しません"><TriangleAlert /></Tooltip> : null}
                     <Button variant="outline" onClick={() => setSelectMode("end")}>選択</Button>
                 </Flex>
             </Flex>
