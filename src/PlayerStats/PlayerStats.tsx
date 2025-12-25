@@ -92,7 +92,7 @@ const PlayerStats = (props: StatsProps) => {
                 <Heading my="2">オプションを選択してください</Heading>
                 <Flex direction="column" gap="2">
                     {generalSkills.map(skill => (
-                        <Text as="label">
+                        <Text as="label" key={skill}>
                             <Flex gap="1" align="center">
                                 <Switch checked={unrankedSkills.includes(skill)} onCheckedChange={val => {
                                     if (val) {
