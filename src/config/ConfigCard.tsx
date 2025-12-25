@@ -7,36 +7,10 @@ import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge";
 import { configCtx, setConfigCtx } from "../App";
 import { Box, Button, Flex, IconButton, Table, TextField, Text, Checkbox, Switch } from "@radix-ui/themes";
 
-type ConfigCardProps = {
-    log?: CcfoliaMessage[]
-}
-
-const ConfigCard = (props: ConfigCardProps) => {
+const ConfigCard = () => {
     const config = useContext(configCtx);
     const setConf = useContext(setConfigCtx);
     const [isPinned, setPinned] = useState(false);
-    const log = props.log ?? [];
-
-    const indexToText = (idx: number) => {
-        const msg = log[idx];
-        if (msg instanceof TalkMessage) {
-            return msg.text;
-        }
-        return "";
-    }
-
-    const textToIndex = (text: string) => {
-        for (let i = 0; i < log.length; i++) {
-            const msg = log[i];
-            if (msg instanceof TalkMessage && msg.text === text) {
-                return i;
-            }
-        }
-        return undefined;
-    }
-
-    const [startMsg, setStartMsg] = useState(indexToText(config.startIdx));
-    const [endMsg, setEndMsg] = useState(indexToText(config.endIdx));
 
     return (
         <div className={`card configCard ${isPinned ? "pinned" : ""}`}>
@@ -82,36 +56,6 @@ const ConfigCard = (props: ConfigCardProps) => {
                     </Table.Root>
                 }
                 <Button variant="surface" my="2" onClick={() => setConf(config.withNameAliases(arr => [...arr, ["", ""]]))}>追加</Button>
-            </>} />
-
-            <ToggleBox title="統計範囲を変更" elem={<>
-                <p>
-                    特定の発言をトリガーに、範囲内の統計を出力します
-                </p>
-                <div className="stats-range-config">
-                    <Flex align="center" py="1">
-                        <Text>範囲：</Text>
-                        <TextField.Root
-                            value={startMsg}
-                            onChange={e => {
-                                setStartMsg(e.target.value.trim())
-                                setConf(config.withStartIdx(textToIndex(e.target.value.trim()) ?? 0))
-                            }}
-                            placeholder="最初から">
-                            <TextField.Slot />
-                        </TextField.Root>
-                        <Text mx="2"> ～ </Text>
-                        <TextField.Root
-                            value={endMsg}
-                            onChange={e => {
-                                setEndMsg(e.target.value.trim())
-                                setConf(config.withEndIdx(textToIndex(e.target.value.trim()) ?? Infinity))
-                            }}
-                            placeholder="最後まで">
-                            <TextField.Slot />
-                        </TextField.Root>
-                    </Flex>
-                </div>
             </>} />
             <ToggleBox title="その他の設定" elem={<>
                 <Text as="label">
