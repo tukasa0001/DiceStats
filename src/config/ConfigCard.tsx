@@ -35,6 +35,9 @@ const ConfigCard = (props: ConfigCardProps) => {
         return undefined;
     }
 
+    const [startMsg, setStartMsg] = useState(indexToText(config.startIdx));
+    const [endMsg, setEndMsg] = useState(indexToText(config.endIdx));
+
     return (
         <div className={`card configCard ${isPinned ? "pinned" : ""}`}>
             <h2>詳細設定</h2>
@@ -89,15 +92,21 @@ const ConfigCard = (props: ConfigCardProps) => {
                     <Flex align="center" py="1">
                         <Text>範囲：</Text>
                         <TextField.Root
-                            value={indexToText(config.startIdx)}
-                            onChange={e => setConf(config.withStartIdx(textToIndex(e.target.value.trim()) ?? 0))}
+                            value={startMsg}
+                            onChange={e => {
+                                setStartMsg(e.target.value.trim())
+                                setConf(config.withStartIdx(textToIndex(e.target.value.trim()) ?? 0))
+                            }}
                             placeholder="最初から">
                             <TextField.Slot />
                         </TextField.Root>
                         <Text mx="2"> ～ </Text>
                         <TextField.Root
-                            value={indexToText(config.endIdx)}
-                            onChange={e => setConf(config.withEndIdx(textToIndex(e.target.value.trim()) ?? Infinity))}
+                            value={endMsg}
+                            onChange={e => {
+                                setEndMsg(e.target.value.trim())
+                                setConf(config.withEndIdx(textToIndex(e.target.value.trim()) ?? Infinity))
+                            }}
                             placeholder="最後まで">
                             <TextField.Slot />
                         </TextField.Root>
