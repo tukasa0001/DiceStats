@@ -40,13 +40,15 @@ class CoCStatsCounter {
 
     createDefaultOption = (): Required<CoCStatOptions> => ({
         filter: (msg) => true,
-        nameAliases: []
+        nameAliases: [],
+        startIdx: 0,
+        endIdx: Infinity
     })
 
     calc = (log: CcfoliaMessage[], _option?: CoCStatOptions) => {
         const option: Required<CoCStatOptions> = { ...this.createDefaultOption(), ..._option };
         let stat = this.createStat();
-        for (let msg of log) {
+        for (let msg of log.slice(option.startIdx, option.endIdx)) {
             let sender = msg.sender;
             // フィルター処理
             if (!option.filter(msg)) {
@@ -147,7 +149,9 @@ class CoCStatsCounter {
 
 export type CoCStatOptions = {
     filter?: (msg: CcfoliaMessage) => boolean
-    nameAliases?: readonly [string, string][]
+    nameAliases?: readonly [string, string][],
+    startIdx?: number,
+    endIdx?: number
 }
 
 export type CoCStat = {
