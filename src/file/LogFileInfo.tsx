@@ -29,7 +29,7 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
 
     return <Box>
         <Card>
-            <Text as="div" weight="bold">{log.filename}</Text>
+            <Text as="div" weight="bold">{log.filename} ({log.endIdx - log.startIdx + 1}メッセージ)</Text>
             <Flex ml="4" my="1" direction="column" gap="2">
                 <Flex gap="2" align="center">
                     <Text>
