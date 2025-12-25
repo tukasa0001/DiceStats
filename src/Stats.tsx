@@ -7,7 +7,7 @@ import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
 import { UnknownSecretDiceMessage } from './ccfoliaLog/message/UnknownSecretDiceMessage';
 import { configCtx, setConfigCtx } from './App';
 import { ErrorBlock, InfoBlock } from './Utils';
-import { Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField } from '@radix-ui/themes';
+import { Text, Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField } from '@radix-ui/themes';
 import "./Stats.css"
 import cocstats from './StatsCalculator/CoCStats';
 import { LogFile } from './file/LogFile';
@@ -23,6 +23,10 @@ const Stats = (props: StatsProps) => {
     const config = useContext(configCtx);
 
     const jpnTextComparer = (a: readonly [string, any], b: readonly [string, any]) => a[0].localeCompare(b[0], "ja");
+
+    if (logs.length <= 0) {
+        return <Text>ログをアップロードしてください</Text>
+    }
 
     const stats = logs
         .map(file => cocstats.calc(file.log, {
