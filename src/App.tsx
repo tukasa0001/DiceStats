@@ -33,6 +33,7 @@ const App: FC = () => {
             const str = await file.text();
             const parsed = parseCcfoliaLog(str);
             logs.push({
+                filename: file.name,
                 log: parsed,
                 startIdx: 0,
                 endIdx: parsed.length - 1
@@ -88,7 +89,7 @@ const App: FC = () => {
 
                             <Tabs.Content value="upload">
                                 <Flex direction="column" mx="4">
-                                    <UploadForm onLogFileChanged={onFileUploaded} />
+                                    <UploadForm logs={log} onLogFileChanged={onFileUploaded} />
                                 </Flex>
                             </Tabs.Content>
                             <Tabs.Content value="stats">

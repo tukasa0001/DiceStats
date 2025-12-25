@@ -1,8 +1,11 @@
-import { Box, Button, Container, Heading, Section, Text, Theme } from "@radix-ui/themes";
+import { Box, Button, Container, Flex, Heading, Section, Text, Theme } from "@radix-ui/themes";
 import parseCcfoliaLog from "./ccfoliaLog/CcfoliaLog";
 import { CcfoliaMessage } from "./ccfoliaLog/message/CcfoliaMessage";
+import { LogFile } from "./file/LogFile";
+import { LogFileInfo } from "./file/LogFileInfo";
 
 type UploadFormProps = {
+    logs: LogFile[],
     onLogFileChanged: (files: File[]) => Promise<void>
 };
 
@@ -24,12 +27,15 @@ const UploadForm = (props: UploadFormProps) => {
 
     return (
         <Box py="6">
-            <Text>
+            <Text my="2" as="div">
                 Ccfoliaのログからダイスロールなどの統計を取得します。<br />
                 CoC6版のみ対応しています。<br />
                 ログファイルをドラッグ&ドロップするか、ファイルを選択してください<br />
                 <Button mt="2" onClick={showUploadDialog}>ファイルを選択</Button>
             </Text>
+            <Flex direction="column" gap="2">
+                {props.logs.map((log, i) => (<LogFileInfo key={i} log={log} />))}
+            </Flex>
         </Box>
     )
 }
