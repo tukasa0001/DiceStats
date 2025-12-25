@@ -10,64 +10,7 @@ import { ErrorBlock, InfoBlock } from '../Utils';
 import { Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField, CheckboxCards, Text, Theme, Grid, Spinner, Separator, Switch } from '@radix-ui/themes';
 import "./PlayerStats.css"
 import domtoimage from "dom-to-image"
-
-class SkillStat {
-    // 技能ごとの統計
-    skillRollNum: number = 0;
-    successNum: number = 0;
-    failNum: number = 0;
-    criticalNum: number = 0;
-    spCriticalNum: number = 0;
-    fumbleNum: number = 0;
-    spFumbleNum: number = 0
-
-    increment(msg: CoCSkillRollMessage) {
-        this.skillRollNum++;
-        if (msg.isSuccess()) {
-            this.successNum++;
-            if (msg.isCritical()) {
-                this.criticalNum++;
-                if (msg.diceValue === 1) {
-                    this.spCriticalNum++;
-                }
-            }
-        }
-        else {
-            this.failNum++;
-            if (msg.isFumble()) {
-                this.fumbleNum++;
-                if (msg.diceValue === 100) {
-                    this.spFumbleNum++;
-                }
-            }
-        }
-    }
-}
-class SanityCheckStat {
-    // SANチェック
-    checkNum: number = 0;
-    successNum: number = 0;
-    criticalNum: number = 0;
-    fumbleNum: number = 0;
-};
-class StatusStat {
-    // ステータス関連
-    totalDamage: number = 0;
-    minHealth: number | undefined = undefined;
-    totalLostSAN: number = 0;
-    minSAN: number | undefined = undefined;
-}
-class TalkStat {
-    // 会話関連
-    talkNum: number = 0;
-    charNum: number = 0;
-    pcTalkNum = 0;
-    pcCharNum = 0;
-};
-class OtherStat {
-    // その他
-    secretDiceCount = 0;
-}
+import cocstats, { SkillStat } from '../StatsCalculator/CoCStats';
 
 type StatsProps = {
     logFile: CcfoliaMessage[]
@@ -107,102 +50,41 @@ const PlayerStats = (props: StatsProps) => {
     const log = props.logFile;
     const config = useContext(configCtx);
 
+    let startIdx = 0, endIdx = Infinity;
+    // 開始・終了位置の判定
+    if (config.startMessage !== "" || config.endMessage !== "") {
+        let isStarted: boolean = config.startMessage === "";
+        for (let i = 0; i < log.length; i++) {
+            const msg = log[i];
+            // 開始メッセージまで無視
+            if (!isStarted && msg instanceof TalkMessage && config.startMessage === msg.text) {
+                isStarted = true;
+                startIdx = i;
+            }
+            // 終了メッセージが来たらbreak
+            else if (config.endMessage !== "" && msg instanceof TalkMessage && config.endMessage === msg.text) {
+                endIdx = i;
+                break;
+            }
+        }
+    }
+
     const allCharacters = new Set<string>();
-    const skillStats = new Map<string, SkillStat>();
-    const statusStat = new StatusStat();
-    const sanityCheckStat = new SanityCheckStat();
-    const talkStat = new TalkStat();
-    const getStat = <T,>(map: Map<string, T>, name: string, factory: new () => T): T => {
-        let stat = map.get(name);
-        if (stat === undefined) {
-            stat = new factory();
-            map.set(name, stat);
-        }
-        return stat;
-    }
 
-    let isStarted: boolean = config.startMessage === "";
-    for (let msg of log) {
-        // 開始メッセージまで無視
-        if (!isStarted && msg instanceof TalkMessage && config.startMessage === msg.text) {
-            isStarted = true;
-            allCharacters.clear();
-            skillStats.clear();
-        }
-        // 終了メッセージが来たらbreak
-        else if (config.endMessage !== "" && msg instanceof TalkMessage && config.endMessage === msg.text) {
-            break;
-        }
+    const stats = cocstats.calc(log, {
+        filter: msg => {
+            allCharacters.add(msg.sender);
+            return selectedCharacters.includes(msg.sender);
+        },
+        nameAliases: config.nameAliases,
+        startIdx, endIdx
+    }).total;
 
-        let sender = msg.sender;
-        for (let [before, after] of config.nameAliases) {
-            if (sender === before) {
-                sender = after;
-            }
-        }
-        // 送信者名が空文字列の場合は無視
-        if (sender === "") {
-            continue;
-        }
-        // 全キャラリストを作成
-        if (msg instanceof CoCSkillRollMessage) {
-            allCharacters.add(sender);
-        }
-        // 未選択のキャラは除外
-        if (!selectedCharacters.includes(sender)) {
-            continue;
-        }
-        // 技能ロール
-        if (msg instanceof CoCSkillRollMessage && (!msg.isSecret || !config.ignoreSecretDice)) {
-            const stat = getStat(skillStats, msg.skill, SkillStat);
-            stat.increment(msg);
-        }
-        else if (msg instanceof ParamChangeMessage) {
-            if (msg.paramName === "HP") {
-                // HP変動
-                const stat = statusStat;
-                if (stat.minHealth === undefined || msg.value < stat.minHealth) {
-                    stat.minHealth = msg.value;
-                }
-                if (msg.value < msg.prevValue) {
-                    // HP減少
-                    stat.totalDamage += msg.prevValue - msg.value;
-                }
-            }
-            if (msg.paramName === "SAN") {
-                // SAN変動
-                const stat = statusStat;
-                if (stat.minSAN === undefined || msg.value < stat.minSAN) {
-                    stat.minSAN = msg.value;
-                }
-                if (msg.value < msg.prevValue) {
-                    // SAN減少
-                    stat.totalLostSAN += msg.prevValue - msg.value;
-                }
-            }
-        }
-        else if (msg instanceof SanityCheckMessage) {
-            const stat = sanityCheckStat;
-            stat.checkNum++;
-            if (msg.isSuccess()) stat.successNum++;
-            if (msg.isCritical()) stat.criticalNum++;
-            if (msg.isFumble()) stat.fumbleNum++;
-        }
-        else if (msg instanceof TalkMessage) {
-            const stat = talkStat;
-            stat.talkNum++;
-            stat.charNum += msg.text.length;
-            const regex = msg.text.match(/^「(.*)」/);
-            if (regex !== null) {
-                stat.pcTalkNum++;
-                stat.pcCharNum += regex[1].length;
-            }
-        }
-    }
-
-    const allCharacterList = [...allCharacters].sort((a, b) => a[0].localeCompare(b[0], "ja"));
-    const skillRanking = [...skillStats].sort((a, b) => b[1].skillRollNum - a[1].skillRollNum)
-    const skillRankingFiltered = skillRanking.filter(skill => !unrankedSkills.includes(skill[0]))
+    const allCharacterList = [...allCharacters].sort((a, b) => a.localeCompare(b, "ja"));
+    const skillStat = stats.skillRoll;
+    const skillRanking = [...skillStat.perSkill]
+        .filter(([name,]) => !unrankedSkills.includes(name))
+        .sort(([, stat1], [, stat2]) => stat2.rollNum - stat1.rollNum)
 
     const avgFormatter = Intl.NumberFormat("ja-JP", {
         minimumFractionDigits: 2,
@@ -266,7 +148,7 @@ const PlayerStats = (props: StatsProps) => {
                                 </Table.Row>
                                 <Table.Row>
                                     <Table.RowHeaderCell><Text size="4">技能振り総数</Text></Table.RowHeaderCell>
-                                    <Table.Cell><Text size="4">{sumOf(skillRanking.map(elem => elem[1].skillRollNum))}回</Text></Table.Cell>
+                                    <Table.Cell><Text size="4">{skillStat.rollNum}回</Text></Table.Cell>
                                 </Table.Row>
                             </Table.Body>
                         </Table.Root>
@@ -279,14 +161,14 @@ const PlayerStats = (props: StatsProps) => {
                             </Flex>
                             <Table.Root>
                                 <Table.Body>
-                                    <SkillRankingRow stats={skillRankingFiltered} rank={1} />
-                                    <SkillRankingRow stats={skillRankingFiltered} rank={2} />
-                                    <SkillRankingRow stats={skillRankingFiltered} rank={3} />
+                                    <SkillRankingRow stats={skillRanking} rank={1} />
+                                    <SkillRankingRow stats={skillRanking} rank={2} />
+                                    <SkillRankingRow stats={skillRanking} rank={3} />
                                 </Table.Body>
                             </Table.Root>
                             <Grid columns="2">
-                                <MiniSkillRankingRow stats={skillRankingFiltered} rank={4} />
-                                <MiniSkillRankingRow stats={skillRankingFiltered} rank={5} />
+                                <MiniSkillRankingRow stats={skillRanking} rank={4} />
+                                <MiniSkillRankingRow stats={skillRanking} rank={5} />
                             </Grid>
                         </Box>
                         <Box>
@@ -297,12 +179,12 @@ const PlayerStats = (props: StatsProps) => {
                                         <Table.RowHeaderCell><Text size="4">技能成功</Text></Table.RowHeaderCell>
                                         <Table.Cell>
                                             <ValueCell title="回数">
-                                                {sumOf(skillRanking.map(elem => elem[1].successNum))}回
+                                                {skillStat.successNum}回
                                             </ValueCell>
                                         </Table.Cell>
                                         <Table.Cell>
                                             <ValueCell title="確率">
-                                                {percentageFormatter.format(sumOf(skillRanking.map(elem => elem[1].successNum)) / sumOf(skillRanking.map(elem => elem[1].skillRollNum)))}
+                                                {percentageFormatter.format(skillStat.successNum / skillStat.rollNum)}
                                             </ValueCell>
                                         </Table.Cell>
                                     </Table.Row>
@@ -310,12 +192,12 @@ const PlayerStats = (props: StatsProps) => {
                                         <Table.RowHeaderCell><Text size="4">クリティカル</Text></Table.RowHeaderCell>
                                         <Table.Cell>
                                             <ValueCell title="回数">
-                                                {sumOf(skillRanking.map(elem => elem[1].criticalNum))}回
+                                                {skillStat.criticalNum}回
                                             </ValueCell>
                                         </Table.Cell>
                                         <Table.Cell>
                                             <ValueCell title="確率">
-                                                {percentageFormatter.format(sumOf(skillRanking.map(elem => elem[1].criticalNum)) / sumOf(skillRanking.map(elem => elem[1].skillRollNum)))}
+                                                {percentageFormatter.format(skillStat.criticalNum / skillStat.rollNum)}
                                             </ValueCell>
                                         </Table.Cell>
                                     </Table.Row>
@@ -323,12 +205,12 @@ const PlayerStats = (props: StatsProps) => {
                                         <Table.RowHeaderCell><Text size="4">ファンブル</Text></Table.RowHeaderCell>
                                         <Table.Cell>
                                             <ValueCell title="回数">
-                                                {sumOf(skillRanking.map(elem => elem[1].fumbleNum))}回
+                                                {skillStat.fumbleNum}回
                                             </ValueCell>
                                         </Table.Cell>
                                         <Table.Cell>
                                             <ValueCell title="確率">
-                                                {percentageFormatter.format(sumOf(skillRanking.map(elem => elem[1].fumbleNum)) / sumOf(skillRanking.map(elem => elem[1].skillRollNum)))}
+                                                {percentageFormatter.format(skillStat.fumbleNum / skillStat.rollNum)}
                                             </ValueCell>
                                         </Table.Cell>
                                     </Table.Row>
@@ -340,13 +222,13 @@ const PlayerStats = (props: StatsProps) => {
                                     borderBottom: "1px solid var(--gray-6)"
                                 }}>
                                     <Text size="2">1クリ</Text>
-                                    <Text size="2">{sumOf(skillRanking.map(elem => elem[1].spCriticalNum))}回/{percentageFormatter.format(sumOf(skillRanking.map(elem => elem[1].spCriticalNum)) / sumOf(skillRanking.map(elem => elem[1].skillRollNum)))}</Text>
+                                    <Text size="2">{skillStat.spCriticalNum}回/{percentageFormatter.format(skillStat.spCriticalNum / skillStat.rollNum)}</Text>
                                 </Flex>
                                 <Flex mt="1" gap="2" style={{
                                     borderBottom: "1px solid var(--gray-6)"
                                 }}>
                                     <Text size="2">100ファン</Text>
-                                    <Text size="2">{sumOf(skillRanking.map(elem => elem[1].spFumbleNum))}回/{percentageFormatter.format(sumOf(skillRanking.map(elem => elem[1].spFumbleNum)) / sumOf(skillRanking.map(elem => elem[1].skillRollNum)))}</Text>
+                                    <Text size="2">{skillStat.spFumbleNum}回/{percentageFormatter.format(skillStat.spFumbleNum / skillStat.rollNum)}</Text>
                                 </Flex>
                             </Grid>
                         </Box>
@@ -356,22 +238,22 @@ const PlayerStats = (props: StatsProps) => {
                             <Heading align="left">その他の成績</Heading>
                             <Grid columns="6">
                                 <ValueBlock title="発言数">
-                                    {talkStat.talkNum}回
+                                    {stats.talk.talkNum}回
                                 </ValueBlock>
                                 <ValueBlock title="キャラ発言数">
-                                    {talkStat.pcTalkNum}回
+                                    {stats.talk.pcTalkNum}回
                                 </ValueBlock>
                                 <ValueBlock title="総喪失HP">
-                                    {statusStat.totalDamage}pt
+                                    {stats.status.totalDamage}pt
                                 </ValueBlock>
                                 <ValueBlock title="総喪失SAN">
-                                    {statusStat.totalLostSAN}pt
+                                    {stats.status.totalLostSAN}pt
                                 </ValueBlock>
                                 <ValueBlock title="SANチェック回数">
-                                    {sanityCheckStat.checkNum}回
+                                    {stats.sanityCheck.rollNum}回
                                 </ValueBlock>
                                 <ValueBlock title="SANチェック成功率">
-                                    {percentageFormatter.format(sanityCheckStat.successNum / sanityCheckStat.checkNum)}
+                                    {percentageFormatter.format(stats.sanityCheck.successNum / stats.sanityCheck.rollNum)}
                                 </ValueBlock>
                             </Grid>
                         </Box>
@@ -427,7 +309,7 @@ const SkillRankingRow = (props: {
             </Table.Cell>
             <Table.Cell>
                 <ValueCell title="使用回数">
-                    {stat[1].skillRollNum}回
+                    {stat[1].rollNum}回
                 </ValueCell>
             </Table.Cell>
             <Table.Cell>
@@ -437,7 +319,7 @@ const SkillRankingRow = (props: {
             </Table.Cell>
             <Table.Cell>
                 <ValueCell title="成功率">
-                    {percentageFormatter.format(stat[1].successNum / stat[1].skillRollNum)}
+                    {percentageFormatter.format(stat[1].successNum / stat[1].rollNum)}
                 </ValueCell>
             </Table.Cell>
         </Table.Row >)
@@ -476,7 +358,7 @@ const MiniSkillRankingRow = (props: {
             <Text size="2">{localeHanidec.format(rank)}位</Text>
             <Text size="2">{stat[0]}</Text>
             <Text size="2">
-                {stat[1].skillRollNum}回/{stat[1].successNum}回/{percentageFormatter.format(stat[1].successNum / stat[1].skillRollNum)}
+                {stat[1].rollNum}回/{stat[1].successNum}回/{percentageFormatter.format(stat[1].successNum / stat[1].rollNum)}
             </Text>
         </Flex>)
 }

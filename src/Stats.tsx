@@ -9,68 +9,7 @@ import { configCtx, setConfigCtx } from './App';
 import { ErrorBlock, InfoBlock } from './Utils';
 import { Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField } from '@radix-ui/themes';
 import "./Stats.css"
-
-class SkillStat {
-    // 技能関連
-    skillRollNum: number = 0;
-    skillRollSum: number = 0;
-    successNum: number = 0;
-    failNum: number = 0;
-    criticalNum: number = 0;
-    spCriticalNum: number = 0;
-    fumbleNum: number = 0;
-    spFumbleNum: number = 0;
-    skillRolls: Map<string, number> = new Map<string, number>();
-
-    increment(msg: CoCSkillRollMessage) {
-        this.skillRollNum++;
-        this.skillRollSum += msg.diceValue;
-        if (msg.isSuccess()) {
-            this.successNum++;
-            if (msg.isCritical()) {
-                this.criticalNum++;
-                if (msg.diceValue === 1) {
-                    this.spCriticalNum++;
-                }
-            }
-        }
-        else {
-            this.failNum++;
-            if (msg.isFumble()) {
-                this.fumbleNum++;
-                if (msg.diceValue === 100) {
-                    this.spFumbleNum++;
-                }
-            }
-        }
-        this.skillRolls.set(msg.skill, (this.skillRolls.get(msg.skill) ?? 0) + 1);
-    }
-}
-class SanityCheckStat {
-    // SANチェック
-    checkNum: number = 0;
-    successNum: number = 0;
-    criticalNum: number = 0;
-    fumbleNum: number = 0;
-};
-class StatusStat {
-    // ステータス関連
-    totalDamage: number = 0;
-    minHealth: number | undefined = undefined;
-    totalLostSAN: number = 0;
-    minSAN: number | undefined = undefined;
-}
-class TalkStat {
-    // 会話関連
-    talkNum: number = 0;
-    charNum: number = 0;
-    pcTalkNum = 0;
-    pcCharNum = 0;
-};
-class OtherStat {
-    // その他
-    secretDiceCount = 0;
-}
+import cocstats from './StatsCalculator/CoCStats';
 
 type StatsProps = {
     logFile: CcfoliaMessage[]
@@ -82,111 +21,52 @@ const Stats = (props: StatsProps) => {
     const log = props.logFile;
     const config = useContext(configCtx);
 
-    const skillStats = new Map<string, SkillStat>();
-    const filteredSkillStats = new Map<string, SkillStat>();
-    const statusStats = new Map<string, StatusStat>();
-    const sanityCheckStatus = new Map<string, SanityCheckStat>();
-    const talkStats = new Map<string, TalkStat>();
-    const otherStats = new Map<string, OtherStat>();
-    const allSkills = new Set<string>();
-    const getStat = <T,>(map: Map<string, T>, name: string, factory: new () => T): T => {
-        let stat = map.get(name);
-        if (stat === undefined) {
-            stat = new factory();
-            map.set(name, stat);
-        }
-        return stat;
-    }
-
-    let isStarted: boolean = config.startMessage === "";
-    for (let msg of log) {
-        // 開始メッセージまで無視
-        if (!isStarted && msg instanceof TalkMessage && config.startMessage === msg.text) {
-            isStarted = true;
-            skillStats.clear();
-            filteredSkillStats.clear();
-            statusStats.clear();
-            sanityCheckStatus.clear();
-            talkStats.clear();
-            otherStats.clear();
-        }
-        // 終了メッセージが来たらbreak
-        else if (config.endMessage !== "" && msg instanceof TalkMessage && config.endMessage === msg.text) {
-            break;
-        }
-
-        let sender = msg.sender;
-        for (let [before, after] of config.nameAliases) {
-            if (sender === before) {
-                sender = after;
+    let startIdx = 0, endIdx = Infinity;
+    // 開始・終了位置の判定
+    if (config.startMessage !== "" || config.endMessage !== "") {
+        let isStarted: boolean = config.startMessage === "";
+        for (let i = 0; i < log.length; i++) {
+            const msg = log[i];
+            // 開始メッセージまで無視
+            if (!isStarted && msg instanceof TalkMessage && config.startMessage === msg.text) {
+                isStarted = true;
+                startIdx = i;
             }
-        }
-        // 送信者名が空文字列の場合は無視
-        if (sender === "") {
-            continue;
-        }
-        if (msg instanceof CoCSkillRollMessage && (!msg.isSecret || !config.ignoreSecretDice)) {
-            const stat = getStat(skillStats, sender, SkillStat);
-            stat.increment(msg);
-            if (msg.skill === skillFilter) {
-                const stat2 = getStat(filteredSkillStats, sender, SkillStat);
-                stat2.increment(msg);
+            // 終了メッセージが来たらbreak
+            else if (config.endMessage !== "" && msg instanceof TalkMessage && config.endMessage === msg.text) {
+                endIdx = i;
+                break;
             }
-            allSkills.add(msg.skill);
-        }
-        else if (msg instanceof ParamChangeMessage) {
-            if (msg.paramName === "HP") {
-                // HP変動
-                const stat = getStat(statusStats, sender, StatusStat);
-                if (stat.minHealth === undefined || msg.value < stat.minHealth) {
-                    stat.minHealth = msg.value;
-                }
-                if (msg.value < msg.prevValue) {
-                    // HP減少
-                    stat.totalDamage += msg.prevValue - msg.value;
-                }
-            }
-            if (msg.paramName === "SAN") {
-                // SAN変動
-                const stat = getStat(statusStats, sender, StatusStat);
-                if (stat.minSAN === undefined || msg.value < stat.minSAN) {
-                    stat.minSAN = msg.value;
-                }
-                if (msg.value < msg.prevValue) {
-                    // SAN減少
-                    stat.totalLostSAN += msg.prevValue - msg.value;
-                }
-            }
-        }
-        else if (msg instanceof SanityCheckMessage) {
-            const stat = getStat(sanityCheckStatus, sender, SanityCheckStat);
-            stat.checkNum++;
-            if (msg.isSuccess()) stat.successNum++;
-            if (msg.isCritical()) stat.criticalNum++;
-            if (msg.isFumble()) stat.fumbleNum++;
-        }
-        else if (msg instanceof TalkMessage) {
-            const stat = getStat(talkStats, sender, TalkStat);
-            stat.talkNum++;
-            stat.charNum += msg.text.length;
-            const regex = msg.text.match(/^「(.*)」/);
-            if (regex !== null) {
-                stat.pcTalkNum++;
-                stat.pcCharNum += regex[1].length;
-            }
-        }
-        else if (msg instanceof UnknownSecretDiceMessage) {
-            const stat = getStat(otherStats, sender, OtherStat);
-            stat.secretDiceCount++;
         }
     }
 
-    const skills = [...skillStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
-    const filteredSkills = [...filteredSkillStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
-    const status = [...statusStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
-    const sanity = [...sanityCheckStatus].sort((a, b) => a[0].localeCompare(b[0], "ja"));
-    const talks = [...talkStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
-    const others = [...otherStats].sort((a, b) => a[0].localeCompare(b[0], "ja"));
+    const jpnTextComparer = (a: readonly [string, any], b: readonly [string, any]) => a[0].localeCompare(b[0], "ja");
+
+    const stats = cocstats.calc(log, {
+        nameAliases: config.nameAliases,
+        startIdx, endIdx
+    });
+
+    const skills = [...stats.perCharacter]
+        .map(([name, stat]) => [name, stat.skillRoll] as const)
+        .filter(([name, stat]) => 0 < stat.rollNum)
+        .sort(jpnTextComparer)
+    const filteredSkills = skillFilter === "none" ? [] : skills
+        .map(([name, stat]) => [name, stat.perSkill.get(skillFilter)] as const)
+        .filter(([name, stat]) => stat !== undefined && 0 < stat.rollNum)
+        .map(([name, stat]) => [name, stat!] as const) // statがundefinedの項目は上のfilterで除去されている
+    const status = [...stats.perCharacter]
+        .map(([name, stat]) => [name, stat.status] as const)
+        .filter(([name, stat]) => stat.minHealth !== undefined || stat.minSAN !== undefined || 0 < stat.totalDamage || 0 < stat.totalLostSAN)
+        .sort(jpnTextComparer);
+    const sanity = [...stats.perCharacter]
+        .map(([name, stat]) => [name, stat.sanityCheck] as const)
+        .filter(([name, stat]) => 0 < stat.rollNum)
+        .sort(jpnTextComparer);
+    const talks = [...stats.perCharacter]
+        .map(([name, stat]) => [name, stat.talk] as const)
+        .filter(([name, stat]) => 0 < stat.talkNum)
+        .sort(jpnTextComparer);
 
     const avgFormatter = Intl.NumberFormat("ja-JP", {
         minimumFractionDigits: 2,
@@ -201,27 +81,27 @@ const Stats = (props: StatsProps) => {
 
     return (
         <Box my="2">
-            {isStarted ? "" : <ErrorBlock>
+            {/*isStarted ? "" : <ErrorBlock>
                 <>
                     開始メッセージが見つかりませんでした<br />
                     ログの最初からの統計を表示します
                 </>
-            </ErrorBlock>}
+            </ErrorBlock>*/}
             <Heading my="4">技能振り統計</Heading>
             {0 < skills.length ?
                 <StatTable characters={skills.map(tp => tp[0])} data={[
-                    Data("技能振り回数", skills.map(tp => tp[1].skillRollNum)),
-                    Data("平均出目", skills.map(tp => tp[1].skillRollNum == 0 ? "N/A" : avgFormatter.format(tp[1].skillRollSum / tp[1].skillRollNum))),
-                    Data("一番振った技能", skills.map(tp => {
-                        if (tp[1].skillRolls.size == 0) {
+                    Data("技能振り回数", skills.map(tp => tp[1].rollNum)),
+                    Data("平均出目", skills.map(tp => tp[1].rollNum == 0 ? "N/A" : avgFormatter.format(tp[1].valueSum / tp[1].rollNum))),
+                    Data("一番振った技能", skills.map(([name, stat]) => {
+                        if (stat.perSkill.size == 0) {
                             return "N/A";
                         }
-                        let sorted = [...tp[1].skillRolls]
-                            .sort((a, b) => b[1] - a[1]); // 技能振り数降順に並べ替え
+                        let sorted = [...stat.perSkill]
+                            .sort(([, stat1], [, stat2]) => stat2.rollNum - stat1.rollNum); // 技能振り数降順に並べ替え
                         return sorted
-                            .filter(x => x[1] == sorted[0][1]) // 一番多く振った技能と同じ回数振った技能のみ残す
-                            .map(x => x[0]) // 技能名のみ残す
-                            .join(", ") + ` (${sorted[0][1]}回)`; // 技能名を結合し、末尾に回数を付け加える
+                            .filter(([, stat]) => stat.rollNum === sorted[0][1].rollNum) // 一番多く振った技能と同じ回数振った技能のみ残す
+                            .map(([name,]) => name) // 技能名のみ残す
+                            .join(", ") + ` (${sorted[0][1].rollNum}回)`; // 技能名を結合し、末尾に回数を付け加える
                     })),
 
                     Data("成功数", skills.map(tp => tp[1].successNum), { separate: true }),
@@ -231,12 +111,12 @@ const Stats = (props: StatsProps) => {
                     Data("ファンブル数", skills.map(tp => tp[1].fumbleNum)),
                     Data("内100ファン", skills.map(tp => tp[1].spFumbleNum), { indent: true }),
 
-                    Data("成功率", skills.map(tp => percentageFormatter.format(tp[1].successNum / tp[1].skillRollNum)), { separate: true }),
-                    Data("失敗率", skills.map(tp => percentageFormatter.format(tp[1].failNum / tp[1].skillRollNum))),
-                    Data("クリティカル率", skills.map(tp => percentageFormatter.format(tp[1].criticalNum / tp[1].skillRollNum))),
-                    Data("内1クリ", skills.map(tp => percentageFormatter.format(tp[1].spCriticalNum / tp[1].skillRollNum)), { indent: true }),
-                    Data("ファンブル率", skills.map(tp => percentageFormatter.format(tp[1].fumbleNum / tp[1].skillRollNum))),
-                    Data("内100ファン", skills.map(tp => percentageFormatter.format(tp[1].spFumbleNum / tp[1].skillRollNum)), { indent: true })
+                    Data("成功率", skills.map(tp => percentageFormatter.format(tp[1].successNum / tp[1].rollNum)), { separate: true }),
+                    Data("失敗率", skills.map(tp => percentageFormatter.format(tp[1].failNum / tp[1].rollNum))),
+                    Data("クリティカル率", skills.map(tp => percentageFormatter.format(tp[1].criticalNum / tp[1].rollNum))),
+                    Data("内1クリ", skills.map(tp => percentageFormatter.format(tp[1].spCriticalNum / tp[1].rollNum)), { indent: true }),
+                    Data("ファンブル率", skills.map(tp => percentageFormatter.format(tp[1].fumbleNum / tp[1].rollNum))),
+                    Data("内100ファン", skills.map(tp => percentageFormatter.format(tp[1].spFumbleNum / tp[1].rollNum)), { indent: true })
                 ]} />
                 : <InfoBlock>記録なし</InfoBlock>}
 
@@ -253,10 +133,10 @@ const Stats = (props: StatsProps) => {
             <Heading my="4">SANチェック統計</Heading>
             {0 < sanity.length ?
                 <StatTable characters={sanity.map(tp => tp[0])} data={[
-                    Data("合計回数", sanity.map(tp => tp[1].checkNum)),
+                    Data("合計回数", sanity.map(tp => tp[1].rollNum)),
                     Data("成功回数", sanity.map(tp => tp[1].successNum)),
-                    Data("失敗回数", sanity.map(tp => tp[1].checkNum - tp[1].successNum)),
-                    Data("成功率", sanity.map(tp => tp[1].checkNum == 0 ? "N/A" : percentageFormatter.format(tp[1].successNum / tp[1].checkNum))),
+                    Data("失敗回数", sanity.map(tp => tp[1].rollNum - tp[1].successNum)),
+                    Data("成功率", sanity.map(tp => tp[1].rollNum == 0 ? "N/A" : percentageFormatter.format(tp[1].successNum / tp[1].rollNum))),
                     Data("クリティカル回数", sanity.map(tp => tp[1].criticalNum), { separate: true }),
                     Data("ファンブル回数", sanity.map(tp => tp[1].fumbleNum))
                 ]} />
@@ -268,14 +148,14 @@ const Stats = (props: StatsProps) => {
                 <Select.Content>
                     <Select.Group>
                         <Select.Item value="none">未選択</Select.Item>
-                        {[...allSkills].sort((a, b) => a[0].localeCompare(b[0], "ja"))
+                        {[...stats.total.skillRoll.perSkill].sort(jpnTextComparer).map(([name,]) => name)
                             .map((skill, i) => <Select.Item key={i} value={skill}>{skill}</Select.Item>)}
                     </Select.Group>
                 </Select.Content>
             </Select.Root>
             {skillFilter !== "none" ? <StatTable characters={filteredSkills.map(tp => tp[0])} data={[
-                Data("技能振り回数", filteredSkills.map(tp => tp[1].skillRollNum)),
-                Data("平均出目", filteredSkills.map(tp => tp[1].skillRollNum == 0 ? "N/A" : avgFormatter.format(tp[1].skillRollSum / tp[1].skillRollNum))),
+                Data("技能振り回数", filteredSkills.map(tp => tp[1].rollNum)),
+                Data("平均出目", filteredSkills.map(tp => tp[1].rollNum == 0 ? "N/A" : avgFormatter.format(tp[1].valueSum / tp[1].rollNum))),
 
                 Data("成功数", filteredSkills.map(tp => tp[1].successNum), { separate: true }),
                 Data("失敗数", filteredSkills.map(tp => tp[1].failNum)),
@@ -284,12 +164,12 @@ const Stats = (props: StatsProps) => {
                 Data("ファンブル数", filteredSkills.map(tp => tp[1].fumbleNum)),
                 Data("内100ファン", filteredSkills.map(tp => tp[1].spFumbleNum), { indent: true }),
 
-                Data("成功率", filteredSkills.map(tp => percentageFormatter.format(tp[1].successNum / tp[1].skillRollNum)), { separate: true }),
-                Data("失敗率", filteredSkills.map(tp => percentageFormatter.format(tp[1].failNum / tp[1].skillRollNum))),
-                Data("クリティカル率", filteredSkills.map(tp => percentageFormatter.format(tp[1].criticalNum / tp[1].skillRollNum))),
-                Data("内1クリ", filteredSkills.map(tp => percentageFormatter.format(tp[1].spCriticalNum / tp[1].skillRollNum)), { indent: true }),
-                Data("ファンブル率", filteredSkills.map(tp => percentageFormatter.format(tp[1].fumbleNum / tp[1].skillRollNum))),
-                Data("内100ファン", filteredSkills.map(tp => percentageFormatter.format(tp[1].spFumbleNum / tp[1].skillRollNum)), { indent: true })
+                Data("成功率", filteredSkills.map(tp => percentageFormatter.format(tp[1].successNum / tp[1].rollNum)), { separate: true }),
+                Data("失敗率", filteredSkills.map(tp => percentageFormatter.format(tp[1].failNum / tp[1].rollNum))),
+                Data("クリティカル率", filteredSkills.map(tp => percentageFormatter.format(tp[1].criticalNum / tp[1].rollNum))),
+                Data("内1クリ", filteredSkills.map(tp => percentageFormatter.format(tp[1].spCriticalNum / tp[1].rollNum)), { indent: true }),
+                Data("ファンブル率", filteredSkills.map(tp => percentageFormatter.format(tp[1].fumbleNum / tp[1].rollNum))),
+                Data("内100ファン", filteredSkills.map(tp => percentageFormatter.format(tp[1].spFumbleNum / tp[1].rollNum)), { indent: true })
             ]} /> : null}
 
             <Heading my="4">会話の統計</Heading>
@@ -305,13 +185,6 @@ const Stats = (props: StatsProps) => {
                     Data("PC発言率", talks.map(tp => percentageFormatter.format(tp[1].pcTalkNum / tp[1].talkNum)), { indent: true }),
                 ]} />
                 : <InfoBlock>記録なし</InfoBlock>}
-
-            {/*<Heading my="4">その他の統計</Heading>
-            {0 < others.length ?
-                <StatTable characters={others.map(tp => tp[0])} data={[
-                    Data("シークレットダイス", others.map(tp => tp[1].secretDiceCount)),
-                ]} />
-                : <InfoQuote>記録なし</InfoQuote>}*/}
         </Box>
     );
 }
