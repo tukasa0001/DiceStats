@@ -210,7 +210,7 @@ const Stats = (props: StatsProps) => {
                 <Select.Content>
                     <Select.Group>
                         <Select.Item value="none">未選択</Select.Item>
-                        {[...stats.total.skillRoll.perSkill].map(([name,]) => name)
+                        {[...stats.total.skillRoll.perSkill].sort(jpnTextComparer).map(([name,]) => name)
                             .map((skill, i) => <Select.Item key={i} value={skill}>{skill}</Select.Item>)}
                     </Select.Group>
                 </Select.Content>
