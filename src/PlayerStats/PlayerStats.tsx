@@ -2,7 +2,7 @@ import { CoCSkillRollMessage } from '../ccfoliaLog/message/CoCSkillRollMessage';
 import { ParamChangeMessage } from '../ccfoliaLog/message/ParamChangeMessage';
 import { TalkMessage } from '../ccfoliaLog/message/TalkMessasge';
 import { SanityCheckMessage } from '../ccfoliaLog/message/SanityCheckMessage';
-import React, { JSX, ReactNode, useContext, useState } from 'react';
+import React, { JSX, ReactNode, useContext, useMemo, useState } from 'react';
 import { CcfoliaMessage } from '../ccfoliaLog/message/CcfoliaMessage';
 import { UnknownSecretDiceMessage } from '../ccfoliaLog/message/UnknownSecretDiceMessage';
 import { configCtx, setConfigCtx } from '../App';
@@ -18,11 +18,21 @@ type StatsProps = {
 }
 
 const PlayerStats = (props: StatsProps) => {
+    const log = props.logs;
+    if (log.length <= 0) {
+        return <Text>ログをアップロードしてください</Text>
+    }
+
     const generalSkills = ["目星", "聞き耳", "図書館", "知識", "アイデア", "幸運"];
     const [selectedCharacters, setSelectedCharacters] = useState<string[]>([]);
     const [playerName, setPlayerName] = useState("");
     const [isSaving, setSaving] = useState(false);
     const [unrankedSkills, setUnrankedSkills] = useState<string[]>(generalSkills);
+    const allCharacterList = useMemo(() => [...new Set(log
+        .flatMap(l => l.log)
+        .map(msg => msg.sender))]
+        .sort((a, b) => a.localeCompare(b, "ja")), [log]
+    )
 
     const wait = async (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
     const saveImg = async () => {
@@ -48,24 +58,18 @@ const PlayerStats = (props: StatsProps) => {
         }
     }
 
-    const log = props.logs;
-    const config = useContext(configCtx);
 
-    const allCharacters = new Set<string>();
+    const config = useContext(configCtx);
 
     const stats = props.logs
         .map(file => cocstats.calc(file.log, {
             ...config,
             startIdx: file.startIdx,
             endIdx: file.endIdx,
-            filter: msg => {
-                allCharacters.add(msg.sender);
-                return selectedCharacters.includes(msg.sender);
-            }
+            filter: msg => selectedCharacters.includes(msg.sender)
         }))
         .reduce((a, b) => a.merge(b)).total;
 
-    const allCharacterList = [...allCharacters].sort((a, b) => a.localeCompare(b, "ja"));
     const skillStat = stats.skillRoll;
     const skillRanking = [...skillStat.perSkill]
         .filter(([name,]) => !unrankedSkills.includes(name))
