@@ -23,7 +23,7 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
         }
         for (let i = 0; i < log.log.length; i++) {
             const msg = log.log[i];
-            if (msg instanceof TalkMessage && msg.text === text) {
+            if (msg.toDisplayText() === text) {
                 return i;
             }
         }
