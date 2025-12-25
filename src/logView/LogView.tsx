@@ -41,8 +41,9 @@ export const LogView = (props: LogViewProps) => {
                 </Flex>
                 {filter.searchText === "" ? <Text>{msg.toDisplayText()}</Text> : <Text>
                     {msg.toDisplayText().split(filter.searchText)
-                        .map((text, i) => i === 0 ? text : <><Code color="lime">{filter.searchText}</Code>{text}</>
-                        )}
+                        .map((text, i) => i === 0 ? text : <>
+                            <u style={{ textDecorationColor: "lime" }}>{filter.searchText}</u>{text}
+                        </>)}
                 </Text>}
             </Card>)}
     </Flex>
