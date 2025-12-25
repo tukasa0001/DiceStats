@@ -1,7 +1,7 @@
 
 import React, { JSX, ReactNode, useContext, useMemo, useRef, useState } from 'react';
 import { configCtx } from '../App';
-import { Box, Button, Flex, Table, Heading, TextField, CheckboxCards, Text, Theme, Grid, Spinner, Switch } from '@radix-ui/themes';
+import { Box, Button, Flex, Table, Heading, TextField, CheckboxCards, Text, Theme, Grid, Spinner, Switch, Card, Checkbox } from '@radix-ui/themes';
 import "./PlayerStats.css"
 import domtoimage from "dom-to-image"
 import cocstats, { CoCStat, SkillStat } from '../StatsCalculator/CoCStats';
@@ -75,14 +75,9 @@ const PlayerStats = (props: StatsProps) => {
                     <TextField.Slot />
                 </TextField.Root>
                 <Heading my="2">あなたのキャラを選択してください</Heading>
-                <CheckboxCards.Root defaultValue={[]}
-                    onValueChange={val => selectedCharacters.current = val}>
-                    {[...allCharacterList].map(name => <CheckboxCards.Item key={name} value={name}>
-                        <Flex direction="column" width="100%">
-                            <Text weight="bold">{name}</Text>
-                        </Flex>
-                    </CheckboxCards.Item>)}
-                </CheckboxCards.Root>
+                <Grid gap="3" columns={{ xs: "2", md: "6" }}>
+                    {[...allCharacterList].map(name => <CharacterCard key={name} name={name} selectedCharacters={selectedCharacters} />)}
+                </Grid>
                 <Heading my="2">オプションを選択してください</Heading>
                 <Flex direction="column" gap="2">
                     {generalSkills.map(skill => (
@@ -113,7 +108,35 @@ const PlayerStats = (props: StatsProps) => {
                     </Flex>
                 </>}
             </Box>
-        </Theme>
+        </Theme >
+    );
+}
+
+const CharacterCard = (props: { name: string, selectedCharacters: React.MutableRefObject<string[]> }) => {
+    const { name, selectedCharacters } = props;
+    return (
+        <Card asChild>
+            <label style={{
+                display: "flex",
+                gap: "var(--space-2)"
+            }}>
+                <Flex direction="column" align="start" justify="center" style={{
+                    width: "100%"
+                }}>
+                    <Text weight="bold">{name}</Text>
+                </Flex>
+                <Flex direction="column" align="center" justify="center">
+                    <Checkbox onCheckedChange={val => {
+                        if (val) {
+                            selectedCharacters.current.push(name)
+                        }
+                        else {
+                            selectedCharacters.current = selectedCharacters.current.filter(n => n !== name)
+                        }
+                    }} />
+                </Flex>
+            </label>
+        </Card>
     );
 }
 
