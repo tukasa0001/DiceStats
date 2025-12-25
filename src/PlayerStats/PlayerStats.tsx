@@ -19,9 +19,10 @@ const PlayerStats = (props: StatsProps) => {
 
     const generalSkills = ["目星", "聞き耳", "図書館", "知識", "アイデア", "幸運"];
     const selectedCharacters = useRef<string[]>([]);
-    const [playerName, setPlayerName] = useState("");
+    const playerName = useRef<HTMLInputElement>(null);
+    const unrankedSkills = useRef<string[]>(generalSkills);
+
     const [isSaving, setSaving] = useState(false);
-    const [unrankedSkills, setUnrankedSkills] = useState<string[]>(generalSkills);
     const [stats, setStats] = useState<CoCStat | null>(null)
     const allCharacterList = useMemo(() => [...new Set(log
         .flatMap(l => l.log)
@@ -71,7 +72,7 @@ const PlayerStats = (props: StatsProps) => {
                 backgroundColor: "var(--gray-1)"
             }}>
                 <Heading my="2">あなたの名前を入力してください</Heading>
-                <TextField.Root value={playerName} onChange={e => setPlayerName(e.target.value)} placeholder="名無しの探索者">
+                <TextField.Root defaultValue="" placeholder="名無しの探索者" ref={playerName}>
                     <TextField.Slot />
                 </TextField.Root>
                 <Heading my="2">あなたのキャラを選択してください</Heading>
@@ -83,12 +84,12 @@ const PlayerStats = (props: StatsProps) => {
                     {generalSkills.map(skill => (
                         <Text as="label" key={skill}>
                             <Flex gap="1" align="center">
-                                <Switch checked={unrankedSkills.includes(skill)} onCheckedChange={val => {
+                                <Switch defaultChecked onCheckedChange={val => {
                                     if (val) {
-                                        setUnrankedSkills([...unrankedSkills, skill]);
+                                        unrankedSkills.current.push(skill)
                                     }
                                     else {
-                                        setUnrankedSkills(unrankedSkills.filter(s => s !== skill));
+                                        unrankedSkills.current = unrankedSkills.current.filter(s => s !== skill)
                                     }
                                 }} />
                                 {skill}をランキングから除外
@@ -102,7 +103,7 @@ const PlayerStats = (props: StatsProps) => {
                 </Flex>
 
                 {stats === null ? null : <>
-                    <PlayerStatsDisplay playerName={playerName} stats={stats} unrankedSkills={unrankedSkills} />
+                    <PlayerStatsDisplay playerName={playerName.current?.value ?? "名無しの探索者"} stats={stats} unrankedSkills={unrankedSkills.current} />
                     <Flex mt="5" direction="column" align="center">
                         <Button onClick={saveImg}>画像として保存{isSaving ? <Spinner /> : null}</Button>
                     </Flex>
