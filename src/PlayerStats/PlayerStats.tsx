@@ -123,7 +123,7 @@ const PlayerStats = (props: StatsProps) => {
     );
 }
 
-const PlayerStatsDisplay = (props: { playerName: string, stats: CoCStat, unrankedSkills: string[] }) => {
+const InnerPlayerStatsDisplay = (props: { playerName: string, stats: CoCStat, unrankedSkills: string[] }) => {
     const { playerName, stats, unrankedSkills } = props;
 
     const skillStat = stats.total.skillRoll;
@@ -273,6 +273,8 @@ const PlayerStatsDisplay = (props: { playerName: string, stats: CoCStat, unranke
         }}>DiceStats: https://tukasa0001.github.io/DiceStats/</Text>
     </Flex>
 }
+
+const PlayerStatsDisplay = React.memo(InnerPlayerStatsDisplay);
 
 const SkillRankingRow = (props: {
     stats: [string, SkillStat][],
