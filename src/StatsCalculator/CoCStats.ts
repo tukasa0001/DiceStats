@@ -38,15 +38,33 @@ class CoCStatsCounter {
         }
     })
 
-    calc = (log: CcfoliaMessage[]) => {
+    createDefaultOption = (): Required<CoCStatOptions> => ({
+        filter: (msg) => true,
+        nameAliases: []
+    })
+
+    calc = (log: CcfoliaMessage[], _option?: CoCStatOptions) => {
+        const option: Required<CoCStatOptions> = { ...this.createDefaultOption(), ..._option };
         let stat = this.createStat();
         for (let msg of log) {
-            this.incrementStat(stat.total, msg);
-            if (msg.sender !== "") {
-                if (!stat.perCharacter.has(msg.sender)) {
-                    stat.perCharacter.set(msg.sender, this.createCharacterStat());
+            let sender = msg.sender;
+            // フィルター処理
+            if (!option.filter(msg)) {
+                continue;
+            }
+            // 名前エイリアス処理
+            for (let [before, after] of option.nameAliases) {
+                if (sender === before) {
+                    sender = after;
                 }
-                this.incrementStat(stat.perCharacter.get(msg.sender)!, msg);
+            }
+            // 統計追加処理
+            this.incrementStat(stat.total, msg);
+            if (sender !== "") {
+                if (!stat.perCharacter.has(sender)) {
+                    stat.perCharacter.set(sender, this.createCharacterStat());
+                }
+                this.incrementStat(stat.perCharacter.get(sender)!, msg);
             }
         }
     }
@@ -125,6 +143,11 @@ class CoCStatsCounter {
             stat.talk.pcCharNum += regex[1].length;
         }
     }
+}
+
+export type CoCStatOptions = {
+    filter?: (msg: CcfoliaMessage) => boolean
+    nameAliases?: readonly [string, string][]
 }
 
 export type CoCStat = {
