@@ -130,8 +130,7 @@ export class CoCStat {
     perCharacter: Map<string, CharacterStat> = new Map()
 
     merge(other: CoCStat): CoCStat {
-        return {
-            ...this,
+        return Object.assign(new CoCStat(), {
             total: this.total.merge(other.total),
             perCharacter: (() => {
                 const map = new Map<string, CharacterStat>()
@@ -146,7 +145,7 @@ export class CoCStat {
                 }
                 return map;
             })()
-        }
+        })
     }
 };
 
@@ -159,9 +158,8 @@ export class CharacterStat {
     talk = new TalkStat()
 
     merge(other: CharacterStat): CharacterStat {
-        return {
-            ...this,
-            skillRoll: {
+        return Object.assign(new CharacterStat(), {
+            skillRoll: Object.assign(new SkillStat(), {
                 ...this.skillRoll.merge(other.skillRoll),
                 perSkill: (() => {
                     const map = new Map<string, SkillStat>()
@@ -176,11 +174,11 @@ export class CharacterStat {
                     }
                     return map;
                 })()
-            },
+            }),
             sanityCheck: this.sanityCheck.merge(other.sanityCheck),
             status: this.status.merge(other.status),
             talk: this.talk.merge(other.talk)
-        }
+        })
     }
 }
 
@@ -195,8 +193,7 @@ export class SkillStat {
     spFumbleNum = 0
 
     merge(other: SkillStat): SkillStat {
-        return {
-            ...this,
+        return Object.assign(new SkillStat(), {
             rollNum: this.rollNum + other.rollNum,
             valueSum: this.valueSum + other.valueSum,
             successNum: this.successNum + other.successNum,
@@ -205,7 +202,7 @@ export class SkillStat {
             spCriticalNum: this.spCriticalNum + other.spCriticalNum,
             fumbleNum: this.fumbleNum + other.fumbleNum,
             spFumbleNum: this.spFumbleNum + other.spFumbleNum
-        }
+        })
     }
 }
 
@@ -222,13 +219,12 @@ export class StatusStat {
             if (b === undefined) return a;
             return Math.min(a, b);
         }
-        return {
-            ...this,
+        return Object.assign(new StatusStat(), {
             totalDamage: this.totalDamage + other.totalDamage,
             totalLostSAN: this.totalLostSAN + other.totalLostSAN,
             minHealth: min(this.minHealth, other.minHealth),
             minSAN: min(this.minSAN, other.minSAN),
-        }
+        })
     }
 }
 
@@ -239,13 +235,12 @@ export class TalkStat {
     pcCharNum = 0
 
     merge(other: TalkStat): TalkStat {
-        return {
-            ...this,
+        return Object.assign(new TalkStat(), {
             talkNum: this.talkNum + other.talkNum,
             charNum: this.charNum + other.charNum,
             pcTalkNum: this.pcTalkNum + other.pcTalkNum,
             pcCharNum: this.pcCharNum + other.pcCharNum,
-        }
+        })
     }
 }
 
