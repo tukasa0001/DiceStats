@@ -11,68 +11,6 @@ import { Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextFie
 import "./Stats.css"
 import cocstats from './StatsCalculator/CoCStats';
 
-class SkillStat {
-    // 技能関連
-    skillRollNum: number = 0;
-    skillRollSum: number = 0;
-    successNum: number = 0;
-    failNum: number = 0;
-    criticalNum: number = 0;
-    spCriticalNum: number = 0;
-    fumbleNum: number = 0;
-    spFumbleNum: number = 0;
-    skillRolls: Map<string, number> = new Map<string, number>();
-
-    increment(msg: CoCSkillRollMessage) {
-        this.skillRollNum++;
-        this.skillRollSum += msg.diceValue;
-        if (msg.isSuccess()) {
-            this.successNum++;
-            if (msg.isCritical()) {
-                this.criticalNum++;
-                if (msg.diceValue === 1) {
-                    this.spCriticalNum++;
-                }
-            }
-        }
-        else {
-            this.failNum++;
-            if (msg.isFumble()) {
-                this.fumbleNum++;
-                if (msg.diceValue === 100) {
-                    this.spFumbleNum++;
-                }
-            }
-        }
-        this.skillRolls.set(msg.skill, (this.skillRolls.get(msg.skill) ?? 0) + 1);
-    }
-}
-class SanityCheckStat {
-    // SANチェック
-    checkNum: number = 0;
-    successNum: number = 0;
-    criticalNum: number = 0;
-    fumbleNum: number = 0;
-};
-class StatusStat {
-    // ステータス関連
-    totalDamage: number = 0;
-    minHealth: number | undefined = undefined;
-    totalLostSAN: number = 0;
-    minSAN: number | undefined = undefined;
-}
-class TalkStat {
-    // 会話関連
-    talkNum: number = 0;
-    charNum: number = 0;
-    pcTalkNum = 0;
-    pcCharNum = 0;
-};
-class OtherStat {
-    // その他
-    secretDiceCount = 0;
-}
-
 type StatsProps = {
     logFile: CcfoliaMessage[]
 }
