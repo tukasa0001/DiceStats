@@ -89,7 +89,7 @@ const App: FC = () => {
 
                             <Tabs.Content value="upload">
                                 <Flex direction="column" mx="4">
-                                    <UploadForm logs={log} onLogFileChanged={onFileUploaded} />
+                                    <UploadForm logs={log} setLogs={setLog} onLogFileChanged={onFileUploaded} />
                                 </Flex>
                             </Tabs.Content>
                             <Tabs.Content value="stats">
