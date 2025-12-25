@@ -3,6 +3,7 @@ import { useContext, useState } from "react"
 import { LogView } from "./LogView"
 import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage";
 import { EMPTY_FILTER } from "./LogViewFilter";
+import { LogFile } from "../file/LogFile";
 
 const ccfoliaMessageTypeTexts = new Map<string, string>([
     ["CoCSkillRollMessage", "技能判定"],
@@ -13,7 +14,7 @@ const ccfoliaMessageTypeTexts = new Map<string, string>([
 ]);
 
 type FilteredLogViewProps = {
-    logs: CcfoliaMessage[]
+    logs: LogFile
 };
 
 export const FilteredLogView = (props: FilteredLogViewProps) => {
@@ -21,8 +22,8 @@ export const FilteredLogView = (props: FilteredLogViewProps) => {
 
     const { logs } = props;
     const [filter, setFilter] = useState(EMPTY_FILTER);
-    const allMessageTypes = [...new Set([...logs].map(msg => msg.constructor.name))];
-    const allCharacters = [...new Set([...logs].map(msg => msg.sender))];
+    const allMessageTypes = [...new Set([...logs.log].map(msg => msg.constructor.name))];
+    const allCharacters = [...new Set([...logs.log].map(msg => msg.sender))];
 
     return <Flex direction="column">
         <Flex my="2" gap="2" justify="center">

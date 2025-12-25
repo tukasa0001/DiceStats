@@ -7,7 +7,7 @@ import ConfigCard from './config/ConfigCard';
 import DisplayConfig from './config/DisplayConfig';
 import Footer from './Footer';
 import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
-import { Grid, Container, Heading, Theme, Box, Flex, Tabs, Button } from '@radix-ui/themes'
+import { Grid, Container, Heading, Theme, Box, Flex, Tabs, Button, Text } from '@radix-ui/themes'
 import parseCcfoliaLog from './ccfoliaLog/CcfoliaLog';
 import "./UploadArea.css";
 import { MoonIcon, SunIcon } from 'lucide-react';
@@ -99,7 +99,7 @@ const App: FC = () => {
                             </Tabs.Content>
                             <Tabs.Content value="logView">
                                 <Flex direction="column" mx="4">
-                                    <FilteredLogView logs={log} />
+                                    {0 < log.length ? <FilteredLogView logs={log[0]} /> : <Text my="2">ログファイルをアップロードしてください</Text>}
                                 </Flex>
                             </Tabs.Content>
                             <Tabs.Content value="plStats">
