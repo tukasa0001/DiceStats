@@ -26,9 +26,9 @@ class CoCStatsCounter {
         sanityCheck: this.createSkillStat(),
         status: {
             totalDamage: 0,
-            minHealth: 0,
+            minHealth: NaN,
             totalLostSAN: 0,
-            minSAN: 0,
+            minSAN: NaN,
         },
         talk: {
             talkNum: 0,
