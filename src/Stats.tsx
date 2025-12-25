@@ -10,20 +10,27 @@ import { ErrorBlock, InfoBlock } from './Utils';
 import { Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField } from '@radix-ui/themes';
 import "./Stats.css"
 import cocstats from './StatsCalculator/CoCStats';
+import { LogFile } from './file/LogFile';
 
 type StatsProps = {
-    logs: CcfoliaMessage[]
+    logs: LogFile[]
 }
 
 const Stats = (props: StatsProps) => {
     const [skillFilter, setSkillFinter] = useState("none");
 
-    const log = props.logs;
+    const logs = props.logs;
     const config = useContext(configCtx);
 
     const jpnTextComparer = (a: readonly [string, any], b: readonly [string, any]) => a[0].localeCompare(b[0], "ja");
 
-    const stats = cocstats.calc(log, config);
+    const stats = logs
+        .map(file => cocstats.calc(file.log, {
+            ...config,
+            startIdx: file.startIdx,
+            endIdx: file.endIdx
+        }))
+        .reduce((a, b) => a.merge(b));
 
     const skills = [...stats.perCharacter]
         .map(([name, stat]) => [name, stat.skillRoll] as const)
