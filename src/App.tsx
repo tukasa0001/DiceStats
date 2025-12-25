@@ -7,13 +7,14 @@ import ConfigCard from './config/ConfigCard';
 import DisplayConfig from './config/DisplayConfig';
 import Footer from './Footer';
 import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
-import { Grid, Container, Heading, Theme, Box, Flex, Tabs, Button } from '@radix-ui/themes'
+import { Grid, Container, Heading, Theme, Box, Flex, Tabs, Button, Text } from '@radix-ui/themes'
 import parseCcfoliaLog from './ccfoliaLog/CcfoliaLog';
 import "./UploadArea.css";
 import { MoonIcon, SunIcon } from 'lucide-react';
 import { LogView } from './logView/LogView';
 import { FilteredLogView } from './logView/FilteredLogView';
 import PlayerStats from './PlayerStats/PlayerStats';
+import { LogFile } from './file/LogFile';
 
 export const configCtx = createContext(new DisplayConfig());
 export const setConfigCtx = createContext((x: DisplayConfig) => { });
@@ -21,19 +22,24 @@ export const setConfigCtx = createContext((x: DisplayConfig) => { });
 const App: FC = () => {
     // 初期値は端末の設定に依存する (TODO:状態をcookieに保存したい)
     const [isDark, setIsDark] = useState(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    const [log, setLog] = useState<CcfoliaMessage[] | undefined>(undefined);
+    const [log, setLog] = useState<LogFile[]>([]);
     const [config, setConfig] = useState(new DisplayConfig());
     const [tab, setTab] = useState("upload");
     const [isDropping, setDropping] = useState(false);
 
     const onFileUploaded = async (files: File[]) => {
-        const msg: CcfoliaMessage[] = [];
+        const logs: LogFile[] = [];
         for (let file of files) {
             const str = await file.text();
             const parsed = parseCcfoliaLog(str);
-            msg.splice(msg.length, 0, ...parsed); // = msg.addAll(parsed);
+            logs.push({
+                filename: file.name,
+                log: parsed,
+                startIdx: 0,
+                endIdx: parsed.length - 1
+            })
         }
-        setLog(msg);
+        setLog(logs);
         if (tab === "upload") {
             setTab("stats");
         }
@@ -83,23 +89,23 @@ const App: FC = () => {
 
                             <Tabs.Content value="upload">
                                 <Flex direction="column" mx="4">
-                                    <UploadForm onLogFileChanged={onFileUploaded} />
+                                    <UploadForm logs={log} setLogs={setLog} onLogFileChanged={onFileUploaded} />
                                 </Flex>
                             </Tabs.Content>
                             <Tabs.Content value="stats">
                                 <Flex direction="column" mx="4">
-                                    <Stats logFile={log ?? []} />
-                                    <ConfigCard log={log} />
+                                    <Stats logs={log} />
+                                    <ConfigCard />
                                 </Flex>
                             </Tabs.Content>
                             <Tabs.Content value="logView">
                                 <Flex direction="column" mx="4">
-                                    <FilteredLogView logs={log ?? []} />
+                                    {0 < log.length ? <FilteredLogView logs={log[0]} /> : <Text my="2">ログファイルをアップロードしてください</Text>}
                                 </Flex>
                             </Tabs.Content>
                             <Tabs.Content value="plStats">
                                 <Flex direction="column" mx="4">
-                                    <PlayerStats logFile={log ?? []} />
+                                    <PlayerStats logs={log} />
                                 </Flex>
                             </Tabs.Content>
                             <Flex direction="column" mx="4">

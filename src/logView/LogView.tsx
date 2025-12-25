@@ -6,9 +6,10 @@ import { CoCSkillRollMessage } from "../ccfoliaLog/message/CoCSkillRollMessage";
 import { SanityCheckMessage } from "../ccfoliaLog/message/SanityCheckMessage";
 import { ParamChangeMessage } from "../ccfoliaLog/message/ParamChangeMessage";
 import LogViewFilter, { EMPTY_FILTER } from "./LogViewFilter";
+import { LogFile } from "../file/LogFile";
 
 type LogViewProps = {
-    logs: CcfoliaMessage[]
+    logs: LogFile
     filter?: LogViewFilter
 };
 
@@ -30,7 +31,7 @@ export const LogView = (props: LogViewProps) => {
     }
 
     return <Flex gap="4" direction="column" mt="4">
-        {logs.map((msg, i) => !testFilter(msg) ? null :
+        {logs.log.map((msg, i) => !testFilter(msg) ? null :
             <Card key={i}>
                 <Flex gap="2" direction="row">
                     <Heading size="4">{msg.sender}</Heading>

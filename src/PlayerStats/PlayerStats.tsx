@@ -11,9 +11,10 @@ import { Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextFie
 import "./PlayerStats.css"
 import domtoimage from "dom-to-image"
 import cocstats, { SkillStat } from '../StatsCalculator/CoCStats';
+import { LogFile } from '../file/LogFile';
 
 type StatsProps = {
-    logFile: CcfoliaMessage[]
+    logs: LogFile[]
 }
 
 const PlayerStats = (props: StatsProps) => {
@@ -47,18 +48,22 @@ const PlayerStats = (props: StatsProps) => {
         }
     }
 
-    const log = props.logFile;
+    const log = props.logs;
     const config = useContext(configCtx);
 
     const allCharacters = new Set<string>();
 
-    const stats = cocstats.calc(log, {
-        ...config,
-        filter: msg => {
-            allCharacters.add(msg.sender);
-            return selectedCharacters.includes(msg.sender);
-        }
-    }).total;
+    const stats = props.logs
+        .map(file => cocstats.calc(file.log, {
+            ...config,
+            startIdx: file.startIdx,
+            endIdx: file.endIdx,
+            filter: msg => {
+                allCharacters.add(msg.sender);
+                return selectedCharacters.includes(msg.sender);
+            }
+        }))
+        .reduce((a, b) => a.merge(b)).total;
 
     const allCharacterList = [...allCharacters].sort((a, b) => a.localeCompare(b, "ja"));
     const skillStat = stats.skillRoll;
