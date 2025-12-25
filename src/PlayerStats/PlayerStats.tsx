@@ -50,34 +50,14 @@ const PlayerStats = (props: StatsProps) => {
     const log = props.logFile;
     const config = useContext(configCtx);
 
-    let startIdx = 0, endIdx = Infinity;
-    // 開始・終了位置の判定
-    if (config.startMessage !== "" || config.endMessage !== "") {
-        let isStarted: boolean = config.startMessage === "";
-        for (let i = 0; i < log.length; i++) {
-            const msg = log[i];
-            // 開始メッセージまで無視
-            if (!isStarted && msg instanceof TalkMessage && config.startMessage === msg.text) {
-                isStarted = true;
-                startIdx = i;
-            }
-            // 終了メッセージが来たらbreak
-            else if (config.endMessage !== "" && msg instanceof TalkMessage && config.endMessage === msg.text) {
-                endIdx = i;
-                break;
-            }
-        }
-    }
-
     const allCharacters = new Set<string>();
 
     const stats = cocstats.calc(log, {
+        ...config,
         filter: msg => {
             allCharacters.add(msg.sender);
             return selectedCharacters.includes(msg.sender);
-        },
-        nameAliases: config.nameAliases,
-        startIdx, endIdx
+        }
     }).total;
 
     const allCharacterList = [...allCharacters].sort((a, b) => a.localeCompare(b, "ja"));

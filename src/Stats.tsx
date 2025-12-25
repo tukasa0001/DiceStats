@@ -21,31 +21,9 @@ const Stats = (props: StatsProps) => {
     const log = props.logFile;
     const config = useContext(configCtx);
 
-    let startIdx = 0, endIdx = Infinity;
-    // 開始・終了位置の判定
-    if (config.startMessage !== "" || config.endMessage !== "") {
-        let isStarted: boolean = config.startMessage === "";
-        for (let i = 0; i < log.length; i++) {
-            const msg = log[i];
-            // 開始メッセージまで無視
-            if (!isStarted && msg instanceof TalkMessage && config.startMessage === msg.text) {
-                isStarted = true;
-                startIdx = i;
-            }
-            // 終了メッセージが来たらbreak
-            else if (config.endMessage !== "" && msg instanceof TalkMessage && config.endMessage === msg.text) {
-                endIdx = i;
-                break;
-            }
-        }
-    }
-
     const jpnTextComparer = (a: readonly [string, any], b: readonly [string, any]) => a[0].localeCompare(b[0], "ja");
 
-    const stats = cocstats.calc(log, {
-        nameAliases: config.nameAliases,
-        startIdx, endIdx
-    });
+    const stats = cocstats.calc(log, config);
 
     const skills = [...stats.perCharacter]
         .map(([name, stat]) => [name, stat.skillRoll] as const)

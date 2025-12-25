@@ -17,23 +17,22 @@ const ConfigCard = (props: ConfigCardProps) => {
     const [isPinned, setPinned] = useState(false);
     const log = props.log ?? [];
 
-    // 開始メッセージ・終了メッセージの有効性を確認
-    let isStartMessageValid = config.startMessage === "";
-    let isEndMessageValid = config.endMessage === "";
-    for (let msg of log) {
+    const indexToText = (idx: number) => {
+        const msg = log[idx];
         if (msg instanceof TalkMessage) {
-            if (!isStartMessageValid && msg.text === config.startMessage) {
-                isStartMessageValid = true;
-                isEndMessageValid = config.endMessage === ""; // ここからまた終了メッセージの検索を開始
-            }
-            if (!isEndMessageValid && msg.text === config.endMessage) {
-                isEndMessageValid = true;
-                // 全てのチェックが終わったらbreak
-                if (isStartMessageValid) {
-                    break;
-                }
+            return msg.text;
+        }
+        return "";
+    }
+
+    const textToIndex = (text: string) => {
+        for (let i = 0; i < log.length; i++) {
+            const msg = log[i];
+            if (msg instanceof TalkMessage && msg.text === text) {
+                return i;
             }
         }
+        return undefined;
     }
 
     return (
@@ -90,15 +89,15 @@ const ConfigCard = (props: ConfigCardProps) => {
                     <Flex align="center" py="1">
                         <Text>範囲：</Text>
                         <TextField.Root
-                            value={config.startMessage}
-                            onChange={e => setConf(config.withStartMessage(e.target.value.trim()))}
+                            value={indexToText(config.startIdx)}
+                            onChange={e => setConf(config.withStartIdx(textToIndex(e.target.value.trim()) ?? 0))}
                             placeholder="最初から">
                             <TextField.Slot />
                         </TextField.Root>
                         <Text mx="2"> ～ </Text>
                         <TextField.Root
-                            value={config.endMessage}
-                            onChange={e => setConf(config.withEndMessage(e.target.value.trim()))}
+                            value={indexToText(config.endIdx)}
+                            onChange={e => setConf(config.withEndIdx(textToIndex(e.target.value.trim()) ?? Infinity))}
                             placeholder="最後まで">
                             <TextField.Slot />
                         </TextField.Root>
