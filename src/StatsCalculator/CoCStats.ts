@@ -69,6 +69,7 @@ class CoCStatsCounter {
                 this.incrementStat(stat.perCharacter.get(sender)!, msg);
             }
         }
+        return stat;
     }
 
     incrementStat = (stat: CharacterStat, msg: CcfoliaMessage) => {
