@@ -5,39 +5,6 @@ import { SanityCheckMessage } from "../ccfoliaLog/message/SanityCheckMessage";
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge";
 
 class CoCStatsCounter {
-    createStat = (): CoCStat => ({
-        total: this.createCharacterStat(),
-        perCharacter: new Map()
-    })
-
-    createSkillStat = (): SkillStat => ({
-        rollNum: 0,
-        valueSum: 0,
-        successNum: 0,
-        failNum: 0,
-        criticalNum: 0,
-        spCriticalNum: 0,
-        fumbleNum: 0,
-        spFumbleNum: 0
-    })
-
-    createCharacterStat = (): CharacterStat => ({
-        skillRoll: { ...this.createSkillStat(), perSkill: new Map() },
-        sanityCheck: this.createSkillStat(),
-        status: {
-            totalDamage: 0,
-            minHealth: undefined,
-            totalLostSAN: 0,
-            minSAN: undefined,
-        },
-        talk: {
-            talkNum: 0,
-            charNum: 0,
-            pcTalkNum: 0,
-            pcCharNum: 0,
-        }
-    })
-
     createDefaultOption = (): Required<CoCStatOptions> => ({
         filter: (msg) => true,
         nameAliases: [],
@@ -47,7 +14,7 @@ class CoCStatsCounter {
 
     calc = (log: CcfoliaMessage[], _option?: CoCStatOptions) => {
         const option: Required<CoCStatOptions> = { ...this.createDefaultOption(), ..._option };
-        let stat = this.createStat();
+        let stat = new CoCStat()
         for (let msg of log.slice(option.startIdx, option.endIdx)) {
             let sender = msg.sender;
             // 名前エイリアス処理
@@ -67,7 +34,7 @@ class CoCStatsCounter {
             this.incrementStat(stat.total, msg);
             if (sender !== "") {
                 if (!stat.perCharacter.has(sender)) {
-                    stat.perCharacter.set(sender, this.createCharacterStat());
+                    stat.perCharacter.set(sender, new CharacterStat());
                 }
                 this.incrementStat(stat.perCharacter.get(sender)!, msg);
             }
@@ -79,7 +46,7 @@ class CoCStatsCounter {
         if (msg instanceof CoCSkillRollMessage) {
             this.incrementSkillStat(stat.skillRoll, msg);
             if (!stat.skillRoll.perSkill.has(msg.skill)) {
-                stat.skillRoll.perSkill.set(msg.skill, this.createSkillStat());
+                stat.skillRoll.perSkill.set(msg.skill, new SkillStat());
             }
             this.incrementSkillStat(stat.skillRoll.perSkill.get(msg.skill)!, msg);
         }
@@ -158,39 +125,128 @@ export type CoCStatOptions = {
     endIdx?: number
 }
 
-export type CoCStat = {
-    total: CharacterStat
-    perCharacter: Map<string, CharacterStat>
+export class CoCStat {
+    total: CharacterStat = new CharacterStat()
+    perCharacter: Map<string, CharacterStat> = new Map()
+
+    merge(other: CoCStat): CoCStat {
+        return {
+            ...this,
+            total: this.total.merge(other.total),
+            perCharacter: (() => {
+                const map = new Map<string, CharacterStat>()
+                for (let [name, stat] of [...this.perCharacter, ...other.perCharacter]) {
+                    const stat2 = map.get(name);
+                    if (stat2 === undefined) {
+                        map.set(name, stat);
+                    }
+                    else {
+                        map.set(name, stat.merge(stat2));
+                    }
+                }
+                return map;
+            })()
+        }
+    }
 };
 
-export type CharacterStat = {
+export class CharacterStat {
     skillRoll: SkillStat & {
         perSkill: Map<string, SkillStat>
-    },
-    sanityCheck: SkillStat,
-    status: {
-        totalDamage: number
-        minHealth: number | undefined
-        totalLostSAN: number
-        minSAN: number | undefined
-    },
-    talk: {
-        talkNum: number
-        charNum: number
-        pcTalkNum: number
-        pcCharNum: number
+    } = Object.assign(new SkillStat(), { perSkill: new Map() })
+    sanityCheck = new SkillStat()
+    status = new StatusStat()
+    talk = new TalkStat()
+
+    merge(other: CharacterStat): CharacterStat {
+        return {
+            ...this,
+            skillRoll: {
+                ...this.skillRoll.merge(other.skillRoll),
+                perSkill: (() => {
+                    const map = new Map<string, SkillStat>()
+                    for (let [name, stat] of [...this.skillRoll.perSkill, ...other.skillRoll.perSkill]) {
+                        const stat2 = map.get(name);
+                        if (stat2 === undefined) {
+                            map.set(name, stat);
+                        }
+                        else {
+                            map.set(name, stat.merge(stat2));
+                        }
+                    }
+                    return map;
+                })()
+            },
+            sanityCheck: this.sanityCheck.merge(other.sanityCheck),
+            status: this.status.merge(other.status),
+            talk: this.talk.merge(other.talk)
+        }
     }
 }
 
-export type SkillStat = {
-    rollNum: number
-    valueSum: number
-    successNum: number
-    failNum: number
-    criticalNum: number
-    spCriticalNum: number
-    fumbleNum: number
-    spFumbleNum: number
+export class SkillStat {
+    rollNum = 0
+    valueSum = 0
+    successNum = 0
+    failNum = 0
+    criticalNum = 0
+    spCriticalNum = 0
+    fumbleNum = 0
+    spFumbleNum = 0
+
+    merge(other: SkillStat): SkillStat {
+        return {
+            ...this,
+            rollNum: this.rollNum + other.rollNum,
+            valueSum: this.valueSum + other.valueSum,
+            successNum: this.successNum + other.successNum,
+            failNum: this.failNum + other.failNum,
+            criticalNum: this.criticalNum + other.criticalNum,
+            spCriticalNum: this.spCriticalNum + other.spCriticalNum,
+            fumbleNum: this.fumbleNum + other.fumbleNum,
+            spFumbleNum: this.spFumbleNum + other.spFumbleNum
+        }
+    }
+}
+
+export class StatusStat {
+    totalDamage = 0
+    minHealth: number | undefined = undefined
+    totalLostSAN = 0
+    minSAN: number | undefined = undefined
+
+    merge(other: StatusStat): StatusStat {
+        const min = (a?: number, b?: number) => {
+            if (a === undefined && b === undefined) return undefined;
+            if (a === undefined) return a;
+            if (b === undefined) return a;
+            return Math.min(a, b);
+        }
+        return {
+            ...this,
+            totalDamage: this.totalDamage + other.totalDamage,
+            totalLostSAN: this.totalLostSAN + other.totalLostSAN,
+            minHealth: min(this.minHealth, other.minHealth),
+            minSAN: min(this.minSAN, other.minSAN),
+        }
+    }
+}
+
+export class TalkStat {
+    talkNum = 0
+    charNum = 0
+    pcTalkNum = 0
+    pcCharNum = 0
+
+    merge(other: TalkStat): TalkStat {
+        return {
+            ...this,
+            talkNum: this.talkNum + other.talkNum,
+            charNum: this.charNum + other.charNum,
+            pcTalkNum: this.pcTalkNum + other.pcTalkNum,
+            pcCharNum: this.pcCharNum + other.pcCharNum,
+        }
+    }
 }
 
 
