@@ -7,34 +7,10 @@ import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge";
 import { configCtx, setConfigCtx } from "../App";
 import { Box, Button, Flex, IconButton, Table, TextField, Text, Checkbox, Switch } from "@radix-ui/themes";
 
-type ConfigCardProps = {
-    log?: CcfoliaMessage[]
-}
-
-const ConfigCard = (props: ConfigCardProps) => {
+const ConfigCard = () => {
     const config = useContext(configCtx);
     const setConf = useContext(setConfigCtx);
     const [isPinned, setPinned] = useState(false);
-    const log = props.log ?? [];
-
-    // 開始メッセージ・終了メッセージの有効性を確認
-    let isStartMessageValid = config.startMessage === "";
-    let isEndMessageValid = config.endMessage === "";
-    for (let msg of log) {
-        if (msg instanceof TalkMessage) {
-            if (!isStartMessageValid && msg.text === config.startMessage) {
-                isStartMessageValid = true;
-                isEndMessageValid = config.endMessage === ""; // ここからまた終了メッセージの検索を開始
-            }
-            if (!isEndMessageValid && msg.text === config.endMessage) {
-                isEndMessageValid = true;
-                // 全てのチェックが終わったらbreak
-                if (isStartMessageValid) {
-                    break;
-                }
-            }
-        }
-    }
 
     return (
         <div className={`card configCard ${isPinned ? "pinned" : ""}`}>
@@ -80,30 +56,6 @@ const ConfigCard = (props: ConfigCardProps) => {
                     </Table.Root>
                 }
                 <Button variant="surface" my="2" onClick={() => setConf(config.withNameAliases(arr => [...arr, ["", ""]]))}>追加</Button>
-            </>} />
-
-            <ToggleBox title="統計範囲を変更" elem={<>
-                <p>
-                    特定の発言をトリガーに、範囲内の統計を出力します
-                </p>
-                <div className="stats-range-config">
-                    <Flex align="center" py="1">
-                        <Text>範囲：</Text>
-                        <TextField.Root
-                            value={config.startMessage}
-                            onChange={e => setConf(config.withStartMessage(e.target.value.trim()))}
-                            placeholder="最初から">
-                            <TextField.Slot />
-                        </TextField.Root>
-                        <Text mx="2"> ～ </Text>
-                        <TextField.Root
-                            value={config.endMessage}
-                            onChange={e => setConf(config.withEndMessage(e.target.value.trim()))}
-                            placeholder="最後まで">
-                            <TextField.Slot />
-                        </TextField.Root>
-                    </Flex>
-                </div>
             </>} />
             <ToggleBox title="その他の設定" elem={<>
                 <Text as="label">
