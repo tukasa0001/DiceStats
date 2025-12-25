@@ -1,13 +1,7 @@
-import { CoCSkillRollMessage } from '../ccfoliaLog/message/CoCSkillRollMessage';
-import { ParamChangeMessage } from '../ccfoliaLog/message/ParamChangeMessage';
-import { TalkMessage } from '../ccfoliaLog/message/TalkMessasge';
-import { SanityCheckMessage } from '../ccfoliaLog/message/SanityCheckMessage';
+
 import React, { JSX, ReactNode, useContext, useMemo, useState } from 'react';
-import { CcfoliaMessage } from '../ccfoliaLog/message/CcfoliaMessage';
-import { UnknownSecretDiceMessage } from '../ccfoliaLog/message/UnknownSecretDiceMessage';
-import { configCtx, setConfigCtx } from '../App';
-import { ErrorBlock, InfoBlock } from '../Utils';
-import { Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField, CheckboxCards, Text, Theme, Grid, Spinner, Separator, Switch } from '@radix-ui/themes';
+import { configCtx } from '../App';
+import { Box, Button, Flex, Table, Heading, TextField, CheckboxCards, Text, Theme, Grid, Spinner, Switch } from '@radix-ui/themes';
 import "./PlayerStats.css"
 import domtoimage from "dom-to-image"
 import cocstats, { CoCStat, SkillStat } from '../StatsCalculator/CoCStats';
