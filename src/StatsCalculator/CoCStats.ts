@@ -50,15 +50,18 @@ class CoCStatsCounter {
         let stat = this.createStat();
         for (let msg of log.slice(option.startIdx, option.endIdx)) {
             let sender = msg.sender;
-            // フィルター処理
-            if (!option.filter(msg)) {
-                continue;
-            }
             // 名前エイリアス処理
             for (let [before, after] of option.nameAliases) {
                 if (sender === before) {
                     sender = after;
                 }
+            }
+            if (msg.sender !== sender) {
+                msg = { ...msg, sender };
+            }
+            // フィルター処理
+            if (!option.filter(msg)) {
+                continue;
             }
             // 統計追加処理
             this.incrementStat(stat.total, msg);
