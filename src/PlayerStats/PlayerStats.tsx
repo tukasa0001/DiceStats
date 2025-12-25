@@ -1,16 +1,10 @@
-import { CoCSkillRollMessage } from '../ccfoliaLog/message/CoCSkillRollMessage';
-import { ParamChangeMessage } from '../ccfoliaLog/message/ParamChangeMessage';
-import { TalkMessage } from '../ccfoliaLog/message/TalkMessasge';
-import { SanityCheckMessage } from '../ccfoliaLog/message/SanityCheckMessage';
-import React, { JSX, ReactNode, useContext, useState } from 'react';
-import { CcfoliaMessage } from '../ccfoliaLog/message/CcfoliaMessage';
-import { UnknownSecretDiceMessage } from '../ccfoliaLog/message/UnknownSecretDiceMessage';
-import { configCtx, setConfigCtx } from '../App';
-import { ErrorBlock, InfoBlock } from '../Utils';
-import { Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField, CheckboxCards, Text, Theme, Grid, Spinner, Separator, Switch } from '@radix-ui/themes';
+
+import React, { JSX, ReactNode, useContext, useMemo, useRef, useState } from 'react';
+import { configCtx } from '../App';
+import { Box, Button, Flex, Table, Heading, TextField, CheckboxCards, Text, Theme, Grid, Spinner, Switch, Card, Checkbox } from '@radix-ui/themes';
 import "./PlayerStats.css"
 import domtoimage from "dom-to-image"
-import cocstats, { SkillStat } from '../StatsCalculator/CoCStats';
+import cocstats, { CoCStat, SkillStat } from '../StatsCalculator/CoCStats';
 import { LogFile } from '../file/LogFile';
 
 type StatsProps = {
@@ -18,11 +12,23 @@ type StatsProps = {
 }
 
 const PlayerStats = (props: StatsProps) => {
+    const log = props.logs;
+    if (log.length <= 0) {
+        return <Text>ログをアップロードしてください</Text>
+    }
+
     const generalSkills = ["目星", "聞き耳", "図書館", "知識", "アイデア", "幸運"];
-    const [selectedCharacters, setSelectedCharacters] = useState<string[]>([]);
-    const [playerName, setPlayerName] = useState("");
+    const selectedCharacters = useRef<string[]>([]);
+    const playerName = useRef<HTMLInputElement>(null);
+    const unrankedSkills = useRef<string[]>(generalSkills);
+
     const [isSaving, setSaving] = useState(false);
-    const [unrankedSkills, setUnrankedSkills] = useState<string[]>(generalSkills);
+    const [stats, setStats] = useState<CoCStat | null>(null)
+    const allCharacterList = useMemo(() => [...new Set(log
+        .flatMap(l => l.log)
+        .map(msg => msg.sender))]
+        .sort((a, b) => a.localeCompare(b, "ja")), [log]
+    )
 
     const wait = async (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
     const saveImg = async () => {
@@ -47,26 +53,98 @@ const PlayerStats = (props: StatsProps) => {
             }
         }
     }
+    const calcStats = () => {
+        setStats(props.logs
+            .map(file => cocstats.calc(file.log, {
+                ...config,
+                startIdx: file.startIdx,
+                endIdx: file.endIdx,
+                filter: msg => selectedCharacters.current.includes(msg.sender)
+            }))
+            .reduce((a, b) => a.merge(b)));
+    }
 
-    const log = props.logs;
     const config = useContext(configCtx);
 
-    const allCharacters = new Set<string>();
+    return (
+        <Theme>
+            <Box my="2" style={{
+                backgroundColor: "var(--gray-1)"
+            }}>
+                <Heading my="2">あなたの名前を入力してください</Heading>
+                <TextField.Root defaultValue="" placeholder="名無しの探索者" ref={playerName}>
+                    <TextField.Slot />
+                </TextField.Root>
+                <Heading my="2">あなたのキャラを選択してください</Heading>
+                <Grid gap="3" columns={{ xs: "2", md: "6" }}>
+                    {[...allCharacterList].map(name => <CharacterCard key={name} name={name} selectedCharacters={selectedCharacters} />)}
+                </Grid>
+                <Heading my="2">オプションを選択してください</Heading>
+                <Flex direction="column" gap="2">
+                    {generalSkills.map(skill => (
+                        <Text as="label" key={skill}>
+                            <Flex gap="1" align="center">
+                                <Switch defaultChecked onCheckedChange={val => {
+                                    if (val) {
+                                        unrankedSkills.current.push(skill)
+                                    }
+                                    else {
+                                        unrankedSkills.current = unrankedSkills.current.filter(s => s !== skill)
+                                    }
+                                }} />
+                                {skill}をランキングから除外
+                            </Flex>
+                        </Text>
+                    ))}
+                </Flex>
 
-    const stats = props.logs
-        .map(file => cocstats.calc(file.log, {
-            ...config,
-            startIdx: file.startIdx,
-            endIdx: file.endIdx,
-            filter: msg => {
-                allCharacters.add(msg.sender);
-                return selectedCharacters.includes(msg.sender);
-            }
-        }))
-        .reduce((a, b) => a.merge(b)).total;
+                <Flex mt="5" direction="column" align="center">
+                    <Button onClick={() => calcStats()}>成績表を表示</Button>
+                </Flex>
 
-    const allCharacterList = [...allCharacters].sort((a, b) => a.localeCompare(b, "ja"));
-    const skillStat = stats.skillRoll;
+                {stats === null ? null : <>
+                    <PlayerStatsDisplay playerName={playerName.current?.value ?? "名無しの探索者"} stats={stats} unrankedSkills={unrankedSkills.current} />
+                    <Flex mt="5" direction="column" align="center">
+                        <Button onClick={saveImg}>画像として保存{isSaving ? <Spinner /> : null}</Button>
+                    </Flex>
+                </>}
+            </Box>
+        </Theme >
+    );
+}
+
+const CharacterCard = (props: { name: string, selectedCharacters: React.MutableRefObject<string[]> }) => {
+    const { name, selectedCharacters } = props;
+    return (
+        <Card asChild>
+            <label style={{
+                display: "flex",
+                gap: "var(--space-2)"
+            }}>
+                <Flex direction="column" align="start" justify="center" style={{
+                    width: "100%"
+                }}>
+                    <Text weight="bold">{name}</Text>
+                </Flex>
+                <Flex direction="column" align="center" justify="center">
+                    <Checkbox onCheckedChange={val => {
+                        if (val) {
+                            selectedCharacters.current.push(name)
+                        }
+                        else {
+                            selectedCharacters.current = selectedCharacters.current.filter(n => n !== name)
+                        }
+                    }} />
+                </Flex>
+            </label>
+        </Card>
+    );
+}
+
+const InnerPlayerStatsDisplay = (props: { playerName: string, stats: CoCStat, unrankedSkills: string[] }) => {
+    const { playerName, stats, unrankedSkills } = props;
+
+    const skillStat = stats.total.skillRoll;
     const skillRanking = [...skillStat.perSkill]
         .filter(([name,]) => !unrankedSkills.includes(name))
         .sort(([, stat1], [, stat2]) => stat2.rollNum - stat1.rollNum)
@@ -75,188 +153,146 @@ const PlayerStats = (props: StatsProps) => {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
     });
-
     const percentageFormatter = Intl.NumberFormat("ja-JP", {
         style: "percent",
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     });
 
-    return (
-        <Theme>
-            <Box my="2" style={{
-                backgroundColor: "var(--gray-1)"
-            }}>
-                <Heading my="2">あなたの名前を入力してください</Heading>
-                <TextField.Root value={playerName} onChange={e => setPlayerName(e.target.value)} placeholder="名無しの探索者">
-                    <TextField.Slot />
-                </TextField.Root>
-                <Heading my="2">あなたのキャラを選択してください</Heading>
-                <CheckboxCards.Root value={selectedCharacters}
-                    onValueChange={val => setSelectedCharacters(val)}>
-                    {[...allCharacterList].map(name => <CheckboxCards.Item key={name} value={name}>
-                        <Flex direction="column" width="100%">
-                            <Text weight="bold">{name}</Text>
-                        </Flex>
-                    </CheckboxCards.Item>)}
-                </CheckboxCards.Root>
-                <Heading my="2">オプションを選択してください</Heading>
-                <Flex direction="column" gap="2">
-                    {generalSkills.map(skill => (
-                        <Text as="label">
-                            <Flex gap="1" align="center">
-                                <Switch checked={unrankedSkills.includes(skill)} onCheckedChange={val => {
-                                    if (val) {
-                                        setUnrankedSkills([...unrankedSkills, skill]);
-                                    }
-                                    else {
-                                        setUnrankedSkills(unrankedSkills.filter(s => s !== skill));
-                                    }
-                                }} />
-                                {skill}をランキングから除外
-                            </Flex>
-                        </Text>
-                    ))}
+    return <Flex id="playerStats" py="2" gap="5" minHeight="100vh" direction="column" align="stretch" justify="center" position="relative" style={{
+        backgroundColor: "var(--gray-1)",
+        overflowX: "auto",
+        textWrap: "nowrap"
+    }}>
+        <Heading size="8" align="center">TRPG成績表</Heading>
+        <Flex align="center" justify="center">
+            <Table.Root>
+                <Table.Body>
+                    <Table.Row>
+                        <Table.RowHeaderCell><Text size="4">名前</Text></Table.RowHeaderCell>
+                        <Table.Cell><Text size="4">{playerName === "" ? "名無しの探索者" : playerName}</Text></Table.Cell>
+                    </Table.Row>
+                    <Table.Row>
+                        <Table.RowHeaderCell><Text size="4">技能振り総数</Text></Table.RowHeaderCell>
+                        <Table.Cell><Text size="4">{skillStat.rollNum}回</Text></Table.Cell>
+                    </Table.Row>
+                </Table.Body>
+            </Table.Root>
+        </Flex>
+        <Flex justify="center" gap="9">
+            <Box>
+                <Flex align="baseline" gap="1">
+                    <Heading align="left">技能別成績</Heading>
+                    {0 < unrankedSkills.length ? <Text size="1">{unrankedSkills.reduce((a, b) => a + "," + b)}を除く</Text> : null}
                 </Flex>
-                <Flex id="playerStats" py="2" gap="5" minHeight="100vh" direction="column" align="stretch" justify="center" position="relative" style={{
-                    backgroundColor: "var(--gray-1)",
-                    overflowX: "auto",
-                    textWrap: "nowrap"
-                }}>
-                    <Heading size="8" align="center">TRPG成績表</Heading>
-                    <Flex align="center" justify="center">
-                        <Table.Root>
-                            <Table.Body>
-                                <Table.Row>
-                                    <Table.RowHeaderCell><Text size="4">名前</Text></Table.RowHeaderCell>
-                                    <Table.Cell><Text size="4">{playerName === "" ? "名無しの探索者" : playerName}</Text></Table.Cell>
-                                </Table.Row>
-                                <Table.Row>
-                                    <Table.RowHeaderCell><Text size="4">技能振り総数</Text></Table.RowHeaderCell>
-                                    <Table.Cell><Text size="4">{skillStat.rollNum}回</Text></Table.Cell>
-                                </Table.Row>
-                            </Table.Body>
-                        </Table.Root>
-                    </Flex>
-                    <Flex justify="center" gap="9">
-                        <Box>
-                            <Flex align="baseline" gap="1">
-                                <Heading align="left">技能別成績</Heading>
-                                {0 < unrankedSkills.length ? <Text size="1">{unrankedSkills.reduce((a, b) => a + "," + b)}を除く</Text> : null}
-                            </Flex>
-                            <Table.Root>
-                                <Table.Body>
-                                    <SkillRankingRow stats={skillRanking} rank={1} />
-                                    <SkillRankingRow stats={skillRanking} rank={2} />
-                                    <SkillRankingRow stats={skillRanking} rank={3} />
-                                </Table.Body>
-                            </Table.Root>
-                            <Grid columns="2">
-                                <MiniSkillRankingRow stats={skillRanking} rank={4} />
-                                <MiniSkillRankingRow stats={skillRanking} rank={5} />
-                            </Grid>
-                        </Box>
-                        <Box>
-                            <Heading align="left">全技能成績</Heading>
-                            <Table.Root>
-                                <Table.Body style={{ verticalAlign: "bottom" }}>
-                                    <Table.Row>
-                                        <Table.RowHeaderCell><Text size="4">技能成功</Text></Table.RowHeaderCell>
-                                        <Table.Cell>
-                                            <ValueCell title="回数">
-                                                {skillStat.successNum}回
-                                            </ValueCell>
-                                        </Table.Cell>
-                                        <Table.Cell>
-                                            <ValueCell title="確率">
-                                                {percentageFormatter.format(skillStat.successNum / skillStat.rollNum)}
-                                            </ValueCell>
-                                        </Table.Cell>
-                                    </Table.Row>
-                                    <Table.Row>
-                                        <Table.RowHeaderCell><Text size="4">クリティカル</Text></Table.RowHeaderCell>
-                                        <Table.Cell>
-                                            <ValueCell title="回数">
-                                                {skillStat.criticalNum}回
-                                            </ValueCell>
-                                        </Table.Cell>
-                                        <Table.Cell>
-                                            <ValueCell title="確率">
-                                                {percentageFormatter.format(skillStat.criticalNum / skillStat.rollNum)}
-                                            </ValueCell>
-                                        </Table.Cell>
-                                    </Table.Row>
-                                    <Table.Row>
-                                        <Table.RowHeaderCell><Text size="4">ファンブル</Text></Table.RowHeaderCell>
-                                        <Table.Cell>
-                                            <ValueCell title="回数">
-                                                {skillStat.fumbleNum}回
-                                            </ValueCell>
-                                        </Table.Cell>
-                                        <Table.Cell>
-                                            <ValueCell title="確率">
-                                                {percentageFormatter.format(skillStat.fumbleNum / skillStat.rollNum)}
-                                            </ValueCell>
-                                        </Table.Cell>
-                                    </Table.Row>
-                                </Table.Body>
-                            </Table.Root>
-
-                            <Grid columns="2">
-                                <Flex mt="1" gap="2" style={{
-                                    borderBottom: "1px solid var(--gray-6)"
-                                }}>
-                                    <Text size="2">1クリ</Text>
-                                    <Text size="2">{skillStat.spCriticalNum}回/{percentageFormatter.format(skillStat.spCriticalNum / skillStat.rollNum)}</Text>
-                                </Flex>
-                                <Flex mt="1" gap="2" style={{
-                                    borderBottom: "1px solid var(--gray-6)"
-                                }}>
-                                    <Text size="2">100ファン</Text>
-                                    <Text size="2">{skillStat.spFumbleNum}回/{percentageFormatter.format(skillStat.spFumbleNum / skillStat.rollNum)}</Text>
-                                </Flex>
-                            </Grid>
-                        </Box>
-                    </Flex>
-                    <Flex justify="center" gap="9">
-                        <Box>
-                            <Heading align="left">その他の成績</Heading>
-                            <Grid columns="6">
-                                <ValueBlock title="発言数">
-                                    {stats.talk.talkNum}回
-                                </ValueBlock>
-                                <ValueBlock title="キャラ発言数">
-                                    {stats.talk.pcTalkNum}回
-                                </ValueBlock>
-                                <ValueBlock title="総喪失HP">
-                                    {stats.status.totalDamage}pt
-                                </ValueBlock>
-                                <ValueBlock title="総喪失SAN">
-                                    {stats.status.totalLostSAN}pt
-                                </ValueBlock>
-                                <ValueBlock title="SANチェック回数">
-                                    {stats.sanityCheck.rollNum}回
-                                </ValueBlock>
-                                <ValueBlock title="SANチェック成功率">
-                                    {percentageFormatter.format(stats.sanityCheck.successNum / stats.sanityCheck.rollNum)}
-                                </ValueBlock>
-                            </Grid>
-                        </Box>
-                    </Flex>
-                    <Text size="1" style={{
-                        position: "absolute",
-                        left: "1em",
-                        bottom: "1em"
-                    }}>DiceStats: https://tukasa0001.github.io/DiceStats/</Text>
-                </Flex>
-
-                <Flex mt="5" direction="column" align="center">
-                    <Button onClick={saveImg}>画像として保存{isSaving ? <Spinner /> : null}</Button>
-                </Flex>
+                <Table.Root>
+                    <Table.Body>
+                        <SkillRankingRow stats={skillRanking} rank={1} />
+                        <SkillRankingRow stats={skillRanking} rank={2} />
+                        <SkillRankingRow stats={skillRanking} rank={3} />
+                    </Table.Body>
+                </Table.Root>
+                <Grid columns="2">
+                    <MiniSkillRankingRow stats={skillRanking} rank={4} />
+                    <MiniSkillRankingRow stats={skillRanking} rank={5} />
+                </Grid>
             </Box>
-        </Theme>
-    );
+            <Box>
+                <Heading align="left">全技能成績</Heading>
+                <Table.Root>
+                    <Table.Body style={{ verticalAlign: "bottom" }}>
+                        <Table.Row>
+                            <Table.RowHeaderCell><Text size="4">技能成功</Text></Table.RowHeaderCell>
+                            <Table.Cell>
+                                <ValueCell title="回数">
+                                    {skillStat.successNum}回
+                                </ValueCell>
+                            </Table.Cell>
+                            <Table.Cell>
+                                <ValueCell title="確率">
+                                    {percentageFormatter.format(skillStat.successNum / skillStat.rollNum)}
+                                </ValueCell>
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.RowHeaderCell><Text size="4">クリティカル</Text></Table.RowHeaderCell>
+                            <Table.Cell>
+                                <ValueCell title="回数">
+                                    {skillStat.criticalNum}回
+                                </ValueCell>
+                            </Table.Cell>
+                            <Table.Cell>
+                                <ValueCell title="確率">
+                                    {percentageFormatter.format(skillStat.criticalNum / skillStat.rollNum)}
+                                </ValueCell>
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.RowHeaderCell><Text size="4">ファンブル</Text></Table.RowHeaderCell>
+                            <Table.Cell>
+                                <ValueCell title="回数">
+                                    {skillStat.fumbleNum}回
+                                </ValueCell>
+                            </Table.Cell>
+                            <Table.Cell>
+                                <ValueCell title="確率">
+                                    {percentageFormatter.format(skillStat.fumbleNum / skillStat.rollNum)}
+                                </ValueCell>
+                            </Table.Cell>
+                        </Table.Row>
+                    </Table.Body>
+                </Table.Root>
+
+                <Grid columns="2">
+                    <Flex mt="1" gap="2" style={{
+                        borderBottom: "1px solid var(--gray-6)"
+                    }}>
+                        <Text size="2">1クリ</Text>
+                        <Text size="2">{skillStat.spCriticalNum}回/{percentageFormatter.format(skillStat.spCriticalNum / skillStat.rollNum)}</Text>
+                    </Flex>
+                    <Flex mt="1" gap="2" style={{
+                        borderBottom: "1px solid var(--gray-6)"
+                    }}>
+                        <Text size="2">100ファン</Text>
+                        <Text size="2">{skillStat.spFumbleNum}回/{percentageFormatter.format(skillStat.spFumbleNum / skillStat.rollNum)}</Text>
+                    </Flex>
+                </Grid>
+            </Box>
+        </Flex>
+        <Flex justify="center" gap="9">
+            <Box>
+                <Heading align="left">その他の成績</Heading>
+                <Grid columns="6">
+                    <ValueBlock title="発言数">
+                        {stats.total.talk.talkNum}回
+                    </ValueBlock>
+                    <ValueBlock title="キャラ発言数">
+                        {stats.total.talk.pcTalkNum}回
+                    </ValueBlock>
+                    <ValueBlock title="総喪失HP">
+                        {stats.total.status.totalDamage}pt
+                    </ValueBlock>
+                    <ValueBlock title="総喪失SAN">
+                        {stats.total.status.totalLostSAN}pt
+                    </ValueBlock>
+                    <ValueBlock title="SANチェック回数">
+                        {stats.total.sanityCheck.rollNum}回
+                    </ValueBlock>
+                    <ValueBlock title="SANチェック成功率">
+                        {percentageFormatter.format(stats.total.sanityCheck.successNum / stats.total.sanityCheck.rollNum)}
+                    </ValueBlock>
+                </Grid>
+            </Box>
+        </Flex>
+        <Text size="1" style={{
+            position: "absolute",
+            left: "1em",
+            bottom: "1em"
+        }}>DiceStats: https://tukasa0001.github.io/DiceStats/</Text>
+    </Flex>
 }
+
+const PlayerStatsDisplay = React.memo(InnerPlayerStatsDisplay);
 
 const SkillRankingRow = (props: {
     stats: [string, SkillStat][],
