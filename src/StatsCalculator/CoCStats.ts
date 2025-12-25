@@ -15,7 +15,7 @@ class CoCStatsCounter {
     calc = (log: CcfoliaMessage[], _option?: CoCStatOptions) => {
         const option: Required<CoCStatOptions> = { ...this.createDefaultOption(), ..._option };
         let stat = new CoCStat()
-        for (let msg of log.slice(option.startIdx, option.endIdx)) {
+        for (let msg of log.slice(option.startIdx, option.endIdx + 1)) {
             let sender = msg.sender;
             // 名前エイリアス処理
             for (let [before, after] of option.nameAliases) {
