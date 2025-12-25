@@ -15,6 +15,7 @@ import { LogView } from './logView/LogView';
 import { FilteredLogView } from './logView/FilteredLogView';
 import PlayerStats from './PlayerStats/PlayerStats';
 import { LogFile } from './file/LogFile';
+import { MultiLogView } from './logView/MultiLogView';
 
 export const configCtx = createContext(new DisplayConfig());
 export const setConfigCtx = createContext((x: DisplayConfig) => { });
@@ -100,7 +101,7 @@ const App: FC = () => {
                             </Tabs.Content>
                             <Tabs.Content value="logView">
                                 <Flex direction="column" mx="4">
-                                    {0 < log.length ? <FilteredLogView logs={log[0]} /> : <Text my="2">ログファイルをアップロードしてください</Text>}
+                                    <MultiLogView logs={log} />
                                 </Flex>
                             </Tabs.Content>
                             <Tabs.Content value="plStats">
