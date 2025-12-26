@@ -10,7 +10,7 @@ type UploadFormProps = {
     onLogFileChanged: (files: File[]) => Promise<void>
 };
 
-const UploadForm = (props: UploadFormProps) => {
+const HomeTab = (props: UploadFormProps) => {
     const { logs, setLogs } = props;
     const showUploadDialog = () => {
         const input = document.createElement('input');
@@ -44,4 +44,4 @@ const UploadForm = (props: UploadFormProps) => {
     )
 }
 
-export default UploadForm
+export default HomeTab

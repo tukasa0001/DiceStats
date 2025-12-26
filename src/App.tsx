@@ -1,7 +1,7 @@
 import { createContext, useContext, useState } from 'react'
 import type { FC } from 'react'
 import "@radix-ui/themes/styles.css"
-import UploadForm from './UploadForm'
+import HomeTab from './Home'
 import Stats from './Stats';
 import ConfigCard from './config/ConfigCard';
 import DisplayConfig from './config/DisplayConfig';
@@ -41,7 +41,7 @@ const App: FC = () => {
             })
         }
         setLog(logs);
-        if (tab === "upload") {
+        if (tab === "home") {
             setTab("stats");
         }
     }
@@ -75,7 +75,7 @@ const App: FC = () => {
                                         <Heading size="7">TRPG統計ツール</Heading>
                                     </Box>
                                     <Flex align="center" justify="center">
-                                        <Tabs.Trigger value="upload">ログ選択</Tabs.Trigger>
+                                        <Tabs.Trigger value="home">ホーム</Tabs.Trigger>
                                         <Tabs.Trigger value="stats">統計</Tabs.Trigger>
                                         <Tabs.Trigger value="logView">表示</Tabs.Trigger>
                                         <Tabs.Trigger value="plStats">成績表</Tabs.Trigger>
@@ -88,9 +88,9 @@ const App: FC = () => {
                                 </Grid>
                             </Tabs.List>
 
-                            <Tabs.Content value="upload">
+                            <Tabs.Content value="home">
                                 <Flex direction="column" mx="4">
-                                    <UploadForm logs={log} setLogs={setLog} onLogFileChanged={onFileUploaded} />
+                                    <HomeTab logs={log} setLogs={setLog} onLogFileChanged={onFileUploaded} />
                                 </Flex>
                             </Tabs.Content>
                             <Tabs.Content value="stats">
