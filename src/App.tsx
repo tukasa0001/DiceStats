@@ -16,7 +16,7 @@ import { FilteredLogView } from './logView/FilteredLogView';
 import PlayerStats from './PlayerStats/PlayerStats';
 import { LogFile } from './file/LogFile';
 import { MultiLogView } from './logView/MultiLogView';
-import cocstats from './StatsCalculator/CoCStats';
+import cocstats, { CoCStat } from './StatsCalculator/CoCStats';
 
 export const configCtx = createContext(new DisplayConfig());
 export const setConfigCtx = createContext((x: DisplayConfig) => { });
@@ -34,23 +34,23 @@ const App: FC = () => {
         for (let file of files) {
             const str = await file.text();
             const parsed = parseCcfoliaLog(str);
-            const stat = cocstats.calc(parsed, {
-                ...config,
-                startIdx: 0,
-                endIdx: parsed.length - 1
-            })
-            logs.push({
+            const idx = logs.push({
                 filename: file.name,
                 log: parsed,
-                stat: stat,
                 startIdx: 0,
                 endIdx: parsed.length - 1
-            })
+            });
+            (async () => {
+                const stat = await cocstats.calcAsync(parsed, {
+                    ...config,
+                    startIdx: 0,
+                    endIdx: parsed.length - 1
+                })
+                // FIXIT: logが下のsetLogを行う前の空配列になる
+                setLog(log.map((logFile, i) => idx === i ? { ...logFile, stat } : logFile))
+            })();
         }
         setLog(logs);
-        if (tab === "home") {
-            setTab("stats");
-        }
     }
 
     return (
