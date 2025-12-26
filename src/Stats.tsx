@@ -28,10 +28,15 @@ const Stats = (props: StatsProps) => {
         return <Text>ログをアップロードしてください</Text>
     }
 
-    const stats = logs
+    const statsArray = logs
         .filter(file => file.stat !== undefined)
         .map(file => file.stat!)
-        .reduce((a, b) => a.merge(b));
+
+    if (statsArray.length <= 0) {
+        return <Text>読み込み中</Text>
+    }
+
+    const stats = statsArray.reduce((a, b) => a.merge(b));
 
     const skills = [...stats.perCharacter]
         .map(([name, stat]) => [name, stat.skillRoll] as const)

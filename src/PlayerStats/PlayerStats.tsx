@@ -60,10 +60,11 @@ const PlayerStats = (props: StatsProps) => {
         }
     }
     const calcStats = () => {
-        setStats(props.logs
+        const statsArray = props.logs
             .filter(file => file.stat !== undefined)
             .map(file => file.stat!)
-            .reduce((a, b) => a.merge(b)));
+
+        setStats(statsArray.length <= 0 ? null : statsArray.reduce((a, b) => a.merge(b)));
     }
 
     const config = useContext(configCtx);
