@@ -25,7 +25,7 @@ const App: FC = () => {
     const [isDark, setIsDark] = useState(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     const [log, setLog] = useState<LogFile[]>([]);
     const [config, setConfig] = useState(new DisplayConfig());
-    const [tab, setTab] = useState("upload");
+    const [tab, setTab] = useState("home");
     const [isDropping, setDropping] = useState(false);
 
     const onFileUploaded = async (files: File[]) => {
