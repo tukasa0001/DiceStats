@@ -29,6 +29,7 @@ const HomeTab = (props: UploadFormProps) => {
 
     return (
         <Box py="6">
+            <Heading size="7">TRPG統計ツール</Heading>
             <Text my="2" as="div">
                 Ccfoliaのログからダイスロールなどの統計を取得します。<br />
                 CoC6版のみ対応しています。<br />

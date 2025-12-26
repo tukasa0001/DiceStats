@@ -71,9 +71,7 @@ const App: FC = () => {
                         <Tabs.Root value={tab} onValueChange={tab => setTab(tab)}>
                             <Tabs.List>
                                 <Grid mx="4" rows="1" columns="3" width="100%" style={{ textWrap: "nowrap" }}>
-                                    <Box>
-                                        <Heading size="7">TRPG統計ツール</Heading>
-                                    </Box>
+                                    <Box />
                                     <Flex align="center" justify="center">
                                         <Tabs.Trigger value="home">ホーム</Tabs.Trigger>
                                         <Tabs.Trigger value="stats">統計</Tabs.Trigger>
