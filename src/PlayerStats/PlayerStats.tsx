@@ -61,12 +61,7 @@ const PlayerStats = (props: StatsProps) => {
     }
     const calcStats = () => {
         setStats(props.logs
-            .map(file => cocstats.calc(file.log, {
-                ...config,
-                startIdx: file.startIdx,
-                endIdx: file.endIdx,
-                filter: msg => selectedCharacters.current.includes(msg.sender)
-            }))
+            .map(file => file.stat)
             .reduce((a, b) => a.merge(b)));
     }
 
