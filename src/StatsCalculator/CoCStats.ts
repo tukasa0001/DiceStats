@@ -42,6 +42,42 @@ class CoCStatsCounter {
         return stat;
     }
 
+    calcAsync = async (log: CcfoliaMessage[], _option?: CoCStatOptions) => {
+        const yieldNow = () => new Promise(resolve => setTimeout(resolve, 0));
+        const option: Required<CoCStatOptions> = { ...this.createDefaultOption(), ..._option };
+        let stat = new CoCStat()
+        let i = 0;
+        for (let msg of log.slice(option.startIdx, option.endIdx + 1)) {
+            let sender = msg.sender;
+            // 名前エイリアス処理
+            for (let [before, after] of option.nameAliases) {
+                if (sender === before) {
+                    sender = after;
+                }
+            }
+            if (msg.sender !== sender) {
+                msg = { ...msg, sender };
+            }
+            // フィルター処理
+            if (!option.filter(msg)) {
+                continue;
+            }
+            // 統計追加処理
+            this.incrementStat(stat.total, msg);
+            if (sender !== "") {
+                if (!stat.perCharacter.has(sender)) {
+                    stat.perCharacter.set(sender, new CharacterStat());
+                }
+                this.incrementStat(stat.perCharacter.get(sender)!, msg);
+            }
+            if (i % 100 === 0) {
+                await yieldNow();
+            }
+            i++;
+        }
+        return stat;
+    }
+
     incrementStat = (stat: CharacterStat, msg: CcfoliaMessage) => {
         if (msg instanceof CoCSkillRollMessage) {
             this.incrementSkillStat(stat.skillRoll, msg);
