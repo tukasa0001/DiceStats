@@ -1,4 +1,4 @@
-import { Box, Button, Card, Flex, Text, TextField, Tooltip } from "@radix-ui/themes"
+import { Box, Button, Card, Flex, Progress, Spinner, Text, TextField, Tooltip } from "@radix-ui/themes"
 import { LogFile } from "./LogFile"
 import { useContext, useState } from "react"
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge"
@@ -48,6 +48,7 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
 
     return <Box>
         <Card>
+            {log.stat === undefined ? <Spinner /> : null}
             <Text as="div" weight="bold">{log.filename} ({log.endIdx - log.startIdx + 1}メッセージ)</Text>
             <Flex ml="4" my="1" direction="column" gap="2">
                 <Flex gap="2" align="center">
