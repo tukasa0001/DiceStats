@@ -61,7 +61,8 @@ const PlayerStats = (props: StatsProps) => {
     }
     const calcStats = () => {
         setStats(props.logs
-            .map(file => file.stat)
+            .filter(file => file.stat !== undefined)
+            .map(file => file.stat!)
             .reduce((a, b) => a.merge(b)));
     }
 

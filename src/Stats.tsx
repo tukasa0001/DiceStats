@@ -29,7 +29,8 @@ const Stats = (props: StatsProps) => {
     }
 
     const stats = logs
-        .map(file => file.stat)
+        .filter(file => file.stat !== undefined)
+        .map(file => file.stat!)
         .reduce((a, b) => a.merge(b));
 
     const skills = [...stats.perCharacter]

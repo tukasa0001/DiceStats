@@ -4,7 +4,7 @@ import { CoCStat } from "../StatsCalculator/CoCStats"
 type LogFile = {
     filename: string,
     log: CcfoliaMessage[],
-    stat: CoCStat,
+    stat?: CoCStat,
     startIdx: number,
     endIdx: number
 }
