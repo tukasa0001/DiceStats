@@ -1,7 +1,7 @@
 import { createContext, useContext, useState } from 'react'
 import type { FC } from 'react'
 import "@radix-ui/themes/styles.css"
-import UploadForm from './UploadForm'
+import HomeTab from './Home'
 import Stats from './Stats';
 import ConfigCard from './config/ConfigCard';
 import DisplayConfig from './config/DisplayConfig';
@@ -25,7 +25,7 @@ const App: FC = () => {
     const [isDark, setIsDark] = useState(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     const [log, setLog] = useState<LogFile[]>([]);
     const [config, setConfig] = useState(new DisplayConfig());
-    const [tab, setTab] = useState("upload");
+    const [tab, setTab] = useState("home");
     const [isDropping, setDropping] = useState(false);
 
     const onFileUploaded = async (files: File[]) => {
@@ -41,7 +41,7 @@ const App: FC = () => {
             })
         }
         setLog(logs);
-        if (tab === "upload") {
+        if (tab === "home") {
             setTab("stats");
         }
     }
@@ -71,11 +71,9 @@ const App: FC = () => {
                         <Tabs.Root value={tab} onValueChange={tab => setTab(tab)}>
                             <Tabs.List>
                                 <Grid mx="4" rows="1" columns="3" width="100%" style={{ textWrap: "nowrap" }}>
-                                    <Box>
-                                        <Heading size="7">TRPG統計ツール</Heading>
-                                    </Box>
+                                    <Box />
                                     <Flex align="center" justify="center">
-                                        <Tabs.Trigger value="upload">ログ選択</Tabs.Trigger>
+                                        <Tabs.Trigger value="home">ホーム</Tabs.Trigger>
                                         <Tabs.Trigger value="stats">統計</Tabs.Trigger>
                                         <Tabs.Trigger value="logView">表示</Tabs.Trigger>
                                         <Tabs.Trigger value="plStats">成績表</Tabs.Trigger>
@@ -88,9 +86,9 @@ const App: FC = () => {
                                 </Grid>
                             </Tabs.List>
 
-                            <Tabs.Content value="upload">
+                            <Tabs.Content value="home">
                                 <Flex direction="column" mx="4">
-                                    <UploadForm logs={log} setLogs={setLog} onLogFileChanged={onFileUploaded} />
+                                    <HomeTab logs={log} setLogs={setLog} onLogFileChanged={onFileUploaded} />
                                 </Flex>
                             </Tabs.Content>
                             <Tabs.Content value="stats">
