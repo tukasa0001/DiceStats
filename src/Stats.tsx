@@ -29,11 +29,7 @@ const Stats = (props: StatsProps) => {
     }
 
     const stats = logs
-        .map(file => cocstats.calc(file.log, {
-            ...config,
-            startIdx: file.startIdx,
-            endIdx: file.endIdx
-        }))
+        .map(file => file.stat)
         .reduce((a, b) => a.merge(b));
 
     const skills = [...stats.perCharacter]

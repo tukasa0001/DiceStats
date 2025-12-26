@@ -16,6 +16,7 @@ import { FilteredLogView } from './logView/FilteredLogView';
 import PlayerStats from './PlayerStats/PlayerStats';
 import { LogFile } from './file/LogFile';
 import { MultiLogView } from './logView/MultiLogView';
+import cocstats from './StatsCalculator/CoCStats';
 
 export const configCtx = createContext(new DisplayConfig());
 export const setConfigCtx = createContext((x: DisplayConfig) => { });
@@ -33,9 +34,15 @@ const App: FC = () => {
         for (let file of files) {
             const str = await file.text();
             const parsed = parseCcfoliaLog(str);
+            const stat = cocstats.calc(parsed, {
+                ...config,
+                startIdx: 0,
+                endIdx: parsed.length - 1
+            })
             logs.push({
                 filename: file.name,
                 log: parsed,
+                stat: stat,
                 startIdx: 0,
                 endIdx: parsed.length - 1
             })
