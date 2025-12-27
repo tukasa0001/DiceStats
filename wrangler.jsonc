@@ -1,5 +1,7 @@
 {
-    "name": "worker",
+    "name": "dicestats",
     "compatibility_date": "2025-12-27",
-    "main": "src/main.tsx"
+    "assets": {
+        "directory": "./dist"
+    }
 }
