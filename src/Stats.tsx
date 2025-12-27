@@ -28,8 +28,13 @@ const Stats = (props: StatsProps) => {
         return <Text>ログをアップロードしてください</Text>
     }
 
+    // 暫定対応: 名前の読み替えを更新してもfile.statが更新されないため
     const stats = logs
-        .map(file => file.stat)
+        .map(file => cocstats.calc(file.log, {
+            ...config,
+            startIdx: file.startIdx,
+            endIdx: file.endIdx
+        }))
         .reduce((a, b) => a.merge(b));
 
     const skills = [...stats.perCharacter]
