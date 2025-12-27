@@ -23,9 +23,6 @@ class CoCStatsCounter {
                     sender = after;
                 }
             }
-            if (msg.sender !== sender) {
-                msg = { ...msg, sender };
-            }
             // フィルター処理
             if (!option.filter(msg)) {
                 continue;
