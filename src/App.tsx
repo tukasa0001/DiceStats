@@ -80,18 +80,26 @@ const App: FC = () => {
                                 <Grid mx="4" rows="1" columns="3" width="100%" style={{ textWrap: "nowrap" }}>
                                     <Box />
                                     <Flex align="center" justify="center">
-                                        <Tooltip content="ファイルのアップロードや統計範囲の設定を行う">
-                                            <Tabs.Trigger value="home">ホーム</Tabs.Trigger>
-                                        </Tooltip>
-                                        <Tooltip content="キャラごとの統計を見る">
-                                            <Tabs.Trigger value="stats">統計</Tabs.Trigger>
-                                        </Tooltip>
-                                        <Tooltip content="ログの内容を見る">
-                                            <Tabs.Trigger value="logView">表示</Tabs.Trigger>
-                                        </Tooltip>
-                                        <Tooltip content="あなたの統計を見る">
-                                            <Tabs.Trigger value="plStats">成績表</Tabs.Trigger>
-                                        </Tooltip>
+                                        <Tabs.Trigger value="home">
+                                            <Tooltip content="ファイルのアップロードや統計範囲の設定を行う">
+                                                <Text>ホーム</Text>
+                                            </Tooltip>
+                                        </Tabs.Trigger>
+                                        <Tabs.Trigger value="stats">
+                                            <Tooltip content="キャラごとの統計を見る">
+                                                <Text>統計</Text>
+                                            </Tooltip>
+                                        </Tabs.Trigger>
+                                        <Tabs.Trigger value="logView">
+                                            <Tooltip content="ログの内容を見る">
+                                                <Text>ログ</Text>
+                                            </Tooltip>
+                                        </Tabs.Trigger>
+                                        <Tabs.Trigger value="plStats">
+                                            <Tooltip content="あなたの統計を見る">
+                                                <Text>成績表</Text>
+                                            </Tooltip>
+                                        </Tabs.Trigger>
                                     </Flex>
                                     <Flex align="center" justify="end">
                                         <Button variant="ghost" onClick={e => setIsDark(!isDark)}>
