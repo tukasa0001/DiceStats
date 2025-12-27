@@ -49,7 +49,7 @@ const App: FC = () => {
         }
         setLog(logs);
         if (tab === "home") {
-            setTab("stats");
+            setTab("plStats");
         }
     }
 
