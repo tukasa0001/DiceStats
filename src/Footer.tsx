@@ -1,18 +1,21 @@
-import "./Footer.css";
+import { Text, Flex, Box, Link, Grid } from "@radix-ui/themes";
 
 const Footer = () => {
     return (
-        <footer className="card footer">
-            <div>
-                <p><a href="https://lucide.dev/license" target="_blank">Lucide License</a></p>
-            </div>
-            <div>
-                <p>© 2025 EmptyBottle</p>
-            </div>
-            <div>
-                <p><a href="https://github.com/tukasa0001/DiceStats" target="_blank">GitHub</a></p>
-            </div>
-        </footer>
+        <Grid asChild justify="center" columns={{ md: "2" }}>
+            <footer className="card footer">
+                <Text as="div" align="center">
+                    <Link href="https://github.com/tukasa0001/DiceStats/blob/main/THIRD_PARTY_LICENSE.md" target="_blank">
+                        Third Party License
+                    </Link>
+                </Text>
+                <Text as="div" align="center">
+                    <Link href="https://github.com/tukasa0001/DiceStats" target="_blank">
+                        Source Code
+                    </Link>
+                </Text>
+            </footer>
+        </Grid>
     )
 }
 

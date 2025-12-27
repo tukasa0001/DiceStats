@@ -1,9 +1,11 @@
 import { Box, Button, Card, Flex, Text, TextField, Tooltip } from "@radix-ui/themes"
 import { LogFile } from "./LogFile"
-import { useState } from "react"
+import { useContext, useState } from "react"
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge"
 import { TriangleAlert } from "lucide-react"
 import { FilteredLogView } from "../logView/FilteredLogView"
+import { configCtx } from "../App"
+import cocstats from "../StatsCalculator/CoCStats"
 
 type LogFileInfoProps = {
     log: LogFile,
@@ -12,6 +14,7 @@ type LogFileInfoProps = {
 
 export const LogFileInfo = (props: LogFileInfoProps) => {
     const { log, setLog } = props;
+    const config = useContext(configCtx);
     const [startMsg, setStartMsg] = useState(log.startIdx === 0 ? "" : log.log[log.startIdx].toDisplayText());
     const [endMsg, setEndMsg] = useState(log.endIdx === log.log.length ? "" : log.log[log.endIdx].toDisplayText());
 
@@ -30,6 +33,19 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
         return undefined;
     }
 
+    const setLogRange = (data: { startIdx?: number, endIdx?: number }) => {
+        const newLog = {
+            ...log,
+            ...data,
+            stat: cocstats.calc(log.log, {
+                ...config,
+                startIdx: data.startIdx ?? log.startIdx,
+                endIdx: data.endIdx ?? log.endIdx,
+            })
+        }
+        setLog(newLog);
+    }
+
     return <Box>
         <Card>
             <Text as="div" weight="bold">{log.filename} ({log.endIdx - log.startIdx + 1}メッセージ)</Text>
@@ -43,7 +59,7 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
                         onChange={e => {
                             setStartMsg(e.target.value.trim())
                             const idx = textToIndex(e.target.value.trim());
-                            setLog({ ...log, startIdx: idx ?? 0 })
+                            setLogRange({ startIdx: idx ?? 0 })
                         }}
                         placeholder="最初から">
                         <TextField.Slot />
@@ -60,7 +76,7 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
                         onChange={e => {
                             setEndMsg(e.target.value.trim())
                             const idx = textToIndex(e.target.value.trim());
-                            setLog({ ...log, endIdx: idx ?? log.log.length })
+                            setLogRange({ endIdx: idx ?? log.log.length })
                         }}
                         placeholder="最後まで">
                         <TextField.Slot />
@@ -87,11 +103,11 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
                     <FilteredLogView logs={log} onClick={(msg, i) => {
                         if (selectMode === "start") {
                             setStartMsg(msg.toDisplayText())
-                            setLog({ ...log, startIdx: i })
+                            setLogRange({ startIdx: i })
                         }
                         else {
                             setEndMsg(msg.toDisplayText())
-                            setLog({ ...log, endIdx: i })
+                            setLogRange({ endIdx: i })
                         }
                         setSelectMode("none")
                     }} />

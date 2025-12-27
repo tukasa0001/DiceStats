@@ -14,7 +14,13 @@ type StatsProps = {
 const PlayerStats = (props: StatsProps) => {
     const log = props.logs;
     if (log.length <= 0) {
-        return <Text>ログをアップロードしてください</Text>
+        return <Box>
+            <Heading my="2">成績表</Heading>
+            <Text>
+                アップロードされた複数のログファイルからあなたの統計を生成します。<br />
+                複数のログファイルをまとめてドラッグ&ドロップしてください。
+            </Text>
+        </Box>
     }
 
     const generalSkills = ["目星", "聞き耳", "図書館", "知識", "アイデア", "幸運"];
@@ -55,12 +61,7 @@ const PlayerStats = (props: StatsProps) => {
     }
     const calcStats = () => {
         setStats(props.logs
-            .map(file => cocstats.calc(file.log, {
-                ...config,
-                startIdx: file.startIdx,
-                endIdx: file.endIdx,
-                filter: msg => selectedCharacters.current.includes(msg.sender)
-            }))
+            .map(file => file.stat)
             .reduce((a, b) => a.merge(b)));
     }
 
@@ -71,6 +72,10 @@ const PlayerStats = (props: StatsProps) => {
             <Box my="2" style={{
                 backgroundColor: "var(--gray-1)"
             }}>
+                <Heading my="2">成績表</Heading>
+                <Text>
+                    アップロードされた複数のログファイルからあなたの統計を生成します。
+                </Text>
                 <Heading my="2">あなたの名前を入力してください</Heading>
                 <TextField.Root defaultValue="" placeholder="名無しの探索者" ref={playerName}>
                     <TextField.Slot />
