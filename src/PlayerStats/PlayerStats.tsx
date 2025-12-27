@@ -6,6 +6,7 @@ import "./PlayerStats.css"
 import domtoimage from "dom-to-image"
 import cocstats, { CoCStat, SkillStat } from '../StatsCalculator/CoCStats';
 import { LogFile } from '../file/LogFile';
+import { CoCSkillRollMessage } from '../ccfoliaLog/message/CoCSkillRollMessage';
 
 type StatsProps = {
     logs: LogFile[]
@@ -32,6 +33,7 @@ const PlayerStats = (props: StatsProps) => {
     const [stats, setStats] = useState<CoCStat | null>(null)
     const allCharacterList = useMemo(() => [...new Set(log
         .flatMap(l => l.log)
+        .filter(msg => msg instanceof CoCSkillRollMessage)
         .map(msg => msg.sender))]
         .sort((a, b) => a.localeCompare(b, "ja")), [log]
     )
