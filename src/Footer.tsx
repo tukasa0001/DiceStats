@@ -4,7 +4,7 @@ const Footer = () => {
     return (
         <footer className="card footer">
             <div>
-                <p><a href="https://lucide.dev/license" target="_blank">Lucide License</a></p>
+                <p><a href="https://github.com/tukasa0001/DiceStats/blob/main/THIRD_PARTY_LICENSE.md" target="_blank">Third Party License</a></p>
             </div>
             <div>
                 <p>© 2025 EmptyBottle</p>
