@@ -4,8 +4,9 @@ import { configCtx } from '../App';
 import { Box, Button, Flex, Table, Heading, TextField, CheckboxCards, Text, Theme, Grid, Spinner, Switch, Card, Checkbox } from '@radix-ui/themes';
 import "./PlayerStats.css"
 import domtoimage from "dom-to-image"
-import cocstats, { CoCStat, SkillStat } from '../StatsCalculator/CoCStats';
+import cocstats, { CharacterStat, CoCStat, SkillStat } from '../StatsCalculator/CoCStats';
 import { LogFile } from '../file/LogFile';
+import { CoCSkillRollMessage } from '../ccfoliaLog/message/CoCSkillRollMessage';
 
 type StatsProps = {
     logs: LogFile[]
@@ -29,9 +30,10 @@ const PlayerStats = (props: StatsProps) => {
     const unrankedSkills = useRef<string[]>(generalSkills);
 
     const [isSaving, setSaving] = useState(false);
-    const [stats, setStats] = useState<CoCStat | null>(null)
+    const [stats, setStats] = useState<CharacterStat | null>(null)
     const allCharacterList = useMemo(() => [...new Set(log
         .flatMap(l => l.log)
+        .filter(msg => msg instanceof CoCSkillRollMessage)
         .map(msg => msg.sender))]
         .sort((a, b) => a.localeCompare(b, "ja")), [log]
     )
@@ -62,6 +64,9 @@ const PlayerStats = (props: StatsProps) => {
     const calcStats = () => {
         setStats(props.logs
             .map(file => file.stat)
+            .flatMap(stat => [...stat.perCharacter])
+            .filter(([name, stat]) => selectedCharacters.current.includes(name))
+            .map(([name, stat]) => stat)
             .reduce((a, b) => a.merge(b)));
     }
 
@@ -146,10 +151,10 @@ const CharacterCard = (props: { name: string, selectedCharacters: React.MutableR
     );
 }
 
-const InnerPlayerStatsDisplay = (props: { playerName: string, stats: CoCStat, unrankedSkills: string[] }) => {
+const InnerPlayerStatsDisplay = (props: { playerName: string, stats: CharacterStat, unrankedSkills: string[] }) => {
     const { playerName, stats, unrankedSkills } = props;
 
-    const skillStat = stats.total.skillRoll;
+    const skillStat = stats.skillRoll;
     const skillRanking = [...skillStat.perSkill]
         .filter(([name,]) => !unrankedSkills.includes(name))
         .sort(([, stat1], [, stat2]) => stat2.rollNum - stat1.rollNum)
@@ -269,22 +274,22 @@ const InnerPlayerStatsDisplay = (props: { playerName: string, stats: CoCStat, un
                 <Heading align="left">その他の成績</Heading>
                 <Grid columns="6">
                     <ValueBlock title="発言数">
-                        {stats.total.talk.talkNum}回
+                        {stats.talk.talkNum}回
                     </ValueBlock>
                     <ValueBlock title="キャラ発言数">
-                        {stats.total.talk.pcTalkNum}回
+                        {stats.talk.pcTalkNum}回
                     </ValueBlock>
                     <ValueBlock title="総喪失HP">
-                        {stats.total.status.totalDamage}pt
+                        {stats.status.totalDamage}pt
                     </ValueBlock>
                     <ValueBlock title="総喪失SAN">
-                        {stats.total.status.totalLostSAN}pt
+                        {stats.status.totalLostSAN}pt
                     </ValueBlock>
                     <ValueBlock title="SANチェック回数">
-                        {stats.total.sanityCheck.rollNum}回
+                        {stats.sanityCheck.rollNum}回
                     </ValueBlock>
                     <ValueBlock title="SANチェック成功率">
-                        {percentageFormatter.format(stats.total.sanityCheck.successNum / stats.total.sanityCheck.rollNum)}
+                        {percentageFormatter.format(stats.sanityCheck.successNum / stats.sanityCheck.rollNum)}
                     </ValueBlock>
                 </Grid>
             </Box>
