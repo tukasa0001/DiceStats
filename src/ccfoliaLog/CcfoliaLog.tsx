@@ -26,7 +26,7 @@ const parseCcfoliaLog = (log: string): CcfoliaMessage[] => {
             // [ {name} ] {param} : {prev} → {value}
             msgs.push(new ParamChangeMessage(channel, reg[1], reg[2], Number(reg[3]), Number(reg[4])));
         }
-        else if ((reg = text.match(/^(S|s)?(CCB|ccb)<=/)) || (reg = text.match(/^x[0-9]+ (S|s)?(CCB|ccb)<=/))) {
+        else if ((reg = text.match(/^(S|s)?(CCB|ccb)<=/)) || (reg = text.match(/^x[0-9]+\s(S|s)?(CCB|ccb)<=/))) {
             const regSkillName = text.match(/【(.*)】/);
             const skillName = regSkillName?.[1] ?? "";
 
