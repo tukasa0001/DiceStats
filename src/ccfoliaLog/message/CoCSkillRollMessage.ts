@@ -18,7 +18,7 @@ export class CoCSkillRollMessage implements CcfoliaMessage {
     }
 
     isSuccess(): boolean {
-        return this.diceValue <= this.successValue;
+        return this.diceValue <= this.successValue && this.diceValue !== 100;
     }
 
     isCritical(): boolean {
