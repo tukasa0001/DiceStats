@@ -26,7 +26,7 @@ export class CoCSkillRollMessage implements CcfoliaMessage {
     }
 
     isFumble(): boolean {
-        return !this.isSuccess() && 96 <= this.diceValue;
+        return !this.isSuccess() && 96 <= this.diceValue || this.diceValue === 100;
     }
 
     toString() {
