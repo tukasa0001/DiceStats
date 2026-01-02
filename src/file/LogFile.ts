@@ -6,7 +6,8 @@ type LogFile = {
     log: CcfoliaMessage[],
     stat: CoCStat,
     startIdx: number,
-    endIdx: number
+    endIdx: number,
+    ingoredChannels: string[]
 }
 
 export {

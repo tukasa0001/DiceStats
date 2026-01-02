@@ -1,4 +1,4 @@
-import { Box, Button, Card, Flex, Text, TextField, Tooltip } from "@radix-ui/themes"
+import { Box, Button, Card, Flex, Switch, Text, TextField, Tooltip } from "@radix-ui/themes"
 import { LogFile } from "./LogFile"
 import { useContext, useState } from "react"
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge"
@@ -41,6 +41,21 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
                 ...config,
                 startIdx: data.startIdx ?? log.startIdx,
                 endIdx: data.endIdx ?? log.endIdx,
+                ignoredChannels: log.ingoredChannels,
+            })
+        }
+        setLog(newLog);
+    }
+
+    const updateLog = (data: Partial<LogFile>) => {
+        const newLog = {
+            ...log,
+            ...data,
+            stat: cocstats.calc(log.log, {
+                ...config,
+                startIdx: data.startIdx ?? log.startIdx,
+                endIdx: data.endIdx ?? log.endIdx,
+                ignoredChannels: data.ingoredChannels ?? log.ingoredChannels,
             })
         }
         setLog(newLog);
@@ -84,6 +99,21 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
                     {log.endIdx === log.log.length && endMsg !== "" ? <Tooltip content="メッセージが存在しません"><TriangleAlert /></Tooltip> : null}
                     <Button variant="outline" onClick={() => setSelectMode("end")}>選択</Button>
                 </Flex>
+                <Text as="label">
+                    <Flex gap="1" align="center">
+                        <Switch
+                            checked={log.ingoredChannels.includes("other")}
+                            onCheckedChange={val => {
+                                if (val) {
+                                    updateLog({ ingoredChannels: [...log.ingoredChannels, "other"] })
+                                }
+                                else {
+                                    updateLog({ ingoredChannels: log.ingoredChannels.filter(ch => ch !== "other") })
+                                }
+                            }} />
+                        雑談チャンネルを統計から除外
+                    </Flex>
+                </Text>
             </Flex>
         </Card>
         {selectMode === "none" ? null : <>
