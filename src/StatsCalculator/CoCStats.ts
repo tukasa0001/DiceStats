@@ -9,7 +9,8 @@ class CoCStatsCounter {
         filter: (msg) => true,
         nameAliases: [],
         startIdx: 0,
-        endIdx: Infinity
+        endIdx: Infinity,
+        ignoredChannels: []
     })
 
     calc = (log: CcfoliaMessage[], _option?: CoCStatOptions) => {
@@ -17,6 +18,10 @@ class CoCStatsCounter {
         let stat = new CoCStat()
         for (let msg of log.slice(option.startIdx, option.endIdx + 1)) {
             let sender = msg.sender;
+            // チャンネルフィルター処理
+            if (option.ignoredChannels.includes(msg.channel)) {
+                continue;
+            }
             // 名前エイリアス処理
             for (let [before, after] of option.nameAliases) {
                 if (sender === before) {
@@ -119,7 +124,8 @@ export type CoCStatOptions = {
     filter?: (msg: CcfoliaMessage) => boolean
     nameAliases?: readonly [string, string][],
     startIdx?: number,
-    endIdx?: number
+    endIdx?: number,
+    ignoredChannels?: readonly string[]
 }
 
 export class CoCStat {

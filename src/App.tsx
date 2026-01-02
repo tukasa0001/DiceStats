@@ -44,7 +44,8 @@ const App: FC = () => {
                 log: parsed,
                 stat: stat,
                 startIdx: 0,
-                endIdx: parsed.length - 1
+                endIdx: parsed.length - 1,
+                ingoredChannels: []
             })
         }
         setLog(logs);

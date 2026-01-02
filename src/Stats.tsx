@@ -33,7 +33,8 @@ const Stats = (props: StatsProps) => {
         .map(file => cocstats.calc(file.log, {
             ...config,
             startIdx: file.startIdx,
-            endIdx: file.endIdx
+            endIdx: file.endIdx,
+            ignoredChannels: file.ingoredChannels
         }))
         .reduce((a, b) => a.merge(b));
 
