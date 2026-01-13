@@ -1,4 +1,4 @@
-import { Box, Button, Card, Flex, Switch, Text, TextField, Tooltip } from "@radix-ui/themes"
+import { Box, Button, Card, Flex, Heading, Switch, Text, TextField, Tooltip } from "@radix-ui/themes"
 import { LogFile } from "./LogFile"
 import { useContext, useState } from "react"
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge"
@@ -6,6 +6,7 @@ import { TriangleAlert } from "lucide-react"
 import { FilteredLogView } from "../logView/FilteredLogView"
 import { configCtx } from "../App"
 import cocstats from "../StatsCalculator/CoCStats"
+import NameAliasConfig from "../config/NameAliasConfig"
 
 type LogFileInfoProps = {
     log: LogFile,
@@ -114,6 +115,10 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
                         雑談チャンネルを統計から除外
                     </Flex>
                 </Text>
+                <Box>
+                    <Heading>名前の変換</Heading>
+                    <NameAliasConfig value={log.nameAliases ?? []} onValueChanged={value => updateLog({ nameAliases: value })} />
+                </Box>
             </Flex>
         </Card>
         {selectMode === "none" ? null : <>

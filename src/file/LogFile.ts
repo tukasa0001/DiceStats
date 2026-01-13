@@ -7,7 +7,8 @@ type LogFile = {
     stat: CoCStat,
     startIdx: number,
     endIdx: number,
-    ingoredChannels: string[]
+    ingoredChannels: string[],
+    nameAliases?: [string, string][]
 }
 
 export {
