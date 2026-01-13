@@ -3,6 +3,7 @@ import { CoCSkillRollMessage } from "../ccfoliaLog/message/CoCSkillRollMessage";
 import { ParamChangeMessage } from "../ccfoliaLog/message/ParamChangeMessage";
 import { SanityCheckMessage } from "../ccfoliaLog/message/SanityCheckMessage";
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge";
+import { LogFile } from "../file/LogFile";
 
 class CoCStatsCounter {
     createDefaultOption = (): Required<CoCStatOptions> => ({
@@ -13,8 +14,11 @@ class CoCStatsCounter {
         ignoredChannels: []
     })
 
-    calc = (log: CcfoliaMessage[], _option?: CoCStatOptions) => {
-        const option: Required<CoCStatOptions> = { ...this.createDefaultOption(), ..._option };
+    calc = (log: CcfoliaMessage[] | LogFile, _option?: CoCStatOptions) => {
+        const option: Required<CoCStatOptions> = { ...this.createDefaultOption(), ...("log" in log ? log : {}), ..._option };
+        if ("log" in log) {
+            log = log.log;
+        }
         let stat = new CoCStat()
         for (let msg of log.slice(option.startIdx, option.endIdx + 1)) {
             let sender = msg.sender;

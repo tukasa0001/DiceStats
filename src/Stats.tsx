@@ -30,11 +30,8 @@ const Stats = (props: StatsProps) => {
 
     // 暫定対応: 名前の読み替えを更新してもfile.statが更新されないため
     const stats = logs
-        .map(file => cocstats.calc(file.log, {
-            ...config,
-            startIdx: file.startIdx,
-            endIdx: file.endIdx,
-            ignoredChannels: file.ingoredChannels
+        .map(file => cocstats.calc(file, {
+            ...config
         }))
         .reduce((a, b) => a.merge(b));
 
