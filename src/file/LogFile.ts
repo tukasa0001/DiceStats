@@ -14,3 +14,6 @@ type LogFile = {
 export {
     type LogFile
 }
+
+// オプションをすべてログに付属するようにする
+// 共通オプションを削除する
