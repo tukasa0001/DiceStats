@@ -139,6 +139,13 @@ export class CoCStat {
             })()
         })
     }
+
+    clone(): CoCStat {
+        const data = new CoCStat();
+        data.total = this.total.clone();
+        data.perCharacter = new Map([...this.perCharacter].map(tp => [tp[0], tp[1].clone()]))
+        return data;
+    }
 };
 
 export class CharacterStat {
@@ -172,6 +179,17 @@ export class CharacterStat {
             talk: this.talk.merge(other.talk)
         })
     }
+
+    clone(): CharacterStat {
+        const data = new CharacterStat();
+        data.skillRoll = Object.assign(this.skillRoll.clone(), {
+            perSkill: new Map([...this.skillRoll.perSkill].map(tp => [tp[0], tp[1].clone()]))
+        });
+        data.sanityCheck = this.sanityCheck.clone();
+        data.status = this.status.clone();
+        data.talk = this.talk.clone();
+        return data;
+    }
 }
 
 export class SkillStat {
@@ -196,6 +214,19 @@ export class SkillStat {
             spFumbleNum: this.spFumbleNum + other.spFumbleNum
         })
     }
+
+    clone(): SkillStat {
+        const data = new SkillStat();
+        data.rollNum = this.rollNum;
+        data.valueSum = this.valueSum;
+        data.successNum = this.successNum;
+        data.failNum = this.failNum;
+        data.criticalNum = this.criticalNum;
+        data.spCriticalNum = this.spCriticalNum;
+        data.fumbleNum = this.fumbleNum;
+        data.spFumbleNum = this.spFumbleNum;
+        return data;
+    }
 }
 
 export class StatusStat {
@@ -218,6 +249,15 @@ export class StatusStat {
             minSAN: min(this.minSAN, other.minSAN),
         })
     }
+
+    clone(): StatusStat {
+        const data = new StatusStat();
+        data.totalDamage = this.totalDamage;
+        data.minHealth = this.minHealth;
+        data.totalLostSAN = this.totalLostSAN;
+        data.minSAN = this.minSAN;
+        return data;
+    }
 }
 
 export class TalkStat {
@@ -233,6 +273,15 @@ export class TalkStat {
             pcTalkNum: this.pcTalkNum + other.pcTalkNum,
             pcCharNum: this.pcCharNum + other.pcCharNum,
         })
+    }
+
+    clone(): TalkStat {
+        const data = new TalkStat();
+        data.talkNum = this.talkNum;
+        data.charNum = this.charNum;
+        data.pcTalkNum = this.pcTalkNum;
+        data.pcCharNum = this.pcCharNum;
+        return data;
     }
 }
 
