@@ -29,11 +29,13 @@ type DataPoint = {
 
 type ValueDisplay = (stat: CharacterStat) => number;
 
-const valueDisplays: ValueDisplay[] = [
-    stat => stat.skillRoll.rollNum,
-    stat => stat.skillRoll.successNum,
-    stat => stat.skillRoll.criticalNum,
-    stat => stat.skillRoll.fumbleNum,
+const valueDisplays: [string, ValueDisplay][] = [
+    ["技能ロール回数", stat => stat.skillRoll.rollNum],
+    ["成功回数", stat => stat.skillRoll.successNum],
+    ["クリティカル回数", stat => stat.skillRoll.criticalNum],
+    ["ファンブル回数", stat => stat.skillRoll.fumbleNum],
+    ["キャラ発言数", stat => stat.talk.pcTalkNum],
+    ["キャラ発言文字数", stat => stat.talk.pcCharNum],
 ]
 
 const StatsChart = (props: StatsChartProps) => {
@@ -43,7 +45,7 @@ const StatsChart = (props: StatsChartProps) => {
     const [stats, setStats] = useState<CoCStat[]>([new CoCStat()]);
     const [statsInitProgress, setStatsInitProgress] = useState(1);
 
-    const [valueDisplay, setValueDisplay] = useState<ValueDisplay>(() => valueDisplays[0]);
+    const [valueDisplay, setValueDisplay] = useState<ValueDisplay>(() => valueDisplays[0][1]);
     const [activeCharacters, setActiveCharacters] = useState<string[]>([]);
     const searchBoxRef = useRef<HTMLInputElement>(null);
 
@@ -117,29 +119,16 @@ const StatsChart = (props: StatsChartProps) => {
             <Flex direction="row">
                 <RadioCards.Root defaultValue="0" onValueChange={val => {
                     const idx = Number(val);
-                    setValueDisplay(() => valueDisplays[idx]);
+                    setValueDisplay(() => valueDisplays[idx][1]);
                 }}>
                     <Flex direction="column" gap="2">
-                        <RadioCards.Item value="0">
-                            <Flex direction="column" width="100%">
-                                <Text weight="bold">技能ロール</Text>
-                            </Flex>
-                        </RadioCards.Item>
-                        <RadioCards.Item value="1">
-                            <Flex direction="column" width="100%">
-                                <Text weight="bold">技能成功</Text>
-                            </Flex>
-                        </RadioCards.Item>
-                        <RadioCards.Item value="2">
-                            <Flex direction="column" width="100%">
-                                <Text weight="bold">クリティカル</Text>
-                            </Flex>
-                        </RadioCards.Item>
-                        <RadioCards.Item value="3">
-                            <Flex direction="column" width="100%">
-                                <Text weight="bold">ファンブル</Text>
-                            </Flex>
-                        </RadioCards.Item>
+                        {valueDisplays.map(([name, _], i) => (
+                            <RadioCards.Item key={i} value={i.toString()}>
+                                <Flex direction="column" width="100%">
+                                    <Text weight="bold">{name}</Text>
+                                </Flex>
+                            </RadioCards.Item>
+                        ))}
                     </Flex>
                 </RadioCards.Root>
                 <LineChart style={{ flexGrow: 1, aspectRatio: 1.618, maxWidth: "80vw", maxHeight: "80vh" }} responsive data={data}>
