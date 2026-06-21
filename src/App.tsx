@@ -17,6 +17,7 @@ import PlayerStats from './PlayerStats/PlayerStats';
 import { LogFile } from './file/LogFile';
 import { MultiLogView } from './logView/MultiLogView';
 import cocstats from './StatsCalculator/CoCStats';
+import StatsChart from './statsChart/StatsChart';
 
 export const configCtx = createContext(new DisplayConfig());
 export const setConfigCtx = createContext((x: DisplayConfig) => { });
@@ -91,6 +92,11 @@ const App: FC = () => {
                                                 <Text>統計</Text>
                                             </Tooltip>
                                         </Tabs.Trigger>
+                                        <Tabs.Trigger value="charts">
+                                            <Tooltip content="統計をグラフで見る">
+                                                <Text>グラフ</Text>
+                                            </Tooltip>
+                                        </Tabs.Trigger>
                                         <Tabs.Trigger value="logView">
                                             <Tooltip content="ログの内容を見る">
                                                 <Text>ログ</Text>
@@ -118,6 +124,12 @@ const App: FC = () => {
                             <Tabs.Content value="stats">
                                 <Flex direction="column" mx="4">
                                     <Stats logs={log} />
+                                    <ConfigCard />
+                                </Flex>
+                            </Tabs.Content>
+                            <Tabs.Content value="charts">
+                                <Flex direction="column" mx="4">
+                                    <StatsChart logs={log} />
                                     <ConfigCard />
                                 </Flex>
                             </Tabs.Content>

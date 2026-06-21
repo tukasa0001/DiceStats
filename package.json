@@ -17,6 +17,7 @@
         "lucide-react": "^0.548.0",
         "react": "^19.1.1",
         "react-dom": "^19.1.1",
+        "recharts": "^3.8.1",
         "save-dev": "^0.0.1-security"
     },
     "devDependencies": {
