@@ -145,7 +145,7 @@ const StatsChart = (props: StatsChartProps) => {
                 <LineChart style={{ flexGrow: 1, aspectRatio: 1.618, maxWidth: "80vw", maxHeight: "80vh" }} responsive data={data}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-4)" />
                     <XAxis dataKey="name" stroke="var(--accent-9)" />
-                    <YAxis width="auto" stroke="var(--accent-9)" />
+                    <YAxis width={60} stroke="var(--accent-9)" />
                     <Tooltip contentStyle={{
                         opacity: 0.7,
                         backgroundColor: 'var(--gray-2)',
