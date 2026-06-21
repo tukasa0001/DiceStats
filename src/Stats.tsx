@@ -2,7 +2,7 @@ import { CoCSkillRollMessage } from './ccfoliaLog/message/CoCSkillRollMessage';
 import { ParamChangeMessage } from './ccfoliaLog/message/ParamChangeMessage';
 import { TalkMessage } from './ccfoliaLog/message/TalkMessasge';
 import { SanityCheckMessage } from './ccfoliaLog/message/SanityCheckMessage';
-import { JSX, useContext, useState } from 'react';
+import { createContext, JSX, useContext, useState } from 'react';
 import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
 import { UnknownSecretDiceMessage } from './ccfoliaLog/message/UnknownSecretDiceMessage';
 import { configCtx, setConfigCtx } from './App';
@@ -82,8 +82,8 @@ const Stats = (props: StatsProps) => {
             {0 < skills.length ?
                 <StatTable characters={skills.map(tp => tp[0])} data={[
                     Data("技能振り回数", skills.map(tp => tp[1].rollNum)),
-                    Data("平均出目", skills.map(tp => tp[1].rollNum == 0 ? "N/A" : avgFormatter.format(tp[1].valueSum / tp[1].rollNum))),
-                    Data("一番振った技能", skills.map(([name, stat]) => {
+                    Data("平均出目", skills.map(tp => tp[1].valueSum / tp[1].rollNum), { formatter: avgFormatter }),
+                    StrData("一番振った技能", skills.map(([name, stat]) => {
                         if (stat.perSkill.size == 0) {
                             return "N/A";
                         }
@@ -102,12 +102,12 @@ const Stats = (props: StatsProps) => {
                     Data("ファンブル数", skills.map(tp => tp[1].fumbleNum)),
                     Data("内100ファン", skills.map(tp => tp[1].spFumbleNum), { indent: true }),
 
-                    Data("成功率", skills.map(tp => percentageFormatter.format(tp[1].successNum / tp[1].rollNum)), { separate: true }),
-                    Data("失敗率", skills.map(tp => percentageFormatter.format(tp[1].failNum / tp[1].rollNum))),
-                    Data("クリティカル率", skills.map(tp => percentageFormatter.format(tp[1].criticalNum / tp[1].rollNum))),
-                    Data("内1クリ", skills.map(tp => percentageFormatter.format(tp[1].spCriticalNum / tp[1].rollNum)), { indent: true }),
-                    Data("ファンブル率", skills.map(tp => percentageFormatter.format(tp[1].fumbleNum / tp[1].rollNum))),
-                    Data("内100ファン", skills.map(tp => percentageFormatter.format(tp[1].spFumbleNum / tp[1].rollNum)), { indent: true })
+                    Data("成功率", skills.map(tp => tp[1].successNum / tp[1].rollNum), { separate: true, formatter: percentageFormatter }),
+                    Data("失敗率", skills.map(tp => tp[1].failNum / tp[1].rollNum), { formatter: percentageFormatter }),
+                    Data("クリティカル率", skills.map(tp => tp[1].criticalNum / tp[1].rollNum), { formatter: percentageFormatter }),
+                    Data("内1クリ", skills.map(tp => tp[1].spCriticalNum / tp[1].rollNum), { indent: true, formatter: percentageFormatter }),
+                    Data("ファンブル率", skills.map(tp => tp[1].fumbleNum / tp[1].rollNum), { formatter: percentageFormatter }),
+                    Data("内100ファン", skills.map(tp => tp[1].spFumbleNum / tp[1].rollNum), { indent: true, formatter: percentageFormatter })
                 ]} />
                 : <InfoBlock>記録なし</InfoBlock>}
 
@@ -115,9 +115,9 @@ const Stats = (props: StatsProps) => {
             {0 < status.length ?
                 <StatTable characters={status.map(tp => tp[0])} data={[
                     Data("合計被ダメージ", status.map(tp => tp[1].totalDamage)),
-                    Data("最低HP", status.map(tp => tp[1].minHealth ?? "N/A")),
+                    Data("最低HP", status.map(tp => tp[1].minHealth ?? NaN)),
                     Data("合計喪失SAN", status.map(tp => tp[1].totalLostSAN)),
-                    Data("最低SAN", status.map(tp => tp[1].minSAN ?? "N/A"))
+                    Data("最低SAN", status.map(tp => tp[1].minSAN ?? NaN))
                 ]} />
                 : <InfoBlock>記録なし</InfoBlock>}
 
@@ -127,7 +127,7 @@ const Stats = (props: StatsProps) => {
                     Data("合計回数", sanity.map(tp => tp[1].rollNum)),
                     Data("成功回数", sanity.map(tp => tp[1].successNum)),
                     Data("失敗回数", sanity.map(tp => tp[1].rollNum - tp[1].successNum)),
-                    Data("成功率", sanity.map(tp => tp[1].rollNum == 0 ? "N/A" : percentageFormatter.format(tp[1].successNum / tp[1].rollNum))),
+                    Data("成功率", sanity.map(tp => tp[1].successNum / tp[1].rollNum), { formatter: percentageFormatter }),
                     Data("クリティカル回数", sanity.map(tp => tp[1].criticalNum), { separate: true }),
                     Data("ファンブル回数", sanity.map(tp => tp[1].fumbleNum))
                 ]} />
@@ -146,7 +146,7 @@ const Stats = (props: StatsProps) => {
             </Select.Root>
             {skillFilter !== "none" ? <StatTable characters={filteredSkills.map(tp => tp[0])} data={[
                 Data("技能振り回数", filteredSkills.map(tp => tp[1].rollNum)),
-                Data("平均出目", filteredSkills.map(tp => tp[1].rollNum == 0 ? "N/A" : avgFormatter.format(tp[1].valueSum / tp[1].rollNum))),
+                Data("平均出目", filteredSkills.map(tp => tp[1].valueSum / tp[1].rollNum), { formatter: avgFormatter }),
 
                 Data("成功数", filteredSkills.map(tp => tp[1].successNum), { separate: true }),
                 Data("失敗数", filteredSkills.map(tp => tp[1].failNum)),
@@ -155,12 +155,12 @@ const Stats = (props: StatsProps) => {
                 Data("ファンブル数", filteredSkills.map(tp => tp[1].fumbleNum)),
                 Data("内100ファン", filteredSkills.map(tp => tp[1].spFumbleNum), { indent: true }),
 
-                Data("成功率", filteredSkills.map(tp => percentageFormatter.format(tp[1].successNum / tp[1].rollNum)), { separate: true }),
-                Data("失敗率", filteredSkills.map(tp => percentageFormatter.format(tp[1].failNum / tp[1].rollNum))),
-                Data("クリティカル率", filteredSkills.map(tp => percentageFormatter.format(tp[1].criticalNum / tp[1].rollNum))),
-                Data("内1クリ", filteredSkills.map(tp => percentageFormatter.format(tp[1].spCriticalNum / tp[1].rollNum)), { indent: true }),
-                Data("ファンブル率", filteredSkills.map(tp => percentageFormatter.format(tp[1].fumbleNum / tp[1].rollNum))),
-                Data("内100ファン", filteredSkills.map(tp => percentageFormatter.format(tp[1].spFumbleNum / tp[1].rollNum)), { indent: true })
+                Data("成功率", filteredSkills.map(tp => tp[1].successNum / tp[1].rollNum), { separate: true, formatter: percentageFormatter }),
+                Data("失敗率", filteredSkills.map(tp => tp[1].failNum / tp[1].rollNum), { formatter: percentageFormatter }),
+                Data("クリティカル率", filteredSkills.map(tp => tp[1].criticalNum / tp[1].rollNum), { formatter: percentageFormatter }),
+                Data("内1クリ", filteredSkills.map(tp => tp[1].spCriticalNum / tp[1].rollNum), { indent: true, formatter: percentageFormatter }),
+                Data("ファンブル率", filteredSkills.map(tp => tp[1].fumbleNum / tp[1].rollNum), { formatter: percentageFormatter }),
+                Data("内100ファン", filteredSkills.map(tp => tp[1].spFumbleNum / tp[1].rollNum), { indent: true, formatter: percentageFormatter })
             ]} /> : null}
 
             <Heading my="4">会話の統計</Heading>
@@ -168,12 +168,12 @@ const Stats = (props: StatsProps) => {
                 <StatTable characters={talks.map(tp => tp[0])} data={[
                     Data("発言数", talks.map(tp => tp[1].talkNum)),
                     Data("発言文字数", talks.map(tp => tp[1].charNum)),
-                    Data("平均文字数", talks.map(tp => avgFormatter.format(tp[1].charNum / tp[1].talkNum))),
-                    Data("PC発言のみ", talks.map(tp => ""), { separate: true }),
+                    Data("平均文字数", talks.map(tp => tp[1].charNum / tp[1].talkNum), { formatter: avgFormatter }),
+                    StrData("PC発言のみ", talks.map(tp => ""), { separate: true }),
                     Data("発言数", talks.map(tp => tp[1].pcTalkNum), { indent: true }),
                     Data("発言文字数", talks.map(tp => tp[1].pcCharNum), { indent: true }),
-                    Data("平均文字数", talks.map(tp => avgFormatter.format(tp[1].pcCharNum / tp[1].pcTalkNum)), { indent: true }),
-                    Data("PC発言率", talks.map(tp => percentageFormatter.format(tp[1].pcTalkNum / tp[1].talkNum)), { indent: true }),
+                    Data("平均文字数", talks.map(tp => tp[1].pcCharNum / tp[1].pcTalkNum), { indent: true, formatter: avgFormatter }),
+                    Data("PC発言率", talks.map(tp => tp[1].pcTalkNum / tp[1].talkNum), { indent: true, formatter: percentageFormatter }),
                 ]} />
                 : <InfoBlock>記録なし</InfoBlock>}
         </Box>
@@ -187,17 +187,26 @@ type StatTableProps = {
 
 type StatTableData = {
     title: string,
-    values: (string | number)[],
+    values: string[],
+    numberValues: number[] | undefined,
     indent: boolean,
     separate: boolean
 };
 
 const StatTable = (props: StatTableProps) => {
+    const { characters, data } = props;
     const config = useContext(configCtx);
     const setConfig = useContext(setConfigCtx);
     const [isNameChanging, setNameChanging] = useState(false);
     const [changingName, setChangingName] = useState(""); // 変更中の名前
     const [changedName, setChangedName] = useState(""); // 変更後の名前
+
+    // ソート
+    const [sortOrder, setSortOrder] = useState<number[] | undefined>(undefined);
+    const [isAscending, setIsAscending] = useState(false);
+    const [sortDataIdx, setSortDataIdx] = useState<number | undefined>(undefined);
+
+    const order = sortOrder ?? characters.map((_, i) => i);
 
     const addNameAlias = (before: string, after: string) => {
         setConfig(config.withNameAliases(arr => [...arr, [before, after]]));
@@ -215,7 +224,7 @@ const StatTable = (props: StatTableProps) => {
                 <Table.Header>
                     <Table.Row>
                         <Table.ColumnHeaderCell className='value_title' justify="center">-</Table.ColumnHeaderCell>
-                        {props.characters.map(name =>
+                        {order.map(i => characters[i]).map(name =>
                             <>
                                 {/*タイトル行:右クリックメニューを付ける*/}
                                 <ContextMenu.Root>
@@ -256,11 +265,48 @@ const StatTable = (props: StatTableProps) => {
                     </Table.Row >
                 </Table.Header>
                 <Table.Body>
-                    {props.data.map((data, i) => {
+                    {data.map((data, i) => {
                         return (
                             <Table.Row key={`${data.title}-${i}`} className={`${data.indent ? "indent1" : ""} ${data.separate || i === 0 ? "separate" : ""}`}>
-                                <Table.RowHeaderCell className='value_title'>{data.title}</Table.RowHeaderCell>
-                                {data.values.map((val, i) => <Table.Cell key={`${props.characters[i]}-${data.title}`} justify="end">{val}</Table.Cell>)}
+                                {/*ラベルセル*/}
+                                <Table.RowHeaderCell className='value_title' onClick={e => {
+                                    if (data.numberValues === undefined) {
+                                        return;
+                                    }
+                                    // 昇順 => ソートなし
+                                    if (sortDataIdx === i && isAscending) {
+                                        setSortDataIdx(undefined);
+                                        setSortOrder(undefined)
+                                    }
+                                    // 降順 => 昇順
+                                    else if (sortDataIdx === i) {
+                                        setIsAscending(true);
+                                        setSortOrder(characters.map((_, i) => i)
+                                            .map(i => [i, data.numberValues![i]])
+                                            .sort(([_, a], [__, b]) => a - b) // 昇順ソート
+                                            .sort(([_, a], [__, b]) => isNaN(a) ? 10000 : isNaN(b) ? -10000 : 0) // NaNは末尾固定
+                                            .map(([i, val]) => i)
+                                        );
+                                    }
+                                    // 任意 => 降順
+                                    else {
+                                        setSortOrder(characters.map((_, i) => i)
+                                            .map(i => [i, data.numberValues![i]])
+                                            .sort(([_, a], [__, b]) => b - a) // 降順ソート
+                                            .sort(([_, a], [__, b]) => isNaN(a) ? 10000 : isNaN(b) ? -10000 : 0) // NaNは末尾固定
+                                            .map(([i, val]) => i)
+                                        );
+                                        setSortDataIdx(i);
+                                        setIsAscending(false);
+                                    }
+                                    window.getSelection()?.removeAllRanges();
+                                }} style={{
+                                    cursor: data.numberValues !== undefined ? "pointer" : "unset"
+                                }}>
+                                    {data.title}{sortDataIdx === i && isAscending ? "▲" : sortDataIdx === i ? "▼" : null}
+                                </Table.RowHeaderCell>
+                                {/*データセル*/}
+                                {order.map(j => data.values[j]).map((val, j) => <Table.Cell key={`${order.map(k => characters[k])[j]}-${data.title}`} justify="end">{val}</Table.Cell>)}
                             </Table.Row>
                         )
                     })}
@@ -300,10 +346,20 @@ const StatTable = (props: StatTableProps) => {
     )
 }
 
-const Data = (title: string, values: (string | number)[], props: { indent?: boolean, separate?: boolean } = {}): StatTableData => {
+const Data = (title: string, values: number[], props: { indent?: boolean, separate?: boolean, formatter?: Intl.NumberFormat } = {}): StatTableData => {
+    return {
+        title: title,
+        values: values.map(val => Number.isNaN(val) ? "N/A" : props.formatter ? props.formatter.format(val) : String(val)),
+        numberValues: values,
+        indent: props.indent ?? false,
+        separate: props.separate ?? false
+    }
+}
+const StrData = (title: string, values: string[], props: { indent?: boolean, separate?: boolean } = {}): StatTableData => {
     return {
         title: title,
         values: values,
+        numberValues: undefined,
         indent: props.indent ?? false,
         separate: props.separate ?? false
     }
