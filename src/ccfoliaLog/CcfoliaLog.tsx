@@ -1,4 +1,5 @@
 import { CcfoliaMessage } from "./message/CcfoliaMessage";
+import { CoCCombinedRollMessage } from "./message/CoCCombinedRollMessage";
 import { CoCSkillRollMessage } from "./message/CoCSkillRollMessage";
 import { ParamChangeMessage } from "./message/ParamChangeMessage";
 import { SanityCheckMessage } from "./message/SanityCheckMessage";
@@ -47,6 +48,19 @@ const parseCcfoliaLog = (log: string): CcfoliaMessage[] => {
                 const successValue = Number(reg2[1]);
                 const diceValue = Number(reg2[2]);
                 msgs.push(new CoCSkillRollMessage(channel, name, skillName === "" ? "対抗ロール" : skillName, diceValue, successValue, reg[1] !== undefined));
+            }
+        }
+        // 組み合わせロール
+        else if ((reg = text.match(/^S?CBRB\(/i)) || (reg = text.match(/^x[0-9]+\S?CBRB\(/i))) {
+            const regSkillName = text.match(/【(.*)】/);
+            const skillName = regSkillName?.[1] ?? "";
+
+            console.log(text);
+            for (let reg2 of text.matchAll(/\(1d100<=([0-9]+),([0-9]+)\) ＞ ([0-9]+)\[/g)) {
+                console.log("detected:" + reg2[0]);
+                const successValue: [number, number] = [Number(reg2[1]), Number(reg2[2])];
+                const diceValue = Number(reg2[3]);
+                msgs.push(new CoCCombinedRollMessage(channel, name, skillName === "" ? "対抗ロール" : skillName, diceValue, successValue, reg[1] !== undefined));
             }
         }
         else if (reg = text.match(/^(S|s)?1d100<=([0-9]+)\s*【正気度ロール】\s*\(1D100<=[0-9]+\) ＞ ([0-9]+) ＞/)) {
