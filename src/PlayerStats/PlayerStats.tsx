@@ -31,12 +31,16 @@ const PlayerStats = (props: StatsProps) => {
 
     const [isSaving, setSaving] = useState(false);
     const [stats, setStats] = useState<CharacterStat | null>(null)
-    const allCharacterList = useMemo(() => [...new Set(log
-        .flatMap(l => l.log)
-        .filter(msg => msg instanceof CoCSkillRollMessage)
-        .map(msg => msg.sender))]
-        .sort((a, b) => a.localeCompare(b, "ja")), [log]
-    )
+    const allCharacterList = useMemo(() => {
+        const map = new Map<string, number>();
+        for (const msg of log
+            .flatMap(l => l.log)
+            .filter(msg => msg instanceof CoCSkillRollMessage)) {
+            map.set(msg.sender, (map.get(msg.sender) ?? 0) + 1);
+        }
+        return [...map].sort(([name1, val1], [name2, val2]) => val2 - val1);
+        // return [...map].sort(([name1, val1], [name2, val2]) => name1.localeCompare(name2, "ja"));
+    }, [log]);
 
     const wait = async (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
     const saveImg = async () => {
@@ -87,7 +91,7 @@ const PlayerStats = (props: StatsProps) => {
                 </TextField.Root>
                 <Heading my="2">あなたのキャラを選択してください</Heading>
                 <Grid gap="3" columns={{ xs: "2", md: "6" }}>
-                    {[...allCharacterList].map(name => <CharacterCard key={name} name={name} selectedCharacters={selectedCharacters} />)}
+                    {[...allCharacterList].map(([name, roll]) => <CharacterCard key={name} name={name} rollNum={roll} selectedCharacters={selectedCharacters} />)}
                 </Grid>
                 <Heading my="2">オプションを選択してください</Heading>
                 <Flex direction="column" gap="2">
@@ -123,8 +127,8 @@ const PlayerStats = (props: StatsProps) => {
     );
 }
 
-const CharacterCard = (props: { name: string, selectedCharacters: React.MutableRefObject<string[]> }) => {
-    const { name, selectedCharacters } = props;
+const CharacterCard = (props: { name: string, rollNum: number, selectedCharacters: React.MutableRefObject<string[]> }) => {
+    const { name, rollNum, selectedCharacters } = props;
     return (
         <Card asChild>
             <label style={{
@@ -135,6 +139,7 @@ const CharacterCard = (props: { name: string, selectedCharacters: React.MutableR
                     width: "100%"
                 }}>
                     <Text weight="bold">{name}</Text>
+                    <Text>技能振り回数: {rollNum}</Text>
                 </Flex>
                 <Flex direction="column" align="center" justify="center">
                     <Checkbox onCheckedChange={val => {
