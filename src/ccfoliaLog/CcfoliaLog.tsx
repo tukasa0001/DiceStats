@@ -56,7 +56,7 @@ const parseCcfoliaLog = (log: string): CcfoliaMessage[] => {
             for (let reg2 of text.matchAll(/\(1d100<=([0-9]+),([0-9]+)\) ＞ ([0-9]+)\[/g)) {
                 const successValue: [number, number] = [Number(reg2[1]), Number(reg2[2])];
                 const diceValue = Number(reg2[3]);
-                msgs.push(new CoCCombinedRollMessage(channel, name, skillName === "" ? "対抗ロール" : skillName, diceValue, successValue, reg[1] !== undefined));
+                msgs.push(new CoCCombinedRollMessage(channel, name, skillName === "" ? "不明な組み合わせロール" : skillName, diceValue, successValue, reg[1] !== undefined));
             }
         }
         else if (reg = text.match(/^(S|s)?1d100<=([0-9]+)\s*【正気度ロール】\s*\(1D100<=[0-9]+\) ＞ ([0-9]+) ＞/)) {
