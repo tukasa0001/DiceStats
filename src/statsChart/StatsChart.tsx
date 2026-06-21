@@ -103,8 +103,6 @@ const StatsChart = (props: StatsChartProps) => {
         })).reduce((a, b) => ({ ...a, ...b }), {})
     }));
 
-    console.log(data);
-
     return (
         <Box my="2">
             <Heading my="4">表示するキャラを選択</Heading>
