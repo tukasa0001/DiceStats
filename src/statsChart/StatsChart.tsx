@@ -96,7 +96,7 @@ const StatsChart = (props: StatsChartProps) => {
     }
 
     if (stats.length === 0) {
-        return <Flex align="center" justify="center">
+        return <Flex align="center" justify="center" mt="2">
             <Text>読み込み中</Text><Spinner />
         </Flex>;
     }
