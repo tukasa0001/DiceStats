@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { LogFile } from "../file/LogFile"
 import { configCtx } from "../App";
-import { Text, Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField, ScrollArea, RadioCards, Grid, CheckboxCards } from '@radix-ui/themes';
+import { Text, Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField, ScrollArea, RadioCards, Grid, CheckboxCards, Spinner } from '@radix-ui/themes';
 import { CartesianGrid, Legend, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts";
 import cocstats, { CharacterStat, CoCStat } from "../StatsCalculator/CoCStats";
 import { Search } from "lucide-react";
@@ -55,27 +55,18 @@ const StatsChart = (props: StatsChartProps) => {
     const { logs } = props;
     const config = useContext(configCtx);
 
-    const [stats, setStats] = useState<CoCStat[]>([new CoCStat()]);
-    const [statsInitProgress, setStatsInitProgress] = useState(1);
+    const [stats, setStats] = useState<CoCStat[]>([]);
 
     const [valueDisplay, setValueDisplay] = useState<ValueDisplay>(() => valueDisplays[0][1]);
     const [activeCharacters, setActiveCharacters] = useState<string[]>([]);
 
-    const jpnTextComparer = (a: readonly [string, any], b: readonly [string, any]) => a[0].localeCompare(b[0], "ja");
-
-    if (logs.length <= 0) {
-        return <Text>ログをアップロードしてください</Text>
-    }
-
     const log = logs[0];
 
-    if (log.log.length <= 10) {
-        return <Text>ログが短すぎます</Text>
-    }
-
     useEffect(() => {
-        if (statsInitProgress <= 10) {
-            const i = statsInitProgress;
+        if (log === undefined || log.log.length <= 10) {
+            return;
+        }
+        function progress(stats: CoCStat[], i: number) {
             const prevStat = stats[i - 1].clone();
             const sectionStat = cocstats.calc(log.log, {
                 ...config,
@@ -83,10 +74,32 @@ const StatsChart = (props: StatsChartProps) => {
                 endIdx: Math.floor(log.log.length * i * 0.1) - 1,
             });
             const stat = sectionStat.merge(prevStat);
-            setStats([...stats, stat]);
-            setStatsInitProgress(i + 1);
+            stats.push(stat);
+            if (i < 10) {
+                setTimeout(() => progress(stats, i + 1), 10);
+            }
+            else {
+                setStats(stats);
+            }
         }
-    }, [logs, statsInitProgress]);
+        progress([new CoCStat()], 1);
+    }, [logs]);
+
+    const jpnTextComparer = (a: readonly [string, any], b: readonly [string, any]) => a[0].localeCompare(b[0], "ja");
+
+    if (logs.length <= 0) {
+        return <Text>ログをアップロードしてください</Text>
+    }
+
+    if (log.log.length <= 10) {
+        return <Text>ログが短すぎます</Text>
+    }
+
+    if (stats.length === 0) {
+        return <Flex align="center" justify="center">
+            <Text>読み込み中</Text><Spinner />
+        </Flex>;
+    }
 
     const totalStat = stats[stats.length - 1];
     const nameRollPair = [...totalStat.perCharacter]
