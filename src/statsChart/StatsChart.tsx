@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { LogFile } from "../file/LogFile"
 import { configCtx } from "../App";
 import { Text, Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField, ScrollArea, RadioCards, Grid, CheckboxCards } from '@radix-ui/themes';
@@ -40,6 +40,9 @@ const StatsChart = (props: StatsChartProps) => {
     const { logs } = props;
     const config = useContext(configCtx);
 
+    const [stats, setStats] = useState<CoCStat[]>([new CoCStat()]);
+    const [statsInitProgress, setStatsInitProgress] = useState(1);
+
     const [valueDisplay, setValueDisplay] = useState<ValueDisplay>(() => valueDisplays[0]);
     const [activeCharacters, setActiveCharacters] = useState<string[]>([]);
     const searchBoxRef = useRef<HTMLInputElement>(null);
@@ -56,18 +59,20 @@ const StatsChart = (props: StatsChartProps) => {
         return <Text>ログが短すぎます</Text>
     }
 
-    const stats: CoCStat[] = [new CoCStat()];
-
-    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
-        const prevStat = stats[i - 1].clone();
-        const sectionStat = cocstats.calc(log.log, {
-            ...config,
-            startIdx: Math.floor(log.log.length * (i - 1) * 0.1),
-            endIdx: Math.floor(log.log.length * i * 0.1) - 1,
-        });
-        const stat = sectionStat.merge(prevStat);
-        stats.push(stat);
-    }
+    useEffect(() => {
+        if (statsInitProgress <= 10) {
+            const i = statsInitProgress;
+            const prevStat = stats[i - 1].clone();
+            const sectionStat = cocstats.calc(log.log, {
+                ...config,
+                startIdx: Math.floor(log.log.length * (i - 1) * 0.1),
+                endIdx: Math.floor(log.log.length * i * 0.1) - 1,
+            });
+            const stat = sectionStat.merge(prevStat);
+            setStats([...stats, stat]);
+            setStatsInitProgress(i + 1);
+        }
+    }, [logs, statsInitProgress]);
 
     const totalStat = stats[stats.length - 1];
     const nameRollPair = [...totalStat.perCharacter]
