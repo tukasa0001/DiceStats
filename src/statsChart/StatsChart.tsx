@@ -73,11 +73,15 @@ const StatsChart = (props: StatsChartProps) => {
     return (
         <Box my="2">
             <Heading my="4">技能振り統計</Heading>
-            <LineChart style={{ width: '100%', aspectRatio: 1.618, maxWidth: 600 }} responsive data={data}>
+            <LineChart style={{ width: '100%', aspectRatio: 1.618, maxWidth: "60vw" }} responsive data={data}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-4)" />
                 <XAxis dataKey="name" stroke="var(--accent-9)" />
                 <YAxis width="auto" stroke="var(--accent-9)" />
-                <Tooltip />
+                <Tooltip contentStyle={{
+                    opacity: 0.7,
+                    backgroundColor: 'var(--gray-2)',
+                    borderColor: 'var(--gray-6)',
+                }} />
                 <Legend />
                 {allCharacters.map((name, i) => <Line
                     key={name} dataKey={name}
