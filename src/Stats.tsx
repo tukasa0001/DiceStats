@@ -283,7 +283,8 @@ const StatTable = (props: StatTableProps) => {
                                         setIsAscending(true);
                                         setSortOrder(characters.map((_, i) => i)
                                             .map(i => [i, data.numberValues![i]])
-                                            .sort(([_, a], [__, b]) => a - b)
+                                            .sort(([_, a], [__, b]) => a - b) // 昇順ソート
+                                            .sort(([_, a], [__, b]) => isNaN(a) ? 10000 : isNaN(b) ? -10000 : 0) // NaNは末尾固定
                                             .map(([i, val]) => i)
                                         );
                                     }
@@ -291,13 +292,13 @@ const StatTable = (props: StatTableProps) => {
                                     else {
                                         setSortOrder(characters.map((_, i) => i)
                                             .map(i => [i, data.numberValues![i]])
-                                            .sort(([_, a], [__, b]) => b - a)
+                                            .sort(([_, a], [__, b]) => b - a) // 降順ソート
+                                            .sort(([_, a], [__, b]) => isNaN(a) ? 10000 : isNaN(b) ? -10000 : 0) // NaNは末尾固定
                                             .map(([i, val]) => i)
                                         );
                                         setSortDataIdx(i);
                                         setIsAscending(false);
                                     }
-                                    e.preventDefault();
                                 }} style={{
                                     cursor: data.numberValues !== undefined ? "pointer" : "unset"
                                 }}>
