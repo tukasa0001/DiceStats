@@ -36,6 +36,19 @@ const parseCcfoliaLog = (log: string): CcfoliaMessage[] => {
                 msgs.push(new CoCSkillRollMessage(channel, name, skillName === "" ? "不明な技能" : skillName, diceValue, successValue, reg[1] !== undefined));
             }
         }
+        // 対抗ロール
+        else if ((reg = text.match(/^S?RESB\(/i)) || (reg = text.match(/^x[0-9]+\S?RESB\(/i))) {
+            const regSkillName = text.match(/【(.*)】/);
+            const skillName = regSkillName?.[1] ?? "";
+
+            console.log(text);
+            for (let reg2 of text.matchAll(/\(1d100<=([0-9]+)\) ＞ ([0-9]+) ＞/g)) {
+                console.log("detected:" + reg2[0]);
+                const successValue = Number(reg2[1]);
+                const diceValue = Number(reg2[2]);
+                msgs.push(new CoCSkillRollMessage(channel, name, skillName === "" ? "対抗ロール" : skillName, diceValue, successValue, reg[1] !== undefined));
+            }
+        }
         else if (reg = text.match(/^(S|s)?1d100<=([0-9]+)\s*【正気度ロール】\s*\(1D100<=[0-9]+\) ＞ ([0-9]+) ＞/)) {
             // 1d100<={successValue} 【正気度ロール】 (1D100<={successValue}) ＞ {diceValue} ＞ 成功
             msgs.push(new SanityCheckMessage(channel, name, Number(reg[3]), Number(reg[2])));
