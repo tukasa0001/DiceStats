@@ -7,11 +7,24 @@ import cocstats, { CharacterStat, CoCStat } from "../StatsCalculator/CoCStats";
 import { Search } from "lucide-react";
 
 const colors = [
-    ...Array.from({ length: 12 }, (_, i) => i)
-        .map(i => `hsl(${i * 60}deg, 80%, 80%)`),
+    ...Array.from({ length: 6 }, (_, i) => i)
+        .map(i => `hsl(${i * 60}deg, 100%, 80%)`),
 
-    ...Array.from({ length: 12 }, (_, i) => i)
-        .map(i => `hsl(${i * 60}deg, 100%, 60%)`),
+    ...Array.from({ length: 6 }, (_, i) => i)
+        .map(i => `hsl(${i * 60 + 30}deg, 80%, 80%)`),
+
+    ...Array.from({ length: 6 }, (_, i) => i)
+        .map(i => `hsl(${i * 60}deg, 100%, 50%)`),
+
+    ...Array.from({ length: 6 }, (_, i) => i)
+        .map(i => `hsl(${i * 60 + 30}deg, 100%, 50%)`),
+
+    // alt
+    ...Array.from({ length: 6 }, (_, i) => i)
+        .map(i => `hsl(${i * 60 + 15}deg, 100%, 50%)`),
+
+    ...Array.from({ length: 6 }, (_, i) => i)
+        .map(i => `hsl(${i * 60 + 45}deg, 100%, 50%)`),
 ]
 
 type StatsChartProps = {
@@ -94,6 +107,9 @@ const StatsChart = (props: StatsChartProps) => {
 
     return (
         <Box my="2">
+            <Flex direction="column">
+                {colors.map((col, i) => <Text key={i} style={{ color: col }}>Color Example</Text>)}
+            </Flex>
             <Heading my="4">表示するキャラを選択</Heading>
             <CheckboxCards.Root mt="2" value={activeCharacters} onValueChange={val => setActiveCharacters(val)}
                 columns={{ initial: "2", sm: "6" }}>
