@@ -107,9 +107,6 @@ const StatsChart = (props: StatsChartProps) => {
 
     return (
         <Box my="2">
-            <Flex direction="column">
-                {colors.map((col, i) => <Text key={i} style={{ color: col }}>Color Example</Text>)}
-            </Flex>
             <Heading my="4">表示するキャラを選択</Heading>
             <CheckboxCards.Root mt="2" value={activeCharacters} onValueChange={val => setActiveCharacters(val)}
                 columns={{ initial: "2", sm: "6" }}>
