@@ -47,7 +47,6 @@ const StatsChart = (props: StatsChartProps) => {
 
     const [valueDisplay, setValueDisplay] = useState<ValueDisplay>(() => valueDisplays[0][1]);
     const [activeCharacters, setActiveCharacters] = useState<string[]>([]);
-    const searchBoxRef = useRef<HTMLInputElement>(null);
 
     const jpnTextComparer = (a: readonly [string, any], b: readonly [string, any]) => a[0].localeCompare(b[0], "ja");
 
@@ -96,15 +95,9 @@ const StatsChart = (props: StatsChartProps) => {
     return (
         <Box my="2">
             <Heading my="4">表示するキャラを選択</Heading>
-            <TextField.Root placeholder="名前を検索" ref={searchBoxRef}>
-                <TextField.Slot>
-                    <Search />
-                </TextField.Slot>
-            </TextField.Root>
             <CheckboxCards.Root mt="2" value={activeCharacters} onValueChange={val => setActiveCharacters(val)}
                 columns={{ initial: "2", sm: "6" }}>
                 {[...nameRollPair]
-                    .filter(([name, _]) => searchBoxRef.current === null || name.startsWith(searchBoxRef.current.value))
                     .sort(([name1, roll1], [name2, roll2]) => roll2 - roll1)
                     .map(([name, roll]) => (
                         <CheckboxCards.Item key={name} value={name}>
