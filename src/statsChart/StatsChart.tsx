@@ -1,9 +1,10 @@
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { LogFile } from "../file/LogFile"
 import { configCtx } from "../App";
-import { Text, Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField, ScrollArea, RadioCards } from '@radix-ui/themes';
+import { Text, Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField, ScrollArea, RadioCards, Grid, CheckboxCards } from '@radix-ui/themes';
 import { CartesianGrid, Legend, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts";
 import cocstats, { CharacterStat, CoCStat } from "../StatsCalculator/CoCStats";
+import { Search } from "lucide-react";
 
 const colors = [
     ...Array.from({ length: 12 }, (_, i) => i)
@@ -40,8 +41,10 @@ const StatsChart = (props: StatsChartProps) => {
     const config = useContext(configCtx);
 
     const [valueDisplay, setValueDisplay] = useState<ValueDisplay>(() => valueDisplays[0]);
+    const [activeCharacters, setActiveCharacters] = useState<string[]>([]);
+    const searchBoxRef = useRef<HTMLInputElement>(null);
 
-    const jpnTextComparer = (a: string, b: string) => a.localeCompare(b, "ja");
+    const jpnTextComparer = (a: readonly [string, any], b: readonly [string, any]) => a[0].localeCompare(b[0], "ja");
 
     if (logs.length <= 0) {
         return <Text>ログをアップロードしてください</Text>
@@ -67,9 +70,11 @@ const StatsChart = (props: StatsChartProps) => {
     }
 
     const totalStat = stats[stats.length - 1];
-    const allCharacters = [...totalStat.perCharacter]
-        .map(([name, _]) => name)
-        .sort(jpnTextComparer);
+    const nameRollPair = [...totalStat.perCharacter]
+        .sort(jpnTextComparer)
+        .map(([name, stat]) => [name, stat.skillRoll.rollNum] as [string, number])
+
+    const allCharacters = nameRollPair.map(([name, _]) => name);
 
     const data = stats.map((stat, i) => ({
         name: `${i * 10}%`,
@@ -83,6 +88,26 @@ const StatsChart = (props: StatsChartProps) => {
 
     return (
         <Box my="2">
+            <Heading my="4">表示するキャラを選択</Heading>
+            <TextField.Root placeholder="名前を検索" ref={searchBoxRef}>
+                <TextField.Slot>
+                    <Search />
+                </TextField.Slot>
+            </TextField.Root>
+            <CheckboxCards.Root mt="2" value={activeCharacters} onValueChange={val => setActiveCharacters(val)}
+                columns={{ initial: "2", sm: "6" }}>
+                {[...nameRollPair]
+                    .filter(([name, _]) => searchBoxRef.current === null || name.startsWith(searchBoxRef.current.value))
+                    .sort(([name1, roll1], [name2, roll2]) => roll2 - roll1)
+                    .map(([name, roll]) => (
+                        <CheckboxCards.Item key={name} value={name}>
+                            <Flex direction="column" width="100%">
+                                <Text weight="bold">{name}</Text>
+                                <Text>技能ロール回数: {roll}</Text>
+                            </Flex>
+                        </CheckboxCards.Item>
+                    ))}
+            </CheckboxCards.Root>
             <Heading my="4">技能振り統計</Heading>
             <Flex direction="row">
                 <RadioCards.Root defaultValue="0" onValueChange={val => {
@@ -122,7 +147,7 @@ const StatsChart = (props: StatsChartProps) => {
                         borderColor: 'var(--gray-6)',
                     }} />
                     <Legend />
-                    {allCharacters.map((name, i) => <Line
+                    {activeCharacters.map((name, i) => <Line
                         key={name} dataKey={name}
                         stroke={colors[i]}
                     />)}
