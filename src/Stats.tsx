@@ -2,7 +2,7 @@ import { CoCSkillRollMessage } from './ccfoliaLog/message/CoCSkillRollMessage';
 import { ParamChangeMessage } from './ccfoliaLog/message/ParamChangeMessage';
 import { TalkMessage } from './ccfoliaLog/message/TalkMessasge';
 import { SanityCheckMessage } from './ccfoliaLog/message/SanityCheckMessage';
-import { JSX, useContext, useState } from 'react';
+import { createContext, JSX, useContext, useState } from 'react';
 import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
 import { UnknownSecretDiceMessage } from './ccfoliaLog/message/UnknownSecretDiceMessage';
 import { configCtx, setConfigCtx } from './App';
@@ -193,11 +193,16 @@ type StatTableData = {
 };
 
 const StatTable = (props: StatTableProps) => {
+    const { characters, data } = props;
     const config = useContext(configCtx);
     const setConfig = useContext(setConfigCtx);
     const [isNameChanging, setNameChanging] = useState(false);
     const [changingName, setChangingName] = useState(""); // 変更中の名前
     const [changedName, setChangedName] = useState(""); // 変更後の名前
+    const [sortOrder, setSortOrder] = useState<number[] | undefined>(undefined);
+    const [sortDataIdx, setSortDataIdx] = useState<number | undefined>(undefined);
+
+    const order = sortOrder ?? characters.map((_, i) => i);
 
     const addNameAlias = (before: string, after: string) => {
         setConfig(config.withNameAliases(arr => [...arr, [before, after]]));
@@ -215,7 +220,7 @@ const StatTable = (props: StatTableProps) => {
                 <Table.Header>
                     <Table.Row>
                         <Table.ColumnHeaderCell className='value_title' justify="center">-</Table.ColumnHeaderCell>
-                        {props.characters.map(name =>
+                        {order.map(i => characters[i]).map(name =>
                             <>
                                 {/*タイトル行:右クリックメニューを付ける*/}
                                 <ContextMenu.Root>
@@ -256,11 +261,27 @@ const StatTable = (props: StatTableProps) => {
                     </Table.Row >
                 </Table.Header>
                 <Table.Body>
-                    {props.data.map((data, i) => {
+                    {data.map((data, i) => {
                         return (
                             <Table.Row key={`${data.title}-${i}`} className={`${data.indent ? "indent1" : ""} ${data.separate || i === 0 ? "separate" : ""}`}>
-                                <Table.RowHeaderCell className='value_title'>{data.title}</Table.RowHeaderCell>
-                                {data.values.map((val, i) => <Table.Cell key={`${props.characters[i]}-${data.title}`} justify="end">{val}</Table.Cell>)}
+                                {/*ラベルセル*/}
+                                <Table.RowHeaderCell className='value_title' onClick={() => {
+                                    if (sortDataIdx === i) {
+                                        setSortOrder(undefined)
+                                    }
+                                    else {
+                                        /*TODO:setSortOrder(characters.map((_, i) => i)
+                                            .map(i => [i, data.values[i]])
+                                        );*/
+                                        setSortDataIdx(i);
+                                    }
+                                }} style={{
+                                    cursor: "pointer"
+                                }}>
+                                    {data.title}
+                                </Table.RowHeaderCell>
+                                {/*データセル*/}
+                                {order.map(j => data.values[j]).map((val, j) => <Table.Cell key={`${order.map(k => characters[k])[j]}-${data.title}`} justify="end">{val}</Table.Cell>)}
                             </Table.Row>
                         )
                     })}
