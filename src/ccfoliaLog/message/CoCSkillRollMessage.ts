@@ -29,6 +29,25 @@ export class CoCSkillRollMessage implements CcfoliaMessage {
         return !this.isSuccess() && 96 <= this.diceValue || this.diceValue === 100;
     }
 
+    successNum(): number {
+        return this.isSuccess() ? 1 : 0;
+    }
+    failureNum(): number {
+        return this.isSuccess() ? 0 : 1;
+    }
+    criticalNum(): number {
+        return this.isCritical() ? 1 : 0;
+    }
+    fumbleNum(): number {
+        return this.isFumble() ? 1 : 0;
+    }
+    spCriticalNum(): number {
+        return this.isSuccess() && this.diceValue === 1 ? 1 : 0;
+    }
+    spFumbleNum(): number {
+        return this.diceValue === 100 ? 1 : 0;
+    }
+
     toString() {
         const result = this.isCritical() ? "Critical"
             : this.isFumble() ? "Fumble"

@@ -1,4 +1,5 @@
 import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage";
+import { CoCCombinedRollMessage } from "../ccfoliaLog/message/CoCCombinedRollMessage";
 import { CoCSkillRollMessage } from "../ccfoliaLog/message/CoCSkillRollMessage";
 import { ParamChangeMessage } from "../ccfoliaLog/message/ParamChangeMessage";
 import { SanityCheckMessage } from "../ccfoliaLog/message/SanityCheckMessage";
@@ -45,7 +46,7 @@ class CoCStatsCounter {
     }
 
     incrementStat = (stat: CharacterStat, msg: CcfoliaMessage) => {
-        if (msg instanceof CoCSkillRollMessage) {
+        if (msg instanceof CoCSkillRollMessage || msg instanceof CoCCombinedRollMessage) {
             this.incrementSkillStat(stat.skillRoll, msg);
             if (!stat.skillRoll.perSkill.has(msg.skill)) {
                 stat.skillRoll.perSkill.set(msg.skill, new SkillStat());
@@ -63,27 +64,15 @@ class CoCStatsCounter {
         }
     }
 
-    incrementSkillStat = (stat: SkillStat, msg: CoCSkillRollMessage | SanityCheckMessage) => {
+    incrementSkillStat = (stat: SkillStat, msg: CoCSkillRollMessage | SanityCheckMessage | CoCCombinedRollMessage) => {
         stat.rollNum++;
         stat.valueSum += msg.diceValue;
-        if (msg.isSuccess()) {
-            stat.successNum++;
-            if (msg.isCritical()) {
-                stat.criticalNum++;
-                if (msg.diceValue === 1) {
-                    stat.spCriticalNum++;
-                }
-            }
-        }
-        else {
-            stat.failNum++;
-            if (msg.isFumble()) {
-                stat.fumbleNum++;
-                if (msg.diceValue === 100) {
-                    stat.spFumbleNum++;
-                }
-            }
-        }
+        stat.successNum += msg.successNum();
+        stat.failNum += msg.failureNum();
+        stat.criticalNum += msg.criticalNum();
+        stat.fumbleNum += msg.fumbleNum();
+        stat.spCriticalNum += msg.spCriticalNum();
+        stat.spFumbleNum += msg.spFumbleNum();
     }
 
     incrementStatusStat = (stat: CharacterStat, msg: ParamChangeMessage) => {
