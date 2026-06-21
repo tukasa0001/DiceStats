@@ -299,6 +299,7 @@ const StatTable = (props: StatTableProps) => {
                                         setSortDataIdx(i);
                                         setIsAscending(false);
                                     }
+                                    window.getSelection()?.removeAllRanges();
                                 }} style={{
                                     cursor: data.numberValues !== undefined ? "pointer" : "unset"
                                 }}>
