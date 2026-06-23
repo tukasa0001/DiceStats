@@ -67,11 +67,15 @@ const StatsChart = (props: StatsChartProps) => {
             return;
         }
         function progress(stats: CoCStat[], i: number) {
+            const logLength = log.endIdx - log.startIdx + 1;
+            console.log(`${i}: ${log.startIdx + Math.floor(logLength * (i - 1) * 0.1)} ~ ${log.startIdx + Math.floor(logLength * i * 0.1) - 1}`);
+
             const prevStat = stats[i - 1].clone();
             const sectionStat = cocstats.calc(log.log, {
                 ...config,
-                startIdx: Math.floor(log.log.length * (i - 1) * 0.1),
-                endIdx: Math.floor(log.log.length * i * 0.1) - 1,
+                startIdx: log.startIdx + Math.floor(logLength * (i - 1) * 0.1),
+                endIdx: log.startIdx + Math.floor(logLength * i * 0.1) - 1,
+                ignoredChannels: log.ingoredChannels
             });
             const stat = sectionStat.merge(prevStat);
             stats.push(stat);
@@ -91,7 +95,7 @@ const StatsChart = (props: StatsChartProps) => {
         return <Text>ログをアップロードしてください</Text>
     }
 
-    if (log.log.length <= 10) {
+    if (log.endIdx - log.startIdx < 10) {
         return <Text>ログが短すぎます</Text>
     }
 
