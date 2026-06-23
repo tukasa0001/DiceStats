@@ -38,15 +38,15 @@ type SanityStats = {
 
 type ChartDisplayMode = {
     name: string,
-    calc: (params: { name: string, stat: CharacterStat, sanity: SanityStats }) => number;
+    calc: (params: { name: string, stat?: CharacterStat, sanity: SanityStats }) => number;
 }
 
 const cdm = {
     simple(name: string, func: (stat: CharacterStat) => number): ChartDisplayMode {
         return {
             name,
-            calc(params) {
-                return func(params.stat);
+            calc({ stat }) {
+                return stat ? func(stat) : 0;
             }
         }
     },
@@ -160,26 +160,25 @@ const StatsChart = (props: StatsChartProps) => {
 
     const data = stats.map((stat, i) => ({
         name: `${i * 10}%`,
-        ...allCharacters.map(name => ({ [name]: 0 })).reduce((a, b) => ({ ...a, ...b }), {}),
-        ...[...stat.perCharacter].map(([name, stat]) => ({
+        ...activeCharacters.map(name => ({
             [name]: (() => {
-                if (i === 0) console.log("detect!");
                 const props = {
                     name: name,
-                    stat: stat,
+                    stat: stat.perCharacter.get(name),
                     sanity: sanityStats[i]
                 }
                 if (1 <= i && deltaDisplay) {
                     const prevStat = stats[i - 1].perCharacter.get(name);
                     const prevSanityStat = sanityStats[i - 1];
-                    if (prevStat && prevSanityStat) {
-                        const prevProps = {
-                            name: name,
-                            stat: prevStat,
-                            sanity: prevSanityStat
-                        };
-                        return chartDisplayMode.calc(props) - chartDisplayMode.calc(prevProps);
-                    }
+                    const prevProps = {
+                        name: name,
+                        stat: prevStat,
+                        sanity: prevSanityStat
+                    };
+                    return chartDisplayMode.calc(props) - chartDisplayMode.calc(prevProps);
+                }
+                else if (deltaDisplay) {
+                    return 0; // 0%時点での変化量
                 }
                 return chartDisplayMode.calc(props);
             })()
