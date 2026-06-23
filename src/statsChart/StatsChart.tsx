@@ -5,6 +5,7 @@ import { Text, Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, T
 import { CartesianGrid, Legend, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts";
 import cocstats, { CharacterStat, CoCStat } from "../StatsCalculator/CoCStats";
 import { Search } from "lucide-react";
+import { ParamChangeMessage } from "../ccfoliaLog/message/ParamChangeMessage";
 
 const colors = [
     ...Array.from({ length: 6 }, (_, i) => i)
@@ -28,21 +29,16 @@ const colors = [
 ]
 
 type StatsChartProps = {
-    logs: LogFile[]
+    logs: LogFile[],
 }
 
-type DataPoint = {
-    name: string,
-    rollNum: number,
-    successNum: number,
-    failNum: number,
-    critNum: number,
-    fumbleNum: number,
+type SanityStats = {
+    [name: string]: number | undefined;
 }
 
 type ChartDisplayMode = {
     name: string,
-    calc: (params: { stat: CharacterStat }) => number;
+    calc: (params: { name: string, stat: CharacterStat, sanity: SanityStats }) => number;
 }
 
 const cdm = {
@@ -51,6 +47,14 @@ const cdm = {
             name,
             calc(params) {
                 return func(params.stat);
+            }
+        }
+    },
+    sanity(name: string): ChartDisplayMode {
+        return {
+            name,
+            calc({ name, sanity }) {
+                return sanity[name] ?? 0;
             }
         }
     }
@@ -64,6 +68,7 @@ const chartDisplayModes: ChartDisplayMode[] = [
     cdm.simple("ファンブル回数", stat => stat.skillRoll.fumbleNum),
     cdm.simple("キャラ発言数", stat => stat.talk.pcTalkNum),
     cdm.simple("キャラ発言文字数", stat => stat.talk.pcCharNum),
+    cdm.sanity("SAN値"),
 ]
 
 const StatsChart = (props: StatsChartProps) => {
@@ -71,6 +76,7 @@ const StatsChart = (props: StatsChartProps) => {
     const config = useContext(configCtx);
 
     const [stats, setStats] = useState<CoCStat[]>([]);
+    const [sanityStats, setSanityStats] = useState<SanityStats[]>([]);
 
     const [deltaDisplay, setDeltaDisplay] = useState(false);
 
@@ -83,27 +89,50 @@ const StatsChart = (props: StatsChartProps) => {
         if (log === undefined || log.log.length <= 10) {
             return;
         }
-        function progress(stats: CoCStat[], i: number) {
+
+        // SAN初期値を取得
+        const initialSanityStats: SanityStats = {};
+        for (let i = log.startIdx; i <= log.endIdx && i < log.log.length; i++) {
+            const msg = log.log[i];
+            if (initialSanityStats[msg.sender] === undefined && msg instanceof ParamChangeMessage && msg.paramName === "SAN") {
+                initialSanityStats[msg.sender] = msg.prevValue;
+            }
+        }
+        console.log(initialSanityStats);
+
+        function progress(stats: CoCStat[], sanityStats: SanityStats[], i: number) {
             const logLength = log.endIdx - log.startIdx + 1;
             console.log(`${i}: ${log.startIdx + Math.floor(logLength * (i - 1) * 0.1)} ~ ${log.startIdx + Math.floor(logLength * i * 0.1) - 1}`);
 
+            const startIdx = log.startIdx + Math.floor(logLength * (i - 1) * 0.1);
+            const endIdx = log.startIdx + Math.floor(logLength * i * 0.1) - 1;
+
             const prevStat = stats[i - 1].clone();
             const sectionStat = cocstats.calc(log.log, {
-                ...config,
-                startIdx: log.startIdx + Math.floor(logLength * (i - 1) * 0.1),
-                endIdx: log.startIdx + Math.floor(logLength * i * 0.1) - 1,
+                ...config, startIdx, endIdx,
                 ignoredChannels: log.ingoredChannels
             });
             const stat = sectionStat.merge(prevStat);
             stats.push(stat);
+
+            const currentSanityStats = { ...sanityStats[i - 1] }; // Make a copy
+            for (let i = startIdx; i <= endIdx && i < log.log.length; i++) {
+                const msg = log.log[i];
+                if (msg instanceof ParamChangeMessage && msg.paramName === "SAN") {
+                    currentSanityStats[msg.sender] = msg.value;
+                }
+            }
+            sanityStats.push(currentSanityStats);
+
             if (i < 10) {
-                setTimeout(() => progress(stats, i + 1), 10);
+                setTimeout(() => progress(stats, sanityStats, i + 1), 10);
             }
             else {
                 setStats(stats);
+                setSanityStats(sanityStats);
             }
         }
-        progress([new CoCStat()], 1);
+        progress([new CoCStat()], [initialSanityStats], 1);
     }, [logs]);
 
     const jpnTextComparer = (a: readonly [string, any], b: readonly [string, any]) => a[0].localeCompare(b[0], "ja");
@@ -134,13 +163,25 @@ const StatsChart = (props: StatsChartProps) => {
         ...allCharacters.map(name => ({ [name]: 0 })).reduce((a, b) => ({ ...a, ...b }), {}),
         ...[...stat.perCharacter].map(([name, stat]) => ({
             [name]: (() => {
+                if (i === 0) console.log("detect!");
+                const props = {
+                    name: name,
+                    stat: stat,
+                    sanity: sanityStats[i]
+                }
                 if (1 <= i && deltaDisplay) {
                     const prevStat = stats[i - 1].perCharacter.get(name);
-                    if (prevStat) {
-                        return chartDisplayMode.calc({ stat }) - chartDisplayMode.calc({ stat: prevStat });
+                    const prevSanityStat = sanityStats[i - 1];
+                    if (prevStat && prevSanityStat) {
+                        const prevProps = {
+                            name: name,
+                            stat: prevStat,
+                            sanity: prevSanityStat
+                        };
+                        return chartDisplayMode.calc(props) - chartDisplayMode.calc(prevProps);
                     }
                 }
-                return chartDisplayMode.calc({ stat });
+                return chartDisplayMode.calc(props);
             })()
         })).reduce((a, b) => ({ ...a, ...b }), {})
     }));
