@@ -59,6 +59,7 @@ const cdm = {
 const chartDisplayModes: ChartDisplayMode[] = [
     cdm.simple("技能ロール回数", stat => stat.skillRoll.rollNum),
     cdm.simple("成功回数", stat => stat.skillRoll.successNum),
+    cdm.simple("失敗回数", stat => stat.skillRoll.failNum),
     cdm.simple("クリティカル回数", stat => stat.skillRoll.criticalNum),
     cdm.simple("ファンブル回数", stat => stat.skillRoll.fumbleNum),
     cdm.simple("キャラ発言数", stat => stat.talk.pcTalkNum),
