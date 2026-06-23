@@ -32,13 +32,24 @@ type StatsChartProps = {
     logs: LogFile[],
 }
 
-type SanityStats = {
-    [name: string]: number | undefined;
+type StatusStats = {
+    [name: string]: {
+        health?: number,
+        sanity?: number,
+    } | undefined
+}
+
+function cloneStatusStats(original: StatusStats): StatusStats {
+    var copy: StatusStats = {};
+    for (const [key, value] of Object.entries(original)) {
+        copy[key] = { ...value };
+    }
+    return copy;
 }
 
 type ChartDisplayMode = {
     name: string,
-    calc: (params: { name: string, stat?: CharacterStat, sanity: SanityStats }) => number;
+    calc: (params: { name: string, stat?: CharacterStat, status: StatusStats }) => number;
 }
 
 const cdm = {
@@ -50,11 +61,11 @@ const cdm = {
             }
         }
     },
-    sanity(name: string): ChartDisplayMode {
+    status(name: string, func: (name: string, status: StatusStats) => number): ChartDisplayMode {
         return {
             name,
-            calc({ name, sanity }) {
-                return sanity[name] ?? 0;
+            calc({ name, status }) {
+                return func(name, status);
             }
         }
     }
@@ -68,7 +79,8 @@ const chartDisplayModes: ChartDisplayMode[] = [
     cdm.simple("ファンブル回数", stat => stat.skillRoll.fumbleNum),
     cdm.simple("キャラ発言数", stat => stat.talk.pcTalkNum),
     cdm.simple("キャラ発言文字数", stat => stat.talk.pcCharNum),
-    cdm.sanity("SAN値"),
+    cdm.status("HP", (name, status) => status[name]?.health ?? 0),
+    cdm.status("SAN値", (name, status) => status[name]?.sanity ?? 0),
 ]
 
 const StatsChart = (props: StatsChartProps) => {
@@ -76,7 +88,7 @@ const StatsChart = (props: StatsChartProps) => {
     const config = useContext(configCtx);
 
     const [stats, setStats] = useState<CoCStat[]>([]);
-    const [sanityStats, setSanityStats] = useState<SanityStats[]>([]);
+    const [statusStats, setStatusStats] = useState<StatusStats[]>([]);
 
     const [deltaDisplay, setDeltaDisplay] = useState(false);
 
@@ -91,16 +103,25 @@ const StatsChart = (props: StatsChartProps) => {
         }
 
         // SAN初期値を取得
-        const initialSanityStats: SanityStats = {};
+        const initialStatusStat: StatusStats = {};
         for (let i = log.startIdx; i <= log.endIdx && i < log.log.length; i++) {
             const msg = log.log[i];
-            if (initialSanityStats[msg.sender] === undefined && msg instanceof ParamChangeMessage && msg.paramName === "SAN") {
-                initialSanityStats[msg.sender] = msg.prevValue;
+            if (msg instanceof ParamChangeMessage) {
+                let status = initialStatusStat[msg.sender] ?? {};
+                if (msg.paramName === "HP" && status.health === undefined) {
+                    status.health = msg.prevValue;
+                    initialStatusStat[msg.sender] = status;
+                }
+                else if (msg.paramName === "SAN" && status.sanity === undefined) {
+                    status.sanity = msg.prevValue;
+                    initialStatusStat[msg.sender] = status;
+                }
             }
-        }
-        console.log(initialSanityStats);
 
-        function progress(stats: CoCStat[], sanityStats: SanityStats[], i: number) {
+        }
+        console.log(initialStatusStat);
+
+        function progress(stats: CoCStat[], statusStats: StatusStats[], i: number) {
             const logLength = log.endIdx - log.startIdx + 1;
             console.log(`${i}: ${log.startIdx + Math.floor(logLength * (i - 1) * 0.1)} ~ ${log.startIdx + Math.floor(logLength * i * 0.1) - 1}`);
 
@@ -115,24 +136,32 @@ const StatsChart = (props: StatsChartProps) => {
             const stat = sectionStat.merge(prevStat);
             stats.push(stat);
 
-            const currentSanityStats = { ...sanityStats[i - 1] }; // Make a copy
+            const statusStat = cloneStatusStats(statusStats[i - 1]); // Make a copy
             for (let i = startIdx; i <= endIdx && i < log.log.length; i++) {
                 const msg = log.log[i];
-                if (msg instanceof ParamChangeMessage && msg.paramName === "SAN") {
-                    currentSanityStats[msg.sender] = msg.value;
+                if (msg instanceof ParamChangeMessage) {
+                    let status = statusStat[msg.sender] ?? {};
+                    if (msg.paramName === "HP") {
+                        status.health = msg.value;
+                        statusStat[msg.sender] = status;
+                    }
+                    else if (msg.paramName === "SAN") {
+                        status.sanity = msg.value;
+                        statusStat[msg.sender] = status;
+                    }
                 }
             }
-            sanityStats.push(currentSanityStats);
+            statusStats.push(statusStat);
 
             if (i < 10) {
-                setTimeout(() => progress(stats, sanityStats, i + 1), 10);
+                setTimeout(() => progress(stats, statusStats, i + 1), 10);
             }
             else {
                 setStats(stats);
-                setSanityStats(sanityStats);
+                setStatusStats(statusStats);
             }
         }
-        progress([new CoCStat()], [initialSanityStats], 1);
+        progress([new CoCStat()], [initialStatusStat], 1);
     }, [logs]);
 
     const jpnTextComparer = (a: readonly [string, any], b: readonly [string, any]) => a[0].localeCompare(b[0], "ja");
@@ -165,15 +194,15 @@ const StatsChart = (props: StatsChartProps) => {
                 const props = {
                     name: name,
                     stat: stat.perCharacter.get(name),
-                    sanity: sanityStats[i]
+                    status: statusStats[i]
                 }
                 if (1 <= i && deltaDisplay) {
                     const prevStat = stats[i - 1].perCharacter.get(name);
-                    const prevSanityStat = sanityStats[i - 1];
+                    const prevStatusStat = statusStats[i - 1];
                     const prevProps = {
                         name: name,
                         stat: prevStat,
-                        sanity: prevSanityStat
+                        status: prevStatusStat
                     };
                     return chartDisplayMode.calc(props) - chartDisplayMode.calc(prevProps);
                 }
