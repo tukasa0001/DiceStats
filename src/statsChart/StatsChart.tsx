@@ -227,7 +227,7 @@ const StatsChart = (props: StatsChartProps) => {
                         borderColor: 'var(--gray-6)',
                     }} />
                     <Legend />
-                    {activeCharacters.map((name, i) => <Line
+                    {activeCharacters.filter(name => allCharacters.includes(name)).map((name, i) => <Line
                         key={name} dataKey={name}
                         stroke={colors[i]}
                     />)}
