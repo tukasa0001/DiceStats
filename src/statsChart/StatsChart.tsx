@@ -87,6 +87,8 @@ const StatsChart = (props: StatsChartProps) => {
     const { logs } = props;
     const config = useContext(configCtx);
 
+    const [isInProgress, setInProgress] = useState(false);
+
     const [stats, setStats] = useState<CoCStat[]>([]);
     const [statusStats, setStatusStats] = useState<StatusStats[]>([]);
 
@@ -103,6 +105,7 @@ const StatsChart = (props: StatsChartProps) => {
         if (log === undefined || log.log.length <= split) {
             return;
         }
+        setInProgress(true);
 
         // SAN初期値を取得
         const initialStatusStat: StatusStats = {};
@@ -119,9 +122,7 @@ const StatsChart = (props: StatsChartProps) => {
                     initialStatusStat[msg.sender] = status;
                 }
             }
-
         }
-        console.log(initialStatusStat);
 
         function progress(stats: CoCStat[], statusStats: StatusStats[], i: number) {
             const logLength = log.endIdx - log.startIdx + 1;
@@ -171,6 +172,7 @@ const StatsChart = (props: StatsChartProps) => {
             else {
                 setStats(stats);
                 setStatusStats(statusStats);
+                setInProgress(false);
             }
         }
         progress([new CoCStat()], [initialStatusStat], 1);
@@ -244,9 +246,9 @@ const StatsChart = (props: StatsChartProps) => {
             </CheckboxCards.Root>
             <Heading my="4">技能振り統計</Heading>
             {/* 表示設定 */}
-            <Flex direction="row" my="2" align="center">
+            <Flex direction="row" my="2" align="center" gap="2">
                 {/* 分割数切り替え */}
-                <Select.Root value={split.toString()} onValueChange={val => setSplit(Number(val))}>
+                <Select.Root value={split.toString()} onValueChange={val => setSplit(Number(val))} disabled={isInProgress}>
                     <Select.Trigger />
                     <Select.Content>
                         <Select.Group>
@@ -265,6 +267,9 @@ const StatsChart = (props: StatsChartProps) => {
                         変化量を表示
                     </Flex>
                 </Text>
+
+                {/*計算中表示*/}
+                {isInProgress ? <Spinner /> : null}
             </Flex>
             <Flex direction="row" my="2">
                 <RadioCards.Root defaultValue="0" onValueChange={val => {
