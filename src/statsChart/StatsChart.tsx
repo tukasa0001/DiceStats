@@ -1,10 +1,11 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { LogFile } from "../file/LogFile"
 import { configCtx } from "../App";
-import { Text, Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField, ScrollArea, RadioCards, Grid, CheckboxCards, Spinner } from '@radix-ui/themes';
+import { Text, Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField, ScrollArea, RadioCards, Grid, CheckboxCards, Spinner, Switch } from '@radix-ui/themes';
 import { CartesianGrid, Legend, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts";
 import cocstats, { CharacterStat, CoCStat } from "../StatsCalculator/CoCStats";
 import { Search } from "lucide-react";
+import { ParamChangeMessage } from "../ccfoliaLog/message/ParamChangeMessage";
 
 const colors = [
     ...Array.from({ length: 6 }, (_, i) => i)
@@ -28,66 +29,154 @@ const colors = [
 ]
 
 type StatsChartProps = {
-    logs: LogFile[]
+    logs: LogFile[],
 }
 
-type DataPoint = {
+type StatusStats = {
+    [name: string]: {
+        health?: number,
+        sanity?: number,
+    } | undefined
+}
+
+function cloneStatusStats(original: StatusStats): StatusStats {
+    var copy: StatusStats = {};
+    for (const [key, value] of Object.entries(original)) {
+        copy[key] = { ...value };
+    }
+    return copy;
+}
+
+type ChartDisplayMode = {
     name: string,
-    rollNum: number,
-    successNum: number,
-    failNum: number,
-    critNum: number,
-    fumbleNum: number,
+    calc: (params: { name: string, stat?: CharacterStat, status: StatusStats }) => number;
 }
 
-type ValueDisplay = (stat: CharacterStat) => number;
+const cdm = {
+    simple(name: string, func: (stat: CharacterStat) => number): ChartDisplayMode {
+        return {
+            name,
+            calc({ stat }) {
+                return stat ? func(stat) : 0;
+            }
+        }
+    },
+    status(name: string, func: (name: string, status: StatusStats) => number): ChartDisplayMode {
+        return {
+            name,
+            calc({ name, status }) {
+                return func(name, status);
+            }
+        }
+    }
+}
 
-const valueDisplays: [string, ValueDisplay][] = [
-    ["技能ロール回数", stat => stat.skillRoll.rollNum],
-    ["成功回数", stat => stat.skillRoll.successNum],
-    ["クリティカル回数", stat => stat.skillRoll.criticalNum],
-    ["ファンブル回数", stat => stat.skillRoll.fumbleNum],
-    ["キャラ発言数", stat => stat.talk.pcTalkNum],
-    ["キャラ発言文字数", stat => stat.talk.pcCharNum],
+const chartDisplayModes: ChartDisplayMode[] = [
+    cdm.simple("技能ロール回数", stat => stat.skillRoll.rollNum),
+    cdm.simple("成功回数", stat => stat.skillRoll.successNum),
+    cdm.simple("失敗回数", stat => stat.skillRoll.failNum),
+    cdm.simple("クリティカル回数", stat => stat.skillRoll.criticalNum),
+    cdm.simple("ファンブル回数", stat => stat.skillRoll.fumbleNum),
+    cdm.simple("キャラ発言数", stat => stat.talk.pcTalkNum),
+    cdm.simple("キャラ発言文字数", stat => stat.talk.pcCharNum),
+    cdm.status("HP", (name, status) => status[name]?.health ?? 0),
+    cdm.status("SAN値", (name, status) => status[name]?.sanity ?? 0),
 ]
 
 const StatsChart = (props: StatsChartProps) => {
     const { logs } = props;
     const config = useContext(configCtx);
 
-    const [stats, setStats] = useState<CoCStat[]>([]);
+    const [isInProgress, setInProgress] = useState(false);
 
-    const [valueDisplay, setValueDisplay] = useState<ValueDisplay>(() => valueDisplays[0][1]);
+    const [stats, setStats] = useState<CoCStat[]>([]);
+    const [statusStats, setStatusStats] = useState<StatusStats[]>([]);
+
+    const [deltaDisplay, setDeltaDisplay] = useState(false);
+
+    const [chartDisplayMode, setChartDisplayMode] = useState<ChartDisplayMode>(chartDisplayModes[0]);
     const [activeCharacters, setActiveCharacters] = useState<string[]>([]);
+
+    const [split, setSplit] = useState(10);
 
     const log = logs[0];
 
     useEffect(() => {
-        if (log === undefined || log.log.length <= 10) {
+        if (log === undefined || log.log.length <= split) {
             return;
         }
-        function progress(stats: CoCStat[], i: number) {
+        setInProgress(true);
+
+        // SAN初期値を取得
+        const initialStatusStat: StatusStats = {};
+        for (let i = log.startIdx; i <= log.endIdx && i < log.log.length; i++) {
+            const msg = log.log[i];
+            if (msg instanceof ParamChangeMessage) {
+                let status = initialStatusStat[msg.sender] ?? {};
+                if (msg.paramName === "HP" && status.health === undefined) {
+                    status.health = msg.prevValue;
+                    initialStatusStat[msg.sender] = status;
+                }
+                else if (msg.paramName === "SAN" && status.sanity === undefined) {
+                    status.sanity = msg.prevValue;
+                    initialStatusStat[msg.sender] = status;
+                }
+            }
+        }
+
+        function progress(stats: CoCStat[], statusStats: StatusStats[], i: number) {
             const logLength = log.endIdx - log.startIdx + 1;
-            console.log(`${i}: ${log.startIdx + Math.floor(logLength * (i - 1) * 0.1)} ~ ${log.startIdx + Math.floor(logLength * i * 0.1) - 1}`);
+
+            const startIdx = log.startIdx + Math.floor(logLength * (i - 1) * (1 / split));
+            const endIdx = log.startIdx + Math.floor(logLength * i * (1 / split)) - 1;
 
             const prevStat = stats[i - 1].clone();
             const sectionStat = cocstats.calc(log.log, {
-                ...config,
-                startIdx: log.startIdx + Math.floor(logLength * (i - 1) * 0.1),
-                endIdx: log.startIdx + Math.floor(logLength * i * 0.1) - 1,
+                ...config, startIdx, endIdx,
                 ignoredChannels: log.ingoredChannels
             });
             const stat = sectionStat.merge(prevStat);
             stats.push(stat);
-            if (i < 10) {
-                setTimeout(() => progress(stats, i + 1), 10);
+
+            // ステータス値の記録を行う
+            const statusStat = cloneStatusStats(statusStats[i - 1]); // Make a copy
+            for (let i = startIdx; i <= endIdx && i < log.log.length; i++) {
+                const msg = log.log[i];
+                let sender = msg.sender
+
+                // 名前エイリアス処理
+                for (let [before, after] of config.nameAliases) {
+                    if (sender === before) {
+                        sender = after;
+                    }
+                }
+
+                // 統計加算
+                if (msg instanceof ParamChangeMessage) {
+                    let status = statusStat[sender] ?? {};
+                    if (msg.paramName === "HP") {
+                        status.health = msg.value;
+                        statusStat[sender] = status;
+                    }
+                    else if (msg.paramName === "SAN") {
+                        status.sanity = msg.value;
+                        statusStat[sender] = status;
+                    }
+                }
+            }
+            statusStats.push(statusStat);
+
+            if (i < split) {
+                setTimeout(() => progress(stats, statusStats, i + 1), 10);
             }
             else {
                 setStats(stats);
+                setStatusStats(statusStats);
+                setInProgress(false);
             }
         }
-        progress([new CoCStat()], 1);
-    }, [logs]);
+        progress([new CoCStat()], [initialStatusStat], 1);
+    }, [logs, split]);
 
     const jpnTextComparer = (a: readonly [string, any], b: readonly [string, any]) => a[0].localeCompare(b[0], "ja");
 
@@ -113,17 +202,36 @@ const StatsChart = (props: StatsChartProps) => {
     const allCharacters = nameRollPair.map(([name, _]) => name);
 
     const data = stats.map((stat, i) => ({
-        name: `${i * 10}%`,
-        ...allCharacters.map(name => ({ [name]: 0 })).reduce((a, b) => ({ ...a, ...b }), {}),
-        ...[...stat.perCharacter].map(([name, stat]) => ({
-            [name]: valueDisplay(stat)
+        name: `${i * (100 / split)}%`,
+        ...activeCharacters.map(name => ({
+            [name]: (() => {
+                const props = {
+                    name: name,
+                    stat: stat.perCharacter.get(name),
+                    status: statusStats[i]
+                }
+                if (1 <= i && deltaDisplay) {
+                    const prevStat = stats[i - 1].perCharacter.get(name);
+                    const prevStatusStat = statusStats[i - 1];
+                    const prevProps = {
+                        name: name,
+                        stat: prevStat,
+                        status: prevStatusStat
+                    };
+                    return chartDisplayMode.calc(props) - chartDisplayMode.calc(prevProps);
+                }
+                else if (deltaDisplay) {
+                    return 0; // 0%時点での変化量
+                }
+                return chartDisplayMode.calc(props);
+            })()
         })).reduce((a, b) => ({ ...a, ...b }), {})
     }));
 
     return (
         <Box my="2">
             <Heading my="4">表示するキャラを選択</Heading>
-            <CheckboxCards.Root mt="2" value={activeCharacters} onValueChange={val => setActiveCharacters(val)}
+            <CheckboxCards.Root my="2" value={activeCharacters} onValueChange={val => setActiveCharacters(val)}
                 columns={{ initial: "2", sm: "6" }}>
                 {[...nameRollPair]
                     .sort(([name1, roll1], [name2, roll2]) => roll2 - roll1)
@@ -137,13 +245,39 @@ const StatsChart = (props: StatsChartProps) => {
                     ))}
             </CheckboxCards.Root>
             <Heading my="4">技能振り統計</Heading>
-            <Flex direction="row">
+            {/* 表示設定 */}
+            <Flex direction="row" my="2" align="center" gap="2">
+                {/* 分割数切り替え */}
+                <Select.Root value={split.toString()} onValueChange={val => setSplit(Number(val))} disabled={isInProgress}>
+                    <Select.Trigger />
+                    <Select.Content>
+                        <Select.Group>
+                            <Select.Item value="10">10%刻み</Select.Item>
+                            <Select.Item value="20">5%刻み</Select.Item>
+                        </Select.Group>
+                    </Select.Content>
+                </Select.Root>
+
+                {/* 変化量表示モード */}
+                <Text as="label">
+                    <Flex gap="1" align="center">
+                        <Switch
+                            checked={deltaDisplay}
+                            onCheckedChange={val => setDeltaDisplay(val)} />
+                        変化量を表示
+                    </Flex>
+                </Text>
+
+                {/*計算中表示*/}
+                {isInProgress ? <Spinner /> : null}
+            </Flex>
+            <Flex direction="row" my="2">
                 <RadioCards.Root defaultValue="0" onValueChange={val => {
                     const idx = Number(val);
-                    setValueDisplay(() => valueDisplays[idx][1]);
+                    setChartDisplayMode(() => chartDisplayModes[idx]);
                 }}>
                     <Flex direction="column" gap="2">
-                        {valueDisplays.map(([name, _], i) => (
+                        {chartDisplayModes.map(({ name }, i) => (
                             <RadioCards.Item key={i} value={i.toString()}>
                                 <Flex direction="column" width="100%">
                                     <Text weight="bold">{name}</Text>
@@ -162,9 +296,10 @@ const StatsChart = (props: StatsChartProps) => {
                         borderColor: 'var(--gray-6)',
                     }} />
                     <Legend />
-                    {activeCharacters.map((name, i) => <Line
+                    {activeCharacters.filter(name => allCharacters.includes(name)).map((name, i) => <Line
                         key={name} dataKey={name}
                         stroke={colors[i]}
+                        isAnimationActive={split <= 20}
                     />)}
                 </LineChart>
             </Flex>
