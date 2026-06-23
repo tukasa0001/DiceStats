@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { LogFile } from "../file/LogFile"
 import { configCtx } from "../App";
-import { Text, Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField, ScrollArea, RadioCards, Grid, CheckboxCards, Spinner } from '@radix-ui/themes';
+import { Text, Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField, ScrollArea, RadioCards, Grid, CheckboxCards, Spinner, Switch } from '@radix-ui/themes';
 import { CartesianGrid, Legend, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts";
 import cocstats, { CharacterStat, CoCStat } from "../StatsCalculator/CoCStats";
 import { Search } from "lucide-react";
@@ -72,6 +72,8 @@ const StatsChart = (props: StatsChartProps) => {
 
     const [stats, setStats] = useState<CoCStat[]>([]);
 
+    const [deltaDisplay, setDeltaDisplay] = useState(false);
+
     const [chartDisplayMode, setChartDisplayMode] = useState<ChartDisplayMode>(chartDisplayModes[0]);
     const [activeCharacters, setActiveCharacters] = useState<string[]>([]);
 
@@ -131,14 +133,22 @@ const StatsChart = (props: StatsChartProps) => {
         name: `${i * 10}%`,
         ...allCharacters.map(name => ({ [name]: 0 })).reduce((a, b) => ({ ...a, ...b }), {}),
         ...[...stat.perCharacter].map(([name, stat]) => ({
-            [name]: chartDisplayMode.calc({ stat })
+            [name]: (() => {
+                if (1 <= i && deltaDisplay) {
+                    const prevStat = stats[i - 1].perCharacter.get(name);
+                    if (prevStat) {
+                        return chartDisplayMode.calc({ stat }) - chartDisplayMode.calc({ stat: prevStat });
+                    }
+                }
+                return chartDisplayMode.calc({ stat });
+            })()
         })).reduce((a, b) => ({ ...a, ...b }), {})
     }));
 
     return (
         <Box my="2">
             <Heading my="4">表示するキャラを選択</Heading>
-            <CheckboxCards.Root mt="2" value={activeCharacters} onValueChange={val => setActiveCharacters(val)}
+            <CheckboxCards.Root my="2" value={activeCharacters} onValueChange={val => setActiveCharacters(val)}
                 columns={{ initial: "2", sm: "6" }}>
                 {[...nameRollPair]
                     .sort(([name1, roll1], [name2, roll2]) => roll2 - roll1)
@@ -152,7 +162,7 @@ const StatsChart = (props: StatsChartProps) => {
                     ))}
             </CheckboxCards.Root>
             <Heading my="4">技能振り統計</Heading>
-            <Flex direction="row">
+            <Flex direction="row" my="2">
                 <RadioCards.Root defaultValue="0" onValueChange={val => {
                     const idx = Number(val);
                     setChartDisplayMode(() => chartDisplayModes[idx]);
@@ -183,6 +193,15 @@ const StatsChart = (props: StatsChartProps) => {
                     />)}
                 </LineChart>
             </Flex>
+
+            <Text as="label">
+                <Flex gap="1" align="center">
+                    <Switch
+                        checked={deltaDisplay}
+                        onCheckedChange={val => setDeltaDisplay(val)} />
+                    変化量を表示
+                </Flex>
+            </Text>
         </Box >
     )
 }
