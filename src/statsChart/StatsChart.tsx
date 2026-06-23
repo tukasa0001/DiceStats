@@ -95,10 +95,12 @@ const StatsChart = (props: StatsChartProps) => {
     const [chartDisplayMode, setChartDisplayMode] = useState<ChartDisplayMode>(chartDisplayModes[0]);
     const [activeCharacters, setActiveCharacters] = useState<string[]>([]);
 
+    const [split, setSplit] = useState(10);
+
     const log = logs[0];
 
     useEffect(() => {
-        if (log === undefined || log.log.length <= 10) {
+        if (log === undefined || log.log.length <= split) {
             return;
         }
 
@@ -123,10 +125,9 @@ const StatsChart = (props: StatsChartProps) => {
 
         function progress(stats: CoCStat[], statusStats: StatusStats[], i: number) {
             const logLength = log.endIdx - log.startIdx + 1;
-            console.log(`${i}: ${log.startIdx + Math.floor(logLength * (i - 1) * 0.1)} ~ ${log.startIdx + Math.floor(logLength * i * 0.1) - 1}`);
 
-            const startIdx = log.startIdx + Math.floor(logLength * (i - 1) * 0.1);
-            const endIdx = log.startIdx + Math.floor(logLength * i * 0.1) - 1;
+            const startIdx = log.startIdx + Math.floor(logLength * (i - 1) * (1 / split));
+            const endIdx = log.startIdx + Math.floor(logLength * i * (1 / split)) - 1;
 
             const prevStat = stats[i - 1].clone();
             const sectionStat = cocstats.calc(log.log, {
@@ -164,7 +165,7 @@ const StatsChart = (props: StatsChartProps) => {
             }
             statusStats.push(statusStat);
 
-            if (i < 10) {
+            if (i < split) {
                 setTimeout(() => progress(stats, statusStats, i + 1), 10);
             }
             else {
@@ -173,7 +174,7 @@ const StatsChart = (props: StatsChartProps) => {
             }
         }
         progress([new CoCStat()], [initialStatusStat], 1);
-    }, [logs]);
+    }, [logs, split]);
 
     const jpnTextComparer = (a: readonly [string, any], b: readonly [string, any]) => a[0].localeCompare(b[0], "ja");
 
@@ -199,7 +200,7 @@ const StatsChart = (props: StatsChartProps) => {
     const allCharacters = nameRollPair.map(([name, _]) => name);
 
     const data = stats.map((stat, i) => ({
-        name: `${i * 10}%`,
+        name: `${i * (100 / split)}%`,
         ...activeCharacters.map(name => ({
             [name]: (() => {
                 const props = {
@@ -242,6 +243,29 @@ const StatsChart = (props: StatsChartProps) => {
                     ))}
             </CheckboxCards.Root>
             <Heading my="4">技能振り統計</Heading>
+            {/* 表示設定 */}
+            <Flex direction="row" my="2" align="center">
+                {/* 分割数切り替え */}
+                <Select.Root value={split.toString()} onValueChange={val => setSplit(Number(val))}>
+                    <Select.Trigger />
+                    <Select.Content>
+                        <Select.Group>
+                            <Select.Item value="10">10%刻み</Select.Item>
+                            <Select.Item value="20">5%刻み</Select.Item>
+                        </Select.Group>
+                    </Select.Content>
+                </Select.Root>
+
+                {/* 変化量表示モード */}
+                <Text as="label">
+                    <Flex gap="1" align="center">
+                        <Switch
+                            checked={deltaDisplay}
+                            onCheckedChange={val => setDeltaDisplay(val)} />
+                        変化量を表示
+                    </Flex>
+                </Text>
+            </Flex>
             <Flex direction="row" my="2">
                 <RadioCards.Root defaultValue="0" onValueChange={val => {
                     const idx = Number(val);
@@ -270,18 +294,10 @@ const StatsChart = (props: StatsChartProps) => {
                     {activeCharacters.filter(name => allCharacters.includes(name)).map((name, i) => <Line
                         key={name} dataKey={name}
                         stroke={colors[i]}
+                        isAnimationActive={split <= 20}
                     />)}
                 </LineChart>
             </Flex>
-
-            <Text as="label">
-                <Flex gap="1" align="center">
-                    <Switch
-                        checked={deltaDisplay}
-                        onCheckedChange={val => setDeltaDisplay(val)} />
-                    変化量を表示
-                </Flex>
-            </Text>
         </Box >
     )
 }
