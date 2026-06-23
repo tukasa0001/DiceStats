@@ -40,15 +40,29 @@ type DataPoint = {
     fumbleNum: number,
 }
 
-type ValueDisplay = (stat: CharacterStat) => number;
+type ChartDisplayMode = {
+    name: string,
+    calc: (params: { stat: CharacterStat }) => number;
+}
 
-const valueDisplays: [string, ValueDisplay][] = [
-    ["技能ロール回数", stat => stat.skillRoll.rollNum],
-    ["成功回数", stat => stat.skillRoll.successNum],
-    ["クリティカル回数", stat => stat.skillRoll.criticalNum],
-    ["ファンブル回数", stat => stat.skillRoll.fumbleNum],
-    ["キャラ発言数", stat => stat.talk.pcTalkNum],
-    ["キャラ発言文字数", stat => stat.talk.pcCharNum],
+const cdm = {
+    simple(name: string, func: (stat: CharacterStat) => number): ChartDisplayMode {
+        return {
+            name,
+            calc(params) {
+                return func(params.stat);
+            }
+        }
+    }
+}
+
+const chartDisplayModes: ChartDisplayMode[] = [
+    cdm.simple("技能ロール回数", stat => stat.skillRoll.rollNum),
+    cdm.simple("成功回数", stat => stat.skillRoll.successNum),
+    cdm.simple("クリティカル回数", stat => stat.skillRoll.criticalNum),
+    cdm.simple("ファンブル回数", stat => stat.skillRoll.fumbleNum),
+    cdm.simple("キャラ発言数", stat => stat.talk.pcTalkNum),
+    cdm.simple("キャラ発言文字数", stat => stat.talk.pcCharNum),
 ]
 
 const StatsChart = (props: StatsChartProps) => {
@@ -57,7 +71,7 @@ const StatsChart = (props: StatsChartProps) => {
 
     const [stats, setStats] = useState<CoCStat[]>([]);
 
-    const [valueDisplay, setValueDisplay] = useState<ValueDisplay>(() => valueDisplays[0][1]);
+    const [chartDisplayMode, setChartDisplayMode] = useState<ChartDisplayMode>(chartDisplayModes[0]);
     const [activeCharacters, setActiveCharacters] = useState<string[]>([]);
 
     const log = logs[0];
@@ -116,7 +130,7 @@ const StatsChart = (props: StatsChartProps) => {
         name: `${i * 10}%`,
         ...allCharacters.map(name => ({ [name]: 0 })).reduce((a, b) => ({ ...a, ...b }), {}),
         ...[...stat.perCharacter].map(([name, stat]) => ({
-            [name]: valueDisplay(stat)
+            [name]: chartDisplayMode.calc({ stat })
         })).reduce((a, b) => ({ ...a, ...b }), {})
     }));
 
@@ -140,10 +154,10 @@ const StatsChart = (props: StatsChartProps) => {
             <Flex direction="row">
                 <RadioCards.Root defaultValue="0" onValueChange={val => {
                     const idx = Number(val);
-                    setValueDisplay(() => valueDisplays[idx][1]);
+                    setChartDisplayMode(() => chartDisplayModes[idx]);
                 }}>
                     <Flex direction="column" gap="2">
-                        {valueDisplays.map(([name, _], i) => (
+                        {chartDisplayModes.map(({ name }, i) => (
                             <RadioCards.Item key={i} value={i.toString()}>
                                 <Flex direction="column" width="100%">
                                     <Text weight="bold">{name}</Text>
