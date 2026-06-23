@@ -136,18 +136,29 @@ const StatsChart = (props: StatsChartProps) => {
             const stat = sectionStat.merge(prevStat);
             stats.push(stat);
 
+            // ステータス値の記録を行う
             const statusStat = cloneStatusStats(statusStats[i - 1]); // Make a copy
             for (let i = startIdx; i <= endIdx && i < log.log.length; i++) {
                 const msg = log.log[i];
+                let sender = msg.sender
+
+                // 名前エイリアス処理
+                for (let [before, after] of config.nameAliases) {
+                    if (sender === before) {
+                        sender = after;
+                    }
+                }
+
+                // 統計加算
                 if (msg instanceof ParamChangeMessage) {
-                    let status = statusStat[msg.sender] ?? {};
+                    let status = statusStat[sender] ?? {};
                     if (msg.paramName === "HP") {
                         status.health = msg.value;
-                        statusStat[msg.sender] = status;
+                        statusStat[sender] = status;
                     }
                     else if (msg.paramName === "SAN") {
                         status.sanity = msg.value;
-                        statusStat[msg.sender] = status;
+                        statusStat[sender] = status;
                     }
                 }
             }
