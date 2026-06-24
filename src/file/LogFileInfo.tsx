@@ -79,7 +79,7 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
                         placeholder="最初から">
                         <TextField.Slot />
                     </TextField.Root>
-                    {log.startIdx === 0 && startMsg !== "" ? <Tooltip content="メッセージが存在しません"><TriangleAlert /></Tooltip> : null}
+                    {log.startIdx !== 0 && startMsg !== "" ? <Tooltip content="メッセージが存在しません"><TriangleAlert /></Tooltip> : null}
                     <Button variant="outline" onClick={() => setSelectMode("start")}>選択</Button>
                 </Flex>
                 <Flex gap="2" align="center">
