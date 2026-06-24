@@ -133,22 +133,17 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
                 }} onClick={() => setSelectMode("none")}>
                     <X />
                 </IconButton>
-                <Box style={{
-                    overflowY: "scroll",
-                    height: "100%"
-                }}>
-                    <FilteredLogView logs={log} onClick={(msg, i) => {
-                        if (selectMode === "start") {
-                            setStartMsg(msg.toDisplayText())
-                            setLogRange({ startIdx: i })
-                        }
-                        else {
-                            setEndMsg(msg.toDisplayText())
-                            setLogRange({ endIdx: i })
-                        }
-                        setSelectMode("none")
-                    }} />
-                </Box>
+                <FilteredLogView logs={log} onClick={(msg, i) => {
+                    if (selectMode === "start") {
+                        setStartMsg(msg.toDisplayText())
+                        setLogRange({ startIdx: i })
+                    }
+                    else {
+                        setEndMsg(msg.toDisplayText())
+                        setLogRange({ endIdx: i })
+                    }
+                    setSelectMode("none")
+                }} />
             </Card>
         </>}
     </Box>

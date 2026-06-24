@@ -1,4 +1,4 @@
-import { Badge, Card, Code, Flex } from "@radix-ui/themes";
+import { Badge, Box, Card, Code, Flex, ScrollArea } from "@radix-ui/themes";
 import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage";
 import { Heading, Text } from "@radix-ui/themes";
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge";
@@ -7,6 +7,8 @@ import { SanityCheckMessage } from "../ccfoliaLog/message/SanityCheckMessage";
 import { ParamChangeMessage } from "../ccfoliaLog/message/ParamChangeMessage";
 import LogViewFilter, { EMPTY_FILTER } from "./LogViewFilter";
 import { LogFile } from "../file/LogFile";
+import { useRef } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 type LogViewProps = {
     logs: LogFile
@@ -16,6 +18,8 @@ type LogViewProps = {
 
 export const LogView = (props: LogViewProps) => {
     const { logs, onClick } = props;
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
+
     const filter = props.filter ?? EMPTY_FILTER;
 
     const testFilter = (msg: CcfoliaMessage) => {
@@ -31,23 +35,44 @@ export const LogView = (props: LogViewProps) => {
         return true;
     }
 
-    return <Flex gap="4" direction="column" mt="4">
-        {logs.log.map((msg, i) =>
-            !testFilter(msg) ? null : onClick === undefined
-                // 通常
-                ? <Card key={i}>
-                    <MessageCardContent msg={msg} filter={filter} />
-                </Card>
-                // クリック可能
-                : <Card key={i} asChild style={{
-                    cursor: "pointer"
-                }}>
-                    <button onClick={() => onClick(msg, i)}>
-                        <MessageCardContent msg={msg} filter={filter} />
-                    </button>
-                </Card>
-        )}
-    </Flex>
+    const filteredLog = logs.log.filter(msg => testFilter(msg))
+
+    const virtualizer = useVirtualizer({
+        count: filteredLog.length,
+        getScrollElement: () => scrollAreaRef.current,
+        estimateSize: () => 72,
+        overscan: 20,
+        gap: 16,
+    })
+
+    return (
+        <ScrollArea scrollbars="vertical" ref={scrollAreaRef} style={{
+            maxHeight: "100%"
+        }}>
+            <Box mt="4" height={`${virtualizer.getTotalSize()}px`} position="relative" ref={virtualizer.containerRef}>
+                {virtualizer.getVirtualItems().map(vItem => (
+                    <Card key={vItem.key} data-index={vItem.index}
+                        ref={virtualizer.measureElement} asChild={onClick !== undefined}
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            transform: `translateY(${vItem.start}px)`,
+                        }}>
+                        {onClick === undefined
+                            // 通常
+                            ? <MessageCardContent msg={filteredLog[vItem.index]} filter={filter} />
+                            // クリック可能
+                            : <button onClick={() => onClick(filteredLog[vItem.index], vItem.index)}>
+                                <MessageCardContent msg={filteredLog[vItem.index]} filter={filter} />
+                            </button>}
+                    </Card>
+
+                ))}
+            </Box>
+        </ScrollArea>
+    )
 };
 
 const MessageCardContent = (props: { msg: CcfoliaMessage, filter: LogViewFilter }) => {
