@@ -2,14 +2,14 @@ import { CoCSkillRollMessage } from './ccfoliaLog/message/CoCSkillRollMessage';
 import { ParamChangeMessage } from './ccfoliaLog/message/ParamChangeMessage';
 import { TalkMessage } from './ccfoliaLog/message/TalkMessasge';
 import { SanityCheckMessage } from './ccfoliaLog/message/SanityCheckMessage';
-import { createContext, JSX, useContext, useState } from 'react';
+import { createContext, JSX, useContext, useEffect, useState } from 'react';
 import { CcfoliaMessage } from './ccfoliaLog/message/CcfoliaMessage';
 import { UnknownSecretDiceMessage } from './ccfoliaLog/message/UnknownSecretDiceMessage';
 import { configCtx, setConfigCtx } from './App';
 import { ErrorBlock, InfoBlock } from './Utils';
-import { Text, Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField } from '@radix-ui/themes';
+import { Text, Box, Button, ContextMenu, Dialog, Flex, Select, Table, Heading, TextField, Spinner } from '@radix-ui/themes';
 import "./Stats.css"
-import cocstats from './StatsCalculator/CoCStats';
+import cocstats, { CoCStat } from './StatsCalculator/CoCStats';
 import { LogFile } from './file/LogFile';
 
 type StatsProps = {
@@ -21,22 +21,29 @@ const Stats = (props: StatsProps) => {
 
     const logs = props.logs;
     const config = useContext(configCtx);
+    const [stats, setStats] = useState<CoCStat | undefined>(undefined);
 
     const jpnTextComparer = (a: readonly [string, any], b: readonly [string, any]) => a[0].localeCompare(b[0], "ja");
+
+    useEffect(() => {
+        const statsArray = logs.map(l => l.stat);
+        if (statsArray.some(stat => stat === undefined)) {
+            return;
+        }
+        if (0 < statsArray.length) {
+            setStats(statsArray.reduce((a, b) => a!.merge(b!)));
+        }
+    }, [logs]);
 
     if (logs.length <= 0) {
         return <Text>ログをアップロードしてください</Text>
     }
 
-    // 暫定対応: 名前の読み替えを更新してもfile.statが更新されないため
-    const stats = logs
-        .map(file => cocstats.calc(file.log, {
-            ...config,
-            startIdx: file.startIdx,
-            endIdx: file.endIdx,
-            ignoredChannels: file.ingoredChannels
-        }))
-        .reduce((a, b) => a.merge(b));
+    if (stats === undefined || logs.some(l => l.stat === undefined)) {
+        return <Flex align="center" justify="center" mt="2">
+            <Text>読み込み中</Text><Spinner />
+        </Flex>;
+    }
 
     const skills = [...stats.perCharacter]
         .map(([name, stat]) => [name, stat.skillRoll] as const)

@@ -1,4 +1,4 @@
-import { Box, Button, Card, Flex, Switch, Text, TextField, Tooltip } from "@radix-ui/themes"
+import { Box, Button, Card, Flex, Spinner, Switch, Text, TextField, Tooltip } from "@radix-ui/themes"
 import { LogFile } from "./LogFile"
 import { useContext, useState } from "react"
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge"
@@ -115,6 +115,7 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
                         雑談チャンネルを統計から除外
                     </Flex>
                 </Text>
+                <Text>統計計算: {log.stat !== undefined ? "完了" : <Spinner />}</Text>
             </Flex>
         </Card>
         {selectMode === "none" ? null : <>

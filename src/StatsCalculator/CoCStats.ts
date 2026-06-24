@@ -14,35 +14,72 @@ class CoCStatsCounter {
         ignoredChannels: []
     })
 
+    calcAsync = (log: CcfoliaMessage[], _option?: CoCStatOptions, signal?: AbortSignal): Promise<CoCStat> => {
+        const maxTime = 100;
+        const option: Required<CoCStatOptions> = { ...this.createDefaultOption(), ..._option };
+        let stat = new CoCStat();
+
+        const calc = (start: number, resolve: (stat: CoCStat) => void) => {
+            signal?.throwIfAborted();
+            const startTime = performance.now(); // TODO:時間ベースでの処理
+            let i = start;
+            while (i <= option.endIdx && i < log.length && performance.now() - startTime <= maxTime) {
+                const msg = log[i];
+                this.calcMsg(msg, stat, option);
+                i++;
+            }
+            const next = i;
+            if (next <= option.endIdx && next < log.length) {
+                console.log("timeout");
+                setTimeout(() => calc(next, resolve), 0);
+            }
+            else {
+                // end calculation
+                resolve(stat);
+                console.log("===calculation end===");
+            }
+        }
+
+        return new Promise(resolve => {
+            console.log("===calculation start===");
+            calc(option.startIdx, resolve);
+        });
+    }
+
     calc = (log: CcfoliaMessage[], _option?: CoCStatOptions) => {
         const option: Required<CoCStatOptions> = { ...this.createDefaultOption(), ..._option };
         let stat = new CoCStat()
         for (let msg of log.slice(option.startIdx, option.endIdx + 1)) {
-            let sender = msg.sender;
-            // チャンネルフィルター処理
-            if (option.ignoredChannels.includes(msg.channel)) {
-                continue;
-            }
-            // 名前エイリアス処理
-            for (let [before, after] of option.nameAliases) {
-                if (sender === before) {
-                    sender = after;
-                }
-            }
-            // フィルター処理
-            if (!option.filter(msg)) {
-                continue;
-            }
-            // 統計追加処理
-            this.incrementStat(stat.total, msg);
-            if (sender !== "") {
-                if (!stat.perCharacter.has(sender)) {
-                    stat.perCharacter.set(sender, new CharacterStat());
-                }
-                this.incrementStat(stat.perCharacter.get(sender)!, msg);
-            }
+            this.calcMsg(msg, stat, option);
         }
         return stat;
+    }
+
+    calcMsg = (msg: CcfoliaMessage, stat: CoCStat, _option: CoCStatOptions) => {
+        const option: Required<CoCStatOptions> = { ...this.createDefaultOption(), ..._option };
+        let sender = msg.sender;
+        // チャンネルフィルター処理
+        if (option.ignoredChannels.includes(msg.channel)) {
+            return;
+        }
+        // 名前エイリアス処理
+        for (let [before, after] of option.nameAliases) {
+            if (sender === before) {
+                sender = after;
+            }
+        }
+        // フィルター処理
+        if (!option.filter(msg)) {
+            return;
+        }
+        // 統計追加処理
+        this.incrementStat(stat.total, msg);
+        if (sender !== "") {
+            if (!stat.perCharacter.has(sender)) {
+                stat.perCharacter.set(sender, new CharacterStat());
+            }
+            this.incrementStat(stat.perCharacter.get(sender)!, msg);
+        }
     }
 
     incrementStat = (stat: CharacterStat, msg: CcfoliaMessage) => {
