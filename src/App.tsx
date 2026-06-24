@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import type { FC } from 'react'
 import "@radix-ui/themes/styles.css"
 import HomeTab from './Home'
@@ -14,9 +14,9 @@ import { MoonIcon, SunIcon } from 'lucide-react';
 import { LogView } from './logView/LogView';
 import { FilteredLogView } from './logView/FilteredLogView';
 import PlayerStats from './PlayerStats/PlayerStats';
-import { LogFile } from './file/LogFile';
+import { copyLog, LogFile } from './file/LogFile';
 import { MultiLogView } from './logView/MultiLogView';
-import cocstats from './StatsCalculator/CoCStats';
+import cocstats, { CoCStat } from './StatsCalculator/CoCStats';
 import StatsChart from './statsChart/StatsChart';
 
 export const configCtx = createContext(new DisplayConfig());
@@ -30,28 +30,81 @@ const App: FC = () => {
     const [tab, setTab] = useState("home");
     const [isDropping, setDropping] = useState(false);
 
+    useEffect(() => {
+        // === 統計の再計算 ===
+        console.log("Recalculation")
+
+        // 既存の統計を削除
+        setLog(log.map(log => copyLog(log)).map(log => { log.stat = undefined; return log }));
+
+        // 統計を再計算
+        async function process() {
+            for (const file of log) {
+                const stat = await cocstats.calcAsync(file.log, {
+                    ...config,
+                    startIdx: file.startIdx,
+                    endIdx: file.endIdx,
+                    ignoredChannels: file.ingoredChannels
+                });
+                console.log("Completed: " + file.filename);
+                setLog(prevLogs => prevLogs.map(log => {
+                    if (log.filename === file.filename) {
+                        log = copyLog(log);
+                        log.stat = stat;
+                    }
+                    return log;
+                }));
+            }
+        }
+        setTimeout(() => process(), 0);
+    }, [config]);
+
     const onFileUploaded = async (files: File[]) => {
         const logs: LogFile[] = [];
         for (let file of files) {
             const str = await file.text();
             const parsed = parseCcfoliaLog(str);
-            const stat = cocstats.calc(parsed, {
-                ...config,
-                startIdx: 0,
-                endIdx: parsed.length - 1
-            })
-            logs.push({
+            const log: LogFile = {
                 filename: file.name,
                 log: parsed,
-                stat: stat,
+                stat: undefined,
                 startIdx: 0,
                 endIdx: parsed.length - 1,
                 ingoredChannels: []
-            })
+            };
+            logs.push(log);
+
+            const stat = new CoCStat();/*cocstats.calc(parsed, {
+                ...config,
+                startIdx: 0,
+                endIdx: parsed.length - 1
+            })*/
+
         }
         setLog(logs);
+
+        // 統計計算
+        async function process() {
+            for (const file of logs) {
+                const stat = await cocstats.calcAsync(file.log, {
+                    ...config,
+                    startIdx: file.startIdx,
+                    endIdx: file.endIdx,
+                    ignoredChannels: file.ingoredChannels
+                });
+                setLog(prevLogs => prevLogs.map(log => {
+                    if (log.filename === file.filename) {
+                        log = copyLog(log);
+                        log.stat = stat;
+                    }
+                    return log;
+                }));
+            }
+        }
+        setTimeout(() => process(), 0);
+
         if (tab === "home") {
-            setTab("stats");
+            //setTab("stats");
         }
     }
 
