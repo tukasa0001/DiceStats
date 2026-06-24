@@ -17,7 +17,6 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
     const config = useContext(configCtx);
     const [startMsg, setStartMsg] = useState(log.startIdx === 0 ? "" : log.log[log.startIdx]?.toDisplayText() ?? "");
     const [endMsg, setEndMsg] = useState(log.endIdx === log.log.length ? "" : log.log[log.endIdx]?.toDisplayText() ?? "");
-    console.log(`logRange: ${log.startIdx} ~ ${log.endIdx}`)
 
     const [selectMode, setSelectMode] = useState<"none" | "start" | "end">("none");
 
