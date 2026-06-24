@@ -34,8 +34,7 @@ type StatsChartProps = {
 
 type StatusStats = {
     [name: string]: {
-        health?: number,
-        sanity?: number,
+        [status: string]: number | undefined
     } | undefined
 }
 
@@ -79,8 +78,8 @@ const chartDisplayModes: ChartDisplayMode[] = [
     cdm.simple("ファンブル回数", stat => stat.skillRoll.fumbleNum),
     cdm.simple("キャラ発言数", stat => stat.talk.pcTalkNum),
     cdm.simple("キャラ発言文字数", stat => stat.talk.pcCharNum),
-    cdm.status("HP", (name, status) => status[name]?.health ?? 0),
-    cdm.status("SAN値", (name, status) => status[name]?.sanity ?? 0),
+    cdm.status("HP", (name, status) => status[name]?.HP ?? 0),
+    cdm.status("SAN値", (name, status) => status[name]?.SAN ?? 0),
 ]
 
 const StatsChart = (props: StatsChartProps) => {
@@ -113,12 +112,8 @@ const StatsChart = (props: StatsChartProps) => {
             const msg = log.log[i];
             if (msg instanceof ParamChangeMessage) {
                 let status = initialStatusStat[msg.sender] ?? {};
-                if (msg.paramName === "HP" && status.health === undefined) {
-                    status.health = msg.prevValue;
-                    initialStatusStat[msg.sender] = status;
-                }
-                else if (msg.paramName === "SAN" && status.sanity === undefined) {
-                    status.sanity = msg.prevValue;
+                if (status[msg.paramName] === undefined) {
+                    status[msg.paramName] = msg.prevValue;
                     initialStatusStat[msg.sender] = status;
                 }
             }
@@ -154,14 +149,8 @@ const StatsChart = (props: StatsChartProps) => {
                 // 統計加算
                 if (msg instanceof ParamChangeMessage) {
                     let status = statusStat[sender] ?? {};
-                    if (msg.paramName === "HP") {
-                        status.health = msg.value;
-                        statusStat[sender] = status;
-                    }
-                    else if (msg.paramName === "SAN") {
-                        status.sanity = msg.value;
-                        statusStat[sender] = status;
-                    }
+                    status[msg.paramName] = msg.value;
+                    statusStat[sender] = status;
                 }
             }
             statusStats.push(statusStat);
