@@ -1,8 +1,8 @@
-import { Box, Button, Card, Flex, Switch, Text, TextField, Tooltip } from "@radix-ui/themes"
+import { Box, Button, Card, Flex, IconButton, Switch, Text, TextField, Tooltip } from "@radix-ui/themes"
 import { LogFile } from "./LogFile"
 import { useContext, useState } from "react"
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge"
-import { TriangleAlert } from "lucide-react"
+import { TriangleAlert, X } from "lucide-react"
 import { FilteredLogView } from "../logView/FilteredLogView"
 import { configCtx } from "../App"
 import cocstats from "../StatsCalculator/CoCStats"
@@ -126,6 +126,13 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
                 maxWidth: "900px",
                 height: "95vh"
             }}>
+                <IconButton variant="ghost" color="red" style={{
+                    position: "absolute",
+                    top: "1em",
+                    left: "1em"
+                }} onClick={() => setSelectMode("none")}>
+                    <X />
+                </IconButton>
                 <Box style={{
                     overflowY: "scroll",
                     height: "100%"
