@@ -68,6 +68,7 @@ const PlayerStats = (props: StatsProps) => {
     const calcStats = () => {
         setStats(props.logs
             .map(file => file.stat)
+            .filter(stat => stat !== undefined)
             .flatMap(stat => [...stat.perCharacter])
             .filter(([name, stat]) => selectedCharacters.current.includes(name))
             .map(([name, stat]) => stat)
@@ -75,6 +76,12 @@ const PlayerStats = (props: StatsProps) => {
     }
 
     const config = useContext(configCtx);
+
+    if (log.some(l => l.stat === undefined)) {
+        return <Flex align="center" justify="center" mt="2">
+            <Text>読み込み中</Text><Spinner />
+        </Flex>;
+    }
 
     return (
         <Theme>

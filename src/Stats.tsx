@@ -39,8 +39,10 @@ const Stats = (props: StatsProps) => {
         return <Text>ログをアップロードしてください</Text>
     }
 
-    if (stats === undefined || logs.some(log => log.stat === undefined)) {
-        return <Spinner />
+    if (stats === undefined || logs.some(l => l.stat === undefined)) {
+        return <Flex align="center" justify="center" mt="2">
+            <Text>読み込み中</Text><Spinner />
+        </Flex>;
     }
 
     const skills = [...stats.perCharacter]
