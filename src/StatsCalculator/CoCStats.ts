@@ -15,27 +15,33 @@ class CoCStatsCounter {
     })
 
     calcAsync = (log: CcfoliaMessage[], _option?: CoCStatOptions, signal?: AbortSignal): Promise<CoCStat> => {
-        const split = 100;
+        const maxTime = 100;
         const option: Required<CoCStatOptions> = { ...this.createDefaultOption(), ..._option };
         let stat = new CoCStat();
 
         const calc = (start: number, resolve: (stat: CoCStat) => void) => {
             signal?.throwIfAborted();
-            for (let i = start; i < start + split && i <= option.endIdx && i < log.length; i++) {
+            const startTime = performance.now(); // TODO:時間ベースでの処理
+            let i = start;
+            while (i <= option.endIdx && i < log.length && performance.now() - startTime <= maxTime) {
                 const msg = log[i];
                 this.calcMsg(msg, stat, option);
+                i++;
             }
-            const next = start + split;
+            const next = i;
             if (next <= option.endIdx && next < log.length) {
+                console.log("timeout");
                 setTimeout(() => calc(next, resolve), 0);
             }
             else {
                 // end calculation
                 resolve(stat);
+                console.log("===calculation end===");
             }
         }
 
         return new Promise(resolve => {
+            console.log("===calculation start===");
             calc(option.startIdx, resolve);
         });
     }
