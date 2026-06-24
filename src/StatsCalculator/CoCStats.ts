@@ -14,6 +14,32 @@ class CoCStatsCounter {
         ignoredChannels: []
     })
 
+    calcAsync = (log: CcfoliaMessage[], _option?: CoCStatOptions, signal?: AbortSignal): Promise<CoCStat> => {
+        const split = 100;
+        const option: Required<CoCStatOptions> = { ...this.createDefaultOption(), ..._option };
+        let stat = new CoCStat();
+
+        const calc = (start: number, resolve: (stat: CoCStat) => void) => {
+            signal?.throwIfAborted();
+            for (let i = start; i < start + split && i <= option.endIdx && i < log.length; i++) {
+                const msg = log[i];
+                this.calcMsg(msg, stat, option);
+            }
+            const next = start + split;
+            if (next <= option.endIdx && next < log.length) {
+                setTimeout(() => calc(next, resolve), 0);
+            }
+            else {
+                // end calculation
+                resolve(stat);
+            }
+        }
+
+        return new Promise(resolve => {
+            calc(option.startIdx, resolve);
+        });
+    }
+
     calc = (log: CcfoliaMessage[], _option?: CoCStatOptions) => {
         const option: Required<CoCStatOptions> = { ...this.createDefaultOption(), ..._option };
         let stat = new CoCStat()
