@@ -18,31 +18,36 @@ class CoCStatsCounter {
         const option: Required<CoCStatOptions> = { ...this.createDefaultOption(), ..._option };
         let stat = new CoCStat()
         for (let msg of log.slice(option.startIdx, option.endIdx + 1)) {
-            let sender = msg.sender;
-            // チャンネルフィルター処理
-            if (option.ignoredChannels.includes(msg.channel)) {
-                continue;
-            }
-            // 名前エイリアス処理
-            for (let [before, after] of option.nameAliases) {
-                if (sender === before) {
-                    sender = after;
-                }
-            }
-            // フィルター処理
-            if (!option.filter(msg)) {
-                continue;
-            }
-            // 統計追加処理
-            this.incrementStat(stat.total, msg);
-            if (sender !== "") {
-                if (!stat.perCharacter.has(sender)) {
-                    stat.perCharacter.set(sender, new CharacterStat());
-                }
-                this.incrementStat(stat.perCharacter.get(sender)!, msg);
-            }
+            this.calcMsg(msg, stat, option);
         }
         return stat;
+    }
+
+    calcMsg = (msg: CcfoliaMessage, stat: CoCStat, _option: CoCStatOptions) => {
+        const option: Required<CoCStatOptions> = { ...this.createDefaultOption(), ..._option };
+        let sender = msg.sender;
+        // チャンネルフィルター処理
+        if (option.ignoredChannels.includes(msg.channel)) {
+            return;
+        }
+        // 名前エイリアス処理
+        for (let [before, after] of option.nameAliases) {
+            if (sender === before) {
+                sender = after;
+            }
+        }
+        // フィルター処理
+        if (!option.filter(msg)) {
+            return;
+        }
+        // 統計追加処理
+        this.incrementStat(stat.total, msg);
+        if (sender !== "") {
+            if (!stat.perCharacter.has(sender)) {
+                stat.perCharacter.set(sender, new CharacterStat());
+            }
+            this.incrementStat(stat.perCharacter.get(sender)!, msg);
+        }
     }
 
     incrementStat = (stat: CharacterStat, msg: CcfoliaMessage) => {
