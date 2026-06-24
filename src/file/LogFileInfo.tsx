@@ -1,8 +1,8 @@
-import { Box, Button, Card, Flex, Switch, Text, TextField, Tooltip } from "@radix-ui/themes"
+import { Box, Button, Card, Flex, IconButton, Switch, Text, TextField, Tooltip } from "@radix-ui/themes"
 import { LogFile } from "./LogFile"
 import { useContext, useState } from "react"
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge"
-import { TriangleAlert } from "lucide-react"
+import { TriangleAlert, X } from "lucide-react"
 import { FilteredLogView } from "../logView/FilteredLogView"
 import { configCtx } from "../App"
 import cocstats from "../StatsCalculator/CoCStats"
@@ -17,7 +17,6 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
     const config = useContext(configCtx);
     const [startMsg, setStartMsg] = useState(log.startIdx === 0 ? "" : log.log[log.startIdx]?.toDisplayText() ?? "");
     const [endMsg, setEndMsg] = useState(log.endIdx === log.log.length ? "" : log.log[log.endIdx]?.toDisplayText() ?? "");
-    console.log(`logRange: ${log.startIdx} ~ ${log.endIdx}`)
 
     const [selectMode, setSelectMode] = useState<"none" | "start" | "end">("none");
 
@@ -124,25 +123,27 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
                 top: "2.5vh",
                 right: "0",
                 margin: "0 1em",
-                maxWidth: "900px",
+                minWidth: "50vw",
                 height: "95vh"
             }}>
-                <Box style={{
-                    overflowY: "scroll",
-                    height: "100%"
-                }}>
-                    <FilteredLogView logs={log} onClick={(msg, i) => {
-                        if (selectMode === "start") {
-                            setStartMsg(msg.toDisplayText())
-                            setLogRange({ startIdx: i })
-                        }
-                        else {
-                            setEndMsg(msg.toDisplayText())
-                            setLogRange({ endIdx: i })
-                        }
-                        setSelectMode("none")
-                    }} />
-                </Box>
+                <IconButton variant="ghost" color="red" style={{
+                    position: "absolute",
+                    top: "1em",
+                    left: "1em"
+                }} onClick={() => setSelectMode("none")}>
+                    <X />
+                </IconButton>
+                <FilteredLogView logs={log} onClick={(msg, i) => {
+                    if (selectMode === "start") {
+                        setStartMsg(i === 0 ? "" : msg.toDisplayText())
+                        setLogRange({ startIdx: i })
+                    }
+                    else {
+                        setEndMsg(msg.toDisplayText())
+                        setLogRange({ endIdx: i })
+                    }
+                    setSelectMode("none")
+                }} />
             </Card>
         </>}
     </Box>

@@ -13,6 +13,7 @@
     },
     "dependencies": {
         "@radix-ui/themes": "^3.2.1",
+        "@tanstack/react-virtual": "^3.14.2",
         "dom-to-image": "^2.6.0",
         "lucide-react": "^0.548.0",
         "react": "^19.1.1",
@@ -29,6 +30,7 @@
         "@typescript-eslint/eslint-plugin": "^8.46.2",
         "@typescript-eslint/parser": "^8.46.2",
         "@vitejs/plugin-react": "^5.0.4",
+        "babel-plugin-react-compiler": "^1.0.0",
         "eslint": "^9.36.0",
         "eslint-plugin-react-hooks": "^5.2.0",
         "eslint-plugin-react-refresh": "^0.4.22",

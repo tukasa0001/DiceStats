@@ -101,7 +101,7 @@ class CoCStatsCounter {
     incrementTalkStat = (stat: CharacterStat, msg: TalkMessage) => {
         stat.talk.talkNum++;
         stat.talk.charNum += msg.text.length;
-        const regex = msg.text.match(/^「(.*)」/);
+        const regex = msg.text.match(/^[「『](.*)[」』]/);
         if (regex !== null) {
             stat.talk.pcTalkNum++;
             stat.talk.pcCharNum += regex[1].length;

@@ -34,8 +34,7 @@ type StatsChartProps = {
 
 type StatusStats = {
     [name: string]: {
-        health?: number,
-        sanity?: number,
+        [status: string]: number | undefined
     } | undefined
 }
 
@@ -49,7 +48,13 @@ function cloneStatusStats(original: StatusStats): StatusStats {
 
 type ChartDisplayMode = {
     name: string,
-    calc: (params: { name: string, stat?: CharacterStat, status: StatusStats }) => number;
+    calc: (params: {
+        name: string,
+        stat?: CharacterStat,
+        status: StatusStats,
+        customStatusName: string,
+    }) => number,
+    special?: "CustomStatus"
 }
 
 const cdm = {
@@ -68,6 +73,15 @@ const cdm = {
                 return func(name, status);
             }
         }
+    },
+    customStatus(name: string): ChartDisplayMode {
+        return {
+            name,
+            calc({ name, status, customStatusName }) {
+                return status[name]?.[customStatusName] ?? 0
+            },
+            special: "CustomStatus"
+        }
     }
 }
 
@@ -79,8 +93,9 @@ const chartDisplayModes: ChartDisplayMode[] = [
     cdm.simple("ファンブル回数", stat => stat.skillRoll.fumbleNum),
     cdm.simple("キャラ発言数", stat => stat.talk.pcTalkNum),
     cdm.simple("キャラ発言文字数", stat => stat.talk.pcCharNum),
-    cdm.status("HP", (name, status) => status[name]?.health ?? 0),
-    cdm.status("SAN値", (name, status) => status[name]?.sanity ?? 0),
+    cdm.status("HP", (name, status) => status[name]?.HP ?? 0),
+    cdm.status("SAN値", (name, status) => status[name]?.SAN ?? 0),
+    cdm.customStatus("その他のステータス"),
 ]
 
 const StatsChart = (props: StatsChartProps) => {
@@ -96,6 +111,7 @@ const StatsChart = (props: StatsChartProps) => {
 
     const [chartDisplayMode, setChartDisplayMode] = useState<ChartDisplayMode>(chartDisplayModes[0]);
     const [activeCharacters, setActiveCharacters] = useState<string[]>([]);
+    const [customStatusName, setCustomStatusName] = useState("");
 
     const [split, setSplit] = useState(10);
 
@@ -113,12 +129,8 @@ const StatsChart = (props: StatsChartProps) => {
             const msg = log.log[i];
             if (msg instanceof ParamChangeMessage) {
                 let status = initialStatusStat[msg.sender] ?? {};
-                if (msg.paramName === "HP" && status.health === undefined) {
-                    status.health = msg.prevValue;
-                    initialStatusStat[msg.sender] = status;
-                }
-                else if (msg.paramName === "SAN" && status.sanity === undefined) {
-                    status.sanity = msg.prevValue;
+                if (status[msg.paramName] === undefined) {
+                    status[msg.paramName] = msg.prevValue;
                     initialStatusStat[msg.sender] = status;
                 }
             }
@@ -154,14 +166,8 @@ const StatsChart = (props: StatsChartProps) => {
                 // 統計加算
                 if (msg instanceof ParamChangeMessage) {
                     let status = statusStat[sender] ?? {};
-                    if (msg.paramName === "HP") {
-                        status.health = msg.value;
-                        statusStat[sender] = status;
-                    }
-                    else if (msg.paramName === "SAN") {
-                        status.sanity = msg.value;
-                        statusStat[sender] = status;
-                    }
+                    status[msg.paramName] = msg.value;
+                    statusStat[sender] = status;
                 }
             }
             statusStats.push(statusStat);
@@ -208,7 +214,8 @@ const StatsChart = (props: StatsChartProps) => {
                 const props = {
                     name: name,
                     stat: stat.perCharacter.get(name),
-                    status: statusStats[i]
+                    status: statusStats[i],
+                    customStatusName
                 }
                 if (1 <= i && deltaDisplay) {
                     const prevStat = stats[i - 1].perCharacter.get(name);
@@ -216,7 +223,8 @@ const StatsChart = (props: StatsChartProps) => {
                     const prevProps = {
                         name: name,
                         stat: prevStat,
-                        status: prevStatusStat
+                        status: prevStatusStat,
+                        customStatusName
                     };
                     return chartDisplayMode.calc(props) - chartDisplayMode.calc(prevProps);
                 }
@@ -267,6 +275,17 @@ const StatsChart = (props: StatsChartProps) => {
                         変化量を表示
                     </Flex>
                 </Text>
+
+                {/* カスタムステータス名 */}
+                {chartDisplayMode.special === "CustomStatus" ? (
+                    <TextField.Root placeholder="ステータス名を入力"
+                        value={customStatusName} onChange={e => setCustomStatusName(e.target.value)}>
+                        <TextField.Slot>
+
+                        </TextField.Slot>
+                    </TextField.Root>
+                ) : null}
+
 
                 {/*計算中表示*/}
                 {isInProgress ? <Spinner /> : null}
