@@ -1,4 +1,4 @@
-import { Badge, Card, Code, Flex } from "@radix-ui/themes";
+import { Badge, Card, Code, Flex, ScrollArea } from "@radix-ui/themes";
 import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage";
 import { Heading, Text } from "@radix-ui/themes";
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge";
@@ -7,6 +7,7 @@ import { SanityCheckMessage } from "../ccfoliaLog/message/SanityCheckMessage";
 import { ParamChangeMessage } from "../ccfoliaLog/message/ParamChangeMessage";
 import LogViewFilter, { EMPTY_FILTER } from "./LogViewFilter";
 import { LogFile } from "../file/LogFile";
+import { useRef } from "react";
 
 type LogViewProps = {
     logs: LogFile
@@ -31,23 +32,28 @@ export const LogView = (props: LogViewProps) => {
         return true;
     }
 
-    return <Flex gap="4" direction="column" mt="4">
-        {logs.log.map((msg, i) =>
-            !testFilter(msg) ? null : onClick === undefined
-                // 通常
-                ? <Card key={i}>
-                    <MessageCardContent msg={msg} filter={filter} />
-                </Card>
-                // クリック可能
-                : <Card key={i} asChild style={{
-                    cursor: "pointer"
-                }}>
-                    <button onClick={() => onClick(msg, i)}>
-                        <MessageCardContent msg={msg} filter={filter} />
-                    </button>
-                </Card>
-        )}
-    </Flex>
+    return (
+        <ScrollArea scrollbars="vertical">
+            <Flex gap="4" direction="column" mt="4" maxHeight="100%">
+                {logs.log.map((msg, i) =>
+                    !testFilter(msg) ? null : onClick === undefined
+                        // 通常
+                        ? <Card key={i} style={{ flexShrink: "1" }}>
+                            <MessageCardContent msg={msg} filter={filter} />
+                        </Card>
+                        // クリック可能
+                        : <Card key={i} asChild style={{
+                            cursor: "pointer",
+                            flexShrink: 0
+                        }}>
+                            <button onClick={() => onClick(msg, i)}>
+                                <MessageCardContent msg={msg} filter={filter} />
+                            </button>
+                        </Card>
+                )}
+            </Flex>
+        </ScrollArea>
+    )
 };
 
 const MessageCardContent = (props: { msg: CcfoliaMessage, filter: LogViewFilter }) => {

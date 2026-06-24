@@ -26,7 +26,7 @@ export const FilteredLogView = (props: FilteredLogViewProps) => {
     const allMessageTypes = [...new Set([...logs.log].map(msg => msg.constructor.name))];
     const allCharacters = [...new Set([...logs.log].map(msg => msg.sender))];
 
-    return <Flex direction="column">
+    return <Flex direction="column" maxHeight="100%">
         <Flex my="2" gap="2" justify="center">
             {/*種類フィルター*/}
             <Select.Root defaultValue={UNFILTERED} onValueChange={sel => setFilter({ ...filter, hiddenMessageTypes: sel === UNFILTERED ? [] : allMessageTypes.filter(val => val !== sel) })}>
