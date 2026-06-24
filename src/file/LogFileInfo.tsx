@@ -79,7 +79,7 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
                         placeholder="最初から">
                         <TextField.Slot />
                     </TextField.Root>
-                    {log.startIdx !== 0 && startMsg !== "" ? <Tooltip content="メッセージが存在しません"><TriangleAlert /></Tooltip> : null}
+                    {log.startIdx === 0 && startMsg !== "" ? <Tooltip content="メッセージが存在しません"><TriangleAlert /></Tooltip> : null}
                     <Button variant="outline" onClick={() => setSelectMode("start")}>選択</Button>
                 </Flex>
                 <Flex gap="2" align="center">
@@ -123,7 +123,7 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
                 top: "2.5vh",
                 right: "0",
                 margin: "0 1em",
-                maxWidth: "900px",
+                minWidth: "50vw",
                 height: "95vh"
             }}>
                 <IconButton variant="ghost" color="red" style={{
@@ -135,7 +135,7 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
                 </IconButton>
                 <FilteredLogView logs={log} onClick={(msg, i) => {
                     if (selectMode === "start") {
-                        setStartMsg(msg.toDisplayText())
+                        setStartMsg(i === 0 ? "" : msg.toDisplayText())
                         setLogRange({ startIdx: i })
                     }
                     else {
