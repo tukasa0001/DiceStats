@@ -11,12 +11,12 @@ export const LogViewBox = (props: {
     const { log } = props;
 
     return (
-        <Box maxHeight="100%" flexBasis="0" flexGrow="1" flexShrink="1">
+        <Flex direction="column" flexBasis="0" flexGrow="1" flexShrink="1">
             <Header />
-            <Box minHeight="0" flexGrow="1">
-                {/*<LogView logs={log} />*/}
+            <Box minHeight="0" height="1px" flexGrow="1" flexShrink="1" overflowY="hidden">
+                <LogView logs={log} />
             </Box>
-        </Box>
+        </Flex>
     )
 }
 

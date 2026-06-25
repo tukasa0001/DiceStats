@@ -78,7 +78,7 @@ const App: FC = () => {
                     }}>
                     <Theme accentColor="indigo" radius='large' appearance={isDark ? "dark" : "light"}>
                         <Tabs.Root value={tab} onValueChange={tab => setTab(tab)} style={{
-                            height: "100%",
+                            minHeight: "100dvh",
                             display: "flex",
                             flexDirection: "column"
                         }}>
@@ -137,10 +137,10 @@ const App: FC = () => {
                                     <ConfigCard />
                                 </Flex>
                             </Tabs.Content>
-                            <Tabs.Content value="logView" style={{
-                                flexGrow: "1"
-                            }}>
-                                <Flex direction="column" mx="4" flexGrow="1">
+                            <Tabs.Content value="logView" asChild>
+                                <Flex direction="column" mx="4" style={{
+                                    flexGrow: 1
+                                }}>
                                     <MultiLogView logs={log} />
                                 </Flex>
                             </Tabs.Content>
@@ -149,7 +149,7 @@ const App: FC = () => {
                                     <PlayerStats logs={log} />
                                 </Flex>
                             </Tabs.Content>
-                            <Flex direction="column" mx="4">
+                            <Flex direction="column" mx="4" my="2">
                                 <Footer />
                             </Flex>
                         </Tabs.Root>
