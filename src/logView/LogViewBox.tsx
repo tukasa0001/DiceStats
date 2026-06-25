@@ -1,21 +1,31 @@
-import { Box, Button, DropdownMenu, Flex, IconButton, Text } from "@radix-ui/themes"
+import { Box, Button, DropdownMenu, Flex, IconButton, Tabs, Text } from "@radix-ui/themes"
 import { Ellipsis } from "lucide-react"
 import { FilteredLogView } from "./FilteredLogView"
 import { LogFile } from "../file/LogFile"
 import { LogView } from "./LogView"
+import { useMemo, useState } from "react"
 
 export const LogViewBox = (props: {
     log: LogFile
 }) => {
-
     const { log } = props;
+
+    const [currentTab, setTab] = useState("@ALL");
+    const allChannels = useMemo(() => [...new Set([...log.log].map(msg => msg.channel))], [log]);
 
     return (
         <Flex direction="column" flexBasis="0" flexGrow="1" flexShrink="1">
-            <Header />
             <Box minHeight="0" height="1px" flexGrow="1" flexShrink="1" overflowY="hidden">
                 <LogView logs={log} />
             </Box>
+            <Tabs.Root value={currentTab} onValueChange={setTab}>
+                <Tabs.List>
+                    <Tabs.Trigger value="@ALL">全て</Tabs.Trigger>
+                    {allChannels.map(channel => (
+                        <Tabs.Trigger key={channel} value={channel}>{channel}</Tabs.Trigger>
+                    ))}
+                </Tabs.List>
+            </Tabs.Root>
         </Flex>
     )
 }
