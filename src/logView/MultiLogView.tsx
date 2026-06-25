@@ -2,6 +2,7 @@ import { Text, Flex, Select } from "@radix-ui/themes"
 import { LogFile } from "../file/LogFile"
 import { FilteredLogView } from "./FilteredLogView"
 import { useState } from "react"
+import { LogViewBox } from "./LogViewBox"
 
 type MultiLogViewProps = {
     logs: LogFile[]
@@ -16,6 +17,7 @@ export const MultiLogView = (props: MultiLogViewProps) => {
             <Text>ログをアップロードしてください</Text>
         </>
     }
+    return <LogViewBox log={logs[0]} />
 
     return <Flex direction="column" gap="1" mt="1">
         <Select.Root
