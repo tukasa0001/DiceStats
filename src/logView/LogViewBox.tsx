@@ -1,4 +1,4 @@
-import { Box, Button, DropdownMenu, Flex, IconButton, Tabs, Text } from "@radix-ui/themes"
+import { Box, Button, DropdownMenu, Flex, IconButton, ScrollArea, Tabs, Text } from "@radix-ui/themes"
 import { Ellipsis, X } from "lucide-react"
 import { FilteredLogView } from "./FilteredLogView"
 import { LogFile } from "../file/LogFile"
@@ -21,10 +21,14 @@ export const LogViewBox = (props: {
             </Box>
             <Tabs.Root value={currentTab} onValueChange={setTab}>
                 <Tabs.List>
-                    <Tabs.Trigger value="@ALL">全て</Tabs.Trigger>
-                    {allChannels.map(channel => (
-                        <Tabs.Trigger key={channel} value={channel}>{channel}</Tabs.Trigger>
-                    ))}
+                    <ScrollArea scrollbars="horizontal">
+                        <Flex maxWidth="1px" mb="3">
+                            <Tabs.Trigger value="@ALL">全て</Tabs.Trigger>
+                            {allChannels.map(channel => (
+                                <Tabs.Trigger key={channel} value={channel}>{channel}</Tabs.Trigger>
+                            ))}
+                        </Flex>
+                    </ScrollArea>
                     {onClose ? (
                         <IconButton ml="auto" mr="2" color="red" variant="soft"
                             onClick={onClose}
