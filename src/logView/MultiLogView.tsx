@@ -16,6 +16,7 @@ type ViewInfo = {
 
 export const MultiLogView = (props: MultiLogViewProps) => {
     const { logs } = props;
+    const [activeViewIdx, setActiveViewIdx] = useState(-1);
     const [views, setViews] = useState<ViewInfo[]>([{ id: 0 }]);
     const scrollerRefs = useRef(new Map<number, LogViewScroller>());
 
@@ -27,8 +28,9 @@ export const MultiLogView = (props: MultiLogViewProps) => {
         }
     };
 
+
     const syncScroll = (src: ViewInfo, idx: number) => {
-        if (src.id !== 0) return;
+        if (src.id !== activeViewIdx) return;
         for (const view of views) {
             if (view !== src && (view.log ?? logs[0]) === (src.log ?? logs[0])) {
                 const scroller = scrollerRefs.current.get(view.id);
@@ -48,7 +50,8 @@ export const MultiLogView = (props: MultiLogViewProps) => {
 
     return <Flex gap="1" mt="1" height="100%" flexBasis="0" flexGrow="1" flexShrink="1" minWidth="0">
         {views.map(view => (
-            <Flex direction="column" flexBasis="0" flexGrow="1" flexShrink="1" minWidth="0">
+            <Flex direction="column" onMouseEnter={e => setActiveViewIdx(view.id)}
+                flexBasis="0" flexGrow="1" flexShrink="1" minWidth="0">
                 <LogViewBox key={view.id} log={view.log ?? logs[0]}
                     scrollerRef={sc => setScrollerRef(view.id, sc)}
                     onScrolled={sc => {
