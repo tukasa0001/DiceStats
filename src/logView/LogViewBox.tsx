@@ -1,5 +1,5 @@
-import { Box, Button, DropdownMenu, Flex, IconButton, ScrollArea, Tabs, Text, TextField } from "@radix-ui/themes"
-import { Ellipsis, X } from "lucide-react"
+import { Box, Button, Card, Checkbox, DropdownMenu, Flex, IconButton, ScrollArea, Tabs, Text, TextField } from "@radix-ui/themes"
+import { Check, Ellipsis, X } from "lucide-react"
 import { LogFile } from "../file/LogFile"
 import { LogView, LogViewScroller } from "./LogView"
 import { Ref, useMemo, useState } from "react"
@@ -14,7 +14,9 @@ export const LogViewBox = (props: {
 
     const [currentTab, setTab] = useState("@ALL");
     const [searchText, setSearchText] = useState("");
+    const [charaFilter, setCharaFilter] = useState([...new Set([...log.log].map(msg => msg.sender))]);
     const allChannels = useMemo(() => [...new Set([...log.log].map(msg => msg.channel))], [log]);
+    const allCharacters = useMemo(() => [...new Set([...log.log].map(msg => msg.sender))], [log]);
 
     return (
         <Flex direction="column" flexBasis="0" flexGrow="1" flexShrink="1">
@@ -23,7 +25,7 @@ export const LogViewBox = (props: {
                     scrollerRef={scrollerRef} onScrolled={onScrolled}
                     filter={{
                         searchText,
-                        hiddenCharacters: [],
+                        hiddenCharacters: allCharacters.filter(chara => !charaFilter.includes(chara)),
                         hiddenMessageTypes: []
                     }} />
             </Box>
@@ -48,11 +50,67 @@ export const LogViewBox = (props: {
                     ) : null}
                 </Tabs.List>
             </Tabs.Root>
-            <Flex my="1">
+            <Flex my="1" mx="3" gap="1">
                 {/*内容検索*/}
-                <TextField.Root value={searchText} onChange={e => setSearchText(e.target.value)} placeholder="検索">
+                <TextField.Root value={searchText} onChange={e => setSearchText(e.target.value)} placeholder="検索" style={{ flex: "2" }}>
                     <TextField.Slot />
                 </TextField.Root>
+
+                {/* キャラフィルター */}
+                <DropdownMenu.Root>
+                    <DropdownMenu.Trigger style={{ flex: "1" }}>
+                        <Button variant="surface" style={{
+                            overflow: "hidden",
+                            whiteSpace: "nowrap",
+                            textAlign: "left"
+                        }}>
+                            <Text style={{
+                                overflow: "hidden",
+                                textOverflow: "ellipsis"
+                            }}>
+                                {charaFilter.length === allCharacters.length ? "全員"
+                                    : charaFilter.length === 1 ? charaFilter[0]
+                                        : charaFilter.length === 0 ? "-"
+                                            : "複数人"
+                                }
+                            </Text>
+                            <DropdownMenu.TriggerIcon />
+                        </Button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Content>
+                        <DropdownMenu.Item onClick={e => {
+                            if (charaFilter.length === allCharacters.length) {
+                                setCharaFilter([]);
+                            }
+                            else {
+                                setCharaFilter(allCharacters);
+                            }
+                            e.preventDefault();
+                        }}>
+                            全員表示 {charaFilter.length === allCharacters.length ? <Check /> : null}
+                        </DropdownMenu.Item>
+                        {allCharacters.map((chara, idx) => (
+                            <DropdownMenu.Item key={`${idx}-${chara}`}
+                                onClick={e => {
+                                    // 全員選択 => 単体選択
+                                    if (charaFilter.length === allCharacters.length) {
+                                        setCharaFilter([chara]);
+                                    }
+                                    // フィルター切り替え
+                                    else if (charaFilter.includes(chara)) {
+                                        setCharaFilter(charaFilter.filter(c => c !== chara));
+                                    }
+                                    else {
+                                        setCharaFilter([...charaFilter, chara]);
+                                    }
+                                    e.preventDefault();
+                                }}>
+                                {chara} {charaFilter.length !== allCharacters.length && charaFilter.includes(chara) ? <Check /> : null}
+                            </DropdownMenu.Item>
+                        ))}
+                    </DropdownMenu.Content>
+                </DropdownMenu.Root>
+
             </Flex>
         </Flex>
     )
