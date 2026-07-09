@@ -18,14 +18,19 @@ export type LogViewScroller = {
 const createScroller = (virtualizer: Virtualizer<HTMLDivElement, Element>, log: CcfoliaMessage[]): LogViewScroller => {
     return ({
         getCurrentIndex() {
-            const rawIdx = virtualizer.getVirtualIndexes()[0];
+            const rawIdx = virtualizer.getVirtualIndexes()[20];
             return log[rawIdx]?.index ?? 0;
         },
         scrollToIndex(idx) {
-            const rawIdx = log.map((m, i) => [m, i] as [CcfoliaMessage, number])
-                .find(([msg, i]) => idx < msg.index)?.[1];
+            let rawIdx = 0;
+            for (const msg of log) {
+                if (idx <= msg.index) {
+                    break;
+                }
+                rawIdx++;
+            }
             if (rawIdx) {
-                virtualizer.scrollToIndex(rawIdx);
+                virtualizer.scrollToIndex(rawIdx, { align: "start", behavior: "smooth" });
             }
         },
     });
@@ -91,6 +96,7 @@ export const LogView = (props: LogViewProps) => {
                         <MessageEntry
                             msg={filteredLog[vItem.index]} filter={filter}
                             onClick={onClick ? () => onClick(filteredLog[vItem.index], vItem.index) : undefined}
+                            debugText={`idx-${vItem.index}`}
                         />
                     </Box>
                 ))}
@@ -101,9 +107,10 @@ export const LogView = (props: LogViewProps) => {
 
 const MessageEntry = (props: {
     msg: CcfoliaMessage, filter: LogViewFilter,
-    onClick?: () => void
+    onClick?: () => void,
+    debugText?: string
 }) => {
-    const { msg, filter, onClick } = props;
+    const { msg, filter, onClick, debugText } = props;
 
     const blockStyle: CSSProperties = {
         display: "block"
@@ -116,6 +123,7 @@ const MessageEntry = (props: {
                 {msg instanceof CoCSkillRollMessage ? <Badge color="lime">技能判定</Badge> : null}
                 {msg instanceof SanityCheckMessage ? <Badge color="ruby">SANチェック</Badge> : null}
                 {msg instanceof ParamChangeMessage ? <Badge color="blue">{msg.paramName}変動</Badge> : null}
+                {debugText ? <Badge color="purple">{debugText}</Badge> : null}
             </Flex>
             {filter.searchText === "" ? <Text style={blockStyle}>{msg.toDisplayText()}</Text> :
                 <Text style={blockStyle}>
