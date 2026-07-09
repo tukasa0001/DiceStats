@@ -2,7 +2,7 @@ import { Box, Button, Card, Checkbox, DropdownMenu, Flex, IconButton, ScrollArea
 import { Check, Ellipsis, X } from "lucide-react"
 import { LogFile } from "../file/LogFile"
 import { LogView, LogViewScroller } from "./LogView"
-import { Ref, useMemo, useState } from "react"
+import { Ref, useEffect, useMemo, useState } from "react"
 
 export const LogViewBox = (props: {
     log: LogFile,
@@ -27,6 +27,9 @@ export const LogViewBox = (props: {
         };
     }, [log.log]);
     const [charaFilter, setCharaFilter] = useState(() => allCharacters);
+    useEffect(() => {
+        setCharaFilter(allCharacters);
+    }, [allCharacters]);
     const hiddenCharacters = useMemo(() => allCharacters.filter(chara => !charaFilter.includes(chara)), [allCharacters, charaFilter]);
     const filter = useMemo(() => ({
         searchText,
