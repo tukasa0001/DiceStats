@@ -1,14 +1,15 @@
 import { Box, Button, DropdownMenu, Flex, IconButton, Tabs, Text } from "@radix-ui/themes"
-import { Ellipsis } from "lucide-react"
+import { Ellipsis, X } from "lucide-react"
 import { FilteredLogView } from "./FilteredLogView"
 import { LogFile } from "../file/LogFile"
 import { LogView } from "./LogView"
 import { useMemo, useState } from "react"
 
 export const LogViewBox = (props: {
-    log: LogFile
+    log: LogFile,
+    onClose?: () => void
 }) => {
-    const { log } = props;
+    const { log, onClose } = props;
 
     const [currentTab, setTab] = useState("@ALL");
     const allChannels = useMemo(() => [...new Set([...log.log].map(msg => msg.channel))], [log]);
@@ -24,6 +25,15 @@ export const LogViewBox = (props: {
                     {allChannels.map(channel => (
                         <Tabs.Trigger key={channel} value={channel}>{channel}</Tabs.Trigger>
                     ))}
+                    {onClose ? (
+                        <IconButton ml="auto" mr="2" color="red" variant="soft"
+                            onClick={onClose}
+                            style={{
+                                alignSelf: "center"
+                            }}>
+                            <X />
+                        </IconButton>
+                    ) : null}
                 </Tabs.List>
             </Tabs.Root>
         </Flex>
