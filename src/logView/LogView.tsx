@@ -100,7 +100,7 @@ export const LogView = (props: LogViewProps) => {
                         <MessageEntry
                             msg={filteredLog[vItem.index]} filter={filter}
                             onClick={onClick ? () => onClick(filteredLog[vItem.index], vItem.index) : undefined}
-                            debugText={`idx-${vItem.index}`}
+                            debugText={`${vItem.index} / ${filteredLog[vItem.index].index}`}
                         />
                     </Box>
                 ))}
