@@ -1,4 +1,4 @@
-import { Box, Button, DropdownMenu, Flex, IconButton, ScrollArea, Tabs, Text } from "@radix-ui/themes"
+import { Box, Button, DropdownMenu, Flex, IconButton, ScrollArea, Tabs, Text, TextField } from "@radix-ui/themes"
 import { Ellipsis, X } from "lucide-react"
 import { LogFile } from "../file/LogFile"
 import { LogView, LogViewScroller } from "./LogView"
@@ -13,13 +13,19 @@ export const LogViewBox = (props: {
     const { log, onClose, scrollerRef, onScrolled } = props;
 
     const [currentTab, setTab] = useState("@ALL");
+    const [searchText, setSearchText] = useState("");
     const allChannels = useMemo(() => [...new Set([...log.log].map(msg => msg.channel))], [log]);
 
     return (
         <Flex direction="column" flexBasis="0" flexGrow="1" flexShrink="1">
             <Box minHeight="0" height="1px" flexGrow="1" flexShrink="1" overflowY="hidden">
                 <LogView logs={log} tab={currentTab === "@ALL" ? undefined : currentTab}
-                    scrollerRef={scrollerRef} onScrolled={onScrolled} />
+                    scrollerRef={scrollerRef} onScrolled={onScrolled}
+                    filter={{
+                        searchText,
+                        hiddenCharacters: [],
+                        hiddenMessageTypes: []
+                    }} />
             </Box>
             <Tabs.Root value={currentTab} onValueChange={setTab}>
                 <Tabs.List>
@@ -42,6 +48,12 @@ export const LogViewBox = (props: {
                     ) : null}
                 </Tabs.List>
             </Tabs.Root>
+            <Flex my="1">
+                {/*内容検索*/}
+                <TextField.Root value={searchText} onChange={e => setSearchText(e.target.value)} placeholder="検索">
+                    <TextField.Slot />
+                </TextField.Root>
+            </Flex>
         </Flex>
     )
 }
