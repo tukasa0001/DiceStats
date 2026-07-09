@@ -20,6 +20,7 @@ export const MultiLogView = (props: MultiLogViewProps) => {
     const [activeViewIdx, setActiveViewIdx] = useState(-1);
     const [views, setViews] = useState<ViewInfo[]>([{ id: 0 }]);
     const scrollerRefs = useRef(new Map<number, LogViewScroller>());
+    const defaultLog = logs[0];
 
     const setScrollerRef = (id: number, scroller: LogViewScroller | null) => {
         if (scroller) {
@@ -36,7 +37,6 @@ export const MultiLogView = (props: MultiLogViewProps) => {
             if (view !== src && (view.log ?? logs[0]) === (src.log ?? logs[0]) && !view.noSync) {
                 const scroller = scrollerRefs.current.get(view.id);
                 if (scroller) {
-                    console.log(`[Scroll Sync] ${src.id} => ${view.id} (idx:${idx})`)
                     scroller.scrollToIndex(idx);
                 }
             }
@@ -51,14 +51,14 @@ export const MultiLogView = (props: MultiLogViewProps) => {
 
     return <Flex gap="1" mt="1" height="100%" flexBasis="0" flexGrow="1" flexShrink="1" minWidth="0">
         {views.map(view => (
-            <Flex direction="column" onMouseEnter={e => setActiveViewIdx(view.id)}
+            <Flex key={view.id} direction="column" onMouseEnter={() => setActiveViewIdx(view.id)}
                 flexBasis="0" flexGrow="1" flexShrink="1" minWidth="0">
-                <LogViewBox key={view.id} log={view.log ?? logs[0]}
+                <LogViewBox log={view.log ?? defaultLog}
                     scrollerRef={sc => setScrollerRef(view.id, sc)}
                     onScrolled={sc => {
                         syncScroll(view, sc.getCurrentIndex());
                     }}
-                    onClose={views.length <= 1 ? undefined : () => setViews(views.filter(v => view !== v))} />
+                    onClose={views.length <= 1 ? undefined : () => setViews(prev => prev.filter(v => view !== v))} />
                 <Flex direction="column" my="1" px="3" gap="1" justify="center" minWidth="0">
                     <Flex>
                         <Card asChild style={{ padding: "4px 12px", flex: "1" }}>
@@ -66,14 +66,14 @@ export const MultiLogView = (props: MultiLogViewProps) => {
                                 <Flex align="center" justify="center" gap="1">
                                     <Text>同期</Text>
                                     <Checkbox checked={!view.noSync}
-                                        onCheckedChange={val => setViews(views.map(v => v.id === view.id ? { ...v, noSync: !val } : v))} />
+                                        onCheckedChange={val => setViews(prev => prev.map(v => v.id === view.id ? { ...v, noSync: !val } : v))} />
                                 </Flex>
                             </label>
                         </Card>
                     </Flex>
                     <Select.Root
-                        value={view.log?.filename ?? logs[0].filename}
-                        onValueChange={sel => setViews(views.map(v => v.id === view.id ? { id: v.id, log: logs.find(l => l.filename === sel) } : v))}
+                        value={view.log?.filename ?? defaultLog.filename}
+                        onValueChange={sel => setViews(prev => prev.map(v => v.id === view.id ? { id: v.id, log: logs.find(l => l.filename === sel) } : v))}
                     >
                         <Select.Trigger style={{ width: "100%" }} />
                         <Select.Content >
@@ -92,7 +92,7 @@ export const MultiLogView = (props: MultiLogViewProps) => {
         {5 <= views.length ? null : (
             <Flex direction="column" align="center" justify="center">
                 <IconButton ml="auto" mr="2" variant="soft"
-                    onClick={() => setViews([...views, { id: views[views.length - 1].id + 1, log: views[views.length - 1].log }])}>
+                    onClick={() => setViews(prev => [...prev, { id: prev[prev.length - 1].id + 1, log: prev[prev.length - 1].log }])}>
                     <Plus />
                 </IconButton>
             </Flex>

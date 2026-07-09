@@ -7,7 +7,7 @@ import { SanityCheckMessage } from "../ccfoliaLog/message/SanityCheckMessage";
 import { ParamChangeMessage } from "../ccfoliaLog/message/ParamChangeMessage";
 import LogViewFilter, { EMPTY_FILTER } from "./LogViewFilter";
 import { LogFile } from "../file/LogFile";
-import { CSSProperties, Ref, useImperativeHandle, useRef, useState } from "react";
+import { CSSProperties, Ref, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { useVirtualizer, Virtualizer } from "@tanstack/react-virtual";
 import { Check, Copy } from "lucide-react";
 
@@ -57,23 +57,24 @@ export const LogView = (props: LogViewProps) => {
 
     const filter = props.filter ?? EMPTY_FILTER;
 
-    const testFilter = (msg: CcfoliaMessage) => {
-        if (filter.hiddenMessageTypes.includes(msg.constructor.name)) {
-            return false;
+    const filteredLog = useMemo(() => {
+        let filtered = logs.log.filter(msg => {
+            if (filter.hiddenMessageTypes.includes(msg.constructor.name)) {
+                return false;
+            }
+            if (filter.hiddenCharacters.includes(msg.sender)) {
+                return false;
+            }
+            if (filter.searchText !== "" && !msg.toDisplayText().includes(filter.searchText)) {
+                return false;
+            }
+            return true;
+        });
+        if (tab) {
+            filtered = filtered.filter(msg => msg.channel === tab);
         }
-        if (filter.hiddenCharacters.includes(msg.sender)) {
-            return false;
-        }
-        if (filter.searchText !== "" && !msg.toDisplayText().includes(filter.searchText)) {
-            return false;
-        }
-        return true;
-    }
-
-    let filteredLog = logs.log.filter(msg => testFilter(msg));
-    if (tab) {
-        filteredLog = filteredLog.filter(msg => msg.channel === tab);
-    }
+        return filtered;
+    }, [logs.log, filter.hiddenMessageTypes, filter.hiddenCharacters, filter.searchText, tab]);
 
     const virtualizer = useVirtualizer({
         count: filteredLog.length,
@@ -83,11 +84,12 @@ export const LogView = (props: LogViewProps) => {
         onChange(instance, sync) {
             if (!onScrolled) return;
             if (sync) {
-                onScrolled(createScroller(instance, filteredLog));
+                onScrolled(scroller);
             }
         },
     });
-    useImperativeHandle(scrollerRef, () => createScroller(virtualizer, filteredLog));
+    const scroller = useMemo(() => createScroller(virtualizer, filteredLog), [virtualizer, filteredLog]);
+    useImperativeHandle(scrollerRef, () => scroller, [scroller]);
 
 
     return (
@@ -121,6 +123,7 @@ const MessageEntry = (props: {
     miniText?: string
 }) => {
     const { msg, filter, onClick, miniText: debugText } = props;
+    const displayText = msg.toDisplayText();
 
     const [showCopyButton, setShowCopyButton] = useState(false);
     const [isCopied, setCopied] = useState(false);
@@ -150,16 +153,16 @@ const MessageEntry = (props: {
                             right: "4px"
                         }}
                         onClick={() => {
-                            navigator.clipboard.writeText(msg.toDisplayText());
+                            navigator.clipboard.writeText(displayText);
                             setCopied(true);
                         }}>
                         {isCopied ? <Check size="1.25em" /> : <Copy size="1.25em" />}
                     </IconButton>
                 ) : null}
             </Flex>
-            {filter.searchText === "" ? <Text style={blockStyle}>{msg.toDisplayText()}</Text> :
+            {filter.searchText === "" ? <Text style={blockStyle}>{displayText}</Text> :
                 <Text style={blockStyle}>
-                    {msg.toDisplayText().split(filter.searchText)
+                    {displayText.split(filter.searchText)
                         .map((text, i) => i === 0 ? text : <>
                             <u style={{ textDecorationColor: "lime" }}>{filter.searchText}</u>{text}
                         </>)}

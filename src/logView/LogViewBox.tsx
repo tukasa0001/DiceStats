@@ -14,20 +14,32 @@ export const LogViewBox = (props: {
 
     const [currentTab, setTab] = useState("@ALL");
     const [searchText, setSearchText] = useState("");
-    const [charaFilter, setCharaFilter] = useState([...new Set([...log.log].map(msg => msg.sender))]);
-    const allChannels = useMemo(() => [...new Set([...log.log].map(msg => msg.channel))], [log]);
-    const allCharacters = useMemo(() => [...new Set([...log.log].map(msg => msg.sender))], [log]);
+    const { allChannels, allCharacters } = useMemo(() => {
+        const channels = new Set<string>();
+        const characters = new Set<string>();
+        for (const msg of log.log) {
+            channels.add(msg.channel);
+            characters.add(msg.sender);
+        }
+        return {
+            allChannels: [...channels],
+            allCharacters: [...characters],
+        };
+    }, [log.log]);
+    const [charaFilter, setCharaFilter] = useState(() => allCharacters);
+    const hiddenCharacters = useMemo(() => allCharacters.filter(chara => !charaFilter.includes(chara)), [allCharacters, charaFilter]);
+    const filter = useMemo(() => ({
+        searchText,
+        hiddenCharacters,
+        hiddenMessageTypes: [] as string[],
+    }), [searchText, hiddenCharacters]);
 
     return (
         <Flex direction="column" flexBasis="0" flexGrow="1" flexShrink="1">
             <Box minHeight="0" height="1px" flexGrow="1" flexShrink="1" overflowY="hidden">
                 <LogView logs={log} tab={currentTab === "@ALL" ? undefined : currentTab}
                     scrollerRef={scrollerRef} onScrolled={onScrolled}
-                    filter={{
-                        searchText,
-                        hiddenCharacters: allCharacters.filter(chara => !charaFilter.includes(chara)),
-                        hiddenMessageTypes: []
-                    }} />
+                    filter={filter} />
             </Box>
             <Tabs.Root value={currentTab} onValueChange={setTab}>
                 <Tabs.List>
