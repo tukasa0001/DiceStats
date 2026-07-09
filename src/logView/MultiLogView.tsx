@@ -1,6 +1,5 @@
 import { Text, Flex, Select, IconButton, Box } from "@radix-ui/themes"
 import { LogFile } from "../file/LogFile"
-import { FilteredLogView } from "./FilteredLogView"
 import { useState } from "react"
 import { LogViewBox } from "./LogViewBox"
 import { Plus } from "lucide-react"
@@ -17,8 +16,6 @@ type ViewInfo = {
 export const MultiLogView = (props: MultiLogViewProps) => {
     const { logs } = props;
     const [views, setViews] = useState<ViewInfo[]>([{ id: 0 }]);
-
-    const [selected, setSelected] = useState(0 < logs.length ? logs[0].filename : "ログがありません");
 
     if (logs.length <= 0) {
         return <>
