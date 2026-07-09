@@ -38,14 +38,15 @@ const createScroller = (virtualizer: Virtualizer<HTMLDivElement, Element>, log: 
 
 type LogViewProps = {
     logs: LogFile
-    filter?: LogViewFilter
+    filter?: LogViewFilter,
+    tab?: string,
     onClick?: (msg: CcfoliaMessage, i: number) => void,
     scrollerRef?: Ref<LogViewScroller>,
     onScrolled?: (scroller: LogViewScroller) => void
 };
 
 export const LogView = (props: LogViewProps) => {
-    const { logs, onClick, scrollerRef, onScrolled } = props;
+    const { logs, onClick, scrollerRef, onScrolled, tab } = props;
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 
     const filter = props.filter ?? EMPTY_FILTER;
@@ -63,7 +64,10 @@ export const LogView = (props: LogViewProps) => {
         return true;
     }
 
-    const filteredLog = logs.log.filter(msg => testFilter(msg))
+    let filteredLog = logs.log.filter(msg => testFilter(msg));
+    if (tab) {
+        filteredLog = filteredLog.filter(msg => msg.channel === tab);
+    }
 
     const virtualizer = useVirtualizer({
         count: filteredLog.length,
