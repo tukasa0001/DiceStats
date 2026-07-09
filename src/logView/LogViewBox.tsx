@@ -1,15 +1,16 @@
 import { Box, Button, DropdownMenu, Flex, IconButton, ScrollArea, Tabs, Text } from "@radix-ui/themes"
 import { Ellipsis, X } from "lucide-react"
-import { FilteredLogView } from "./FilteredLogView"
 import { LogFile } from "../file/LogFile"
-import { LogView } from "./LogView"
-import { useMemo, useState } from "react"
+import { LogView, LogViewScroller } from "./LogView"
+import { Ref, useMemo, useState } from "react"
 
 export const LogViewBox = (props: {
     log: LogFile,
-    onClose?: () => void
+    onClose?: () => void,
+    scrollerRef?: Ref<LogViewScroller>,
+    onScrolled?: (scroller: LogViewScroller) => void
 }) => {
-    const { log, onClose } = props;
+    const { log, onClose, scrollerRef, onScrolled } = props;
 
     const [currentTab, setTab] = useState("@ALL");
     const allChannels = useMemo(() => [...new Set([...log.log].map(msg => msg.channel))], [log]);
@@ -17,7 +18,7 @@ export const LogViewBox = (props: {
     return (
         <Flex direction="column" flexBasis="0" flexGrow="1" flexShrink="1">
             <Box minHeight="0" height="1px" flexGrow="1" flexShrink="1" overflowY="hidden">
-                <LogView logs={log} />
+                <LogView logs={log} scrollerRef={scrollerRef} onScrolled={onScrolled} />
             </Box>
             <Tabs.Root value={currentTab} onValueChange={setTab}>
                 <Tabs.List>

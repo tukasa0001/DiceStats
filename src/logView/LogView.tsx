@@ -7,17 +7,40 @@ import { SanityCheckMessage } from "../ccfoliaLog/message/SanityCheckMessage";
 import { ParamChangeMessage } from "../ccfoliaLog/message/ParamChangeMessage";
 import LogViewFilter, { EMPTY_FILTER } from "./LogViewFilter";
 import { LogFile } from "../file/LogFile";
-import { CSSProperties, useRef } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { CSSProperties, Ref, useImperativeHandle, useRef } from "react";
+import { useVirtualizer, Virtualizer } from "@tanstack/react-virtual";
+
+export type LogViewScroller = {
+    getCurrentIndex(): number,
+    scrollToIndex(idx: number): void
+}
+
+const createScroller = (virtualizer: Virtualizer<HTMLDivElement, Element>, log: CcfoliaMessage[]): LogViewScroller => {
+    return ({
+        getCurrentIndex() {
+            const rawIdx = virtualizer.getVirtualIndexes()[0];
+            return log[rawIdx]?.index ?? 0;
+        },
+        scrollToIndex(idx) {
+            const rawIdx = log.map((m, i) => [m, i] as [CcfoliaMessage, number])
+                .find(([msg, i]) => idx < msg.index)?.[1];
+            if (rawIdx) {
+                virtualizer.scrollToIndex(rawIdx);
+            }
+        },
+    });
+}
 
 type LogViewProps = {
     logs: LogFile
     filter?: LogViewFilter
-    onClick?: (msg: CcfoliaMessage, i: number) => void
+    onClick?: (msg: CcfoliaMessage, i: number) => void,
+    scrollerRef?: Ref<LogViewScroller>,
+    onScrolled?: (scroller: LogViewScroller) => void
 };
 
 export const LogView = (props: LogViewProps) => {
-    const { logs, onClick } = props;
+    const { logs, onClick, scrollerRef, onScrolled } = props;
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 
     const filter = props.filter ?? EMPTY_FILTER;
@@ -42,7 +65,15 @@ export const LogView = (props: LogViewProps) => {
         getScrollElement: () => scrollAreaRef.current,
         estimateSize: () => 81.6,
         overscan: 20,
-    })
+        onChange(instance, sync) {
+            if (!onScrolled) return;
+            if (sync) {
+                onScrolled(createScroller(instance, filteredLog));
+            }
+        },
+    });
+    useImperativeHandle(scrollerRef, () => createScroller(virtualizer, filteredLog));
+
 
     return (
         <ScrollArea scrollbars="vertical" size="2" ref={scrollAreaRef} style={{
