@@ -59,14 +59,6 @@ export const MultiLogView = (props: MultiLogViewProps) => {
                     }}
                     onClose={views.length <= 1 ? undefined : () => setViews(views.filter(v => view !== v))} />
                 <Flex direction="column" my="1" px="3" justify="center" minWidth="0">
-                    <IconButton onClick={() => {
-                        const scroller = scrollerRefs.current.get(view.id);
-                        if (scroller) {
-                            scroller.scrollToIndex(500);
-                        }
-                    }}>
-                        <Plus />
-                    </IconButton>
                     <Select.Root
                         value={view.log?.filename ?? logs[0].filename}
                         onValueChange={sel => setViews(views.map(v => v.id === view.id ? { id: v.id, log: logs.find(l => l.filename === sel) } : v))}
