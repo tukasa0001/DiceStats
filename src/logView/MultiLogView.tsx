@@ -1,8 +1,9 @@
 import { Text, Flex, Select, IconButton, Box } from "@radix-ui/themes"
 import { LogFile } from "../file/LogFile"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { LogViewBox } from "./LogViewBox"
 import { Plus } from "lucide-react"
+import { LogViewScroller } from "./LogView"
 
 type MultiLogViewProps = {
     logs: LogFile[]
@@ -16,6 +17,28 @@ type ViewInfo = {
 export const MultiLogView = (props: MultiLogViewProps) => {
     const { logs } = props;
     const [views, setViews] = useState<ViewInfo[]>([{ id: 0 }]);
+    const scrollerRefs = useRef(new Map<number, LogViewScroller>());
+
+    const setScrollerRef = (id: number, scroller: LogViewScroller | null) => {
+        if (scroller) {
+            scrollerRefs.current.set(id, scroller);
+        } else {
+            scrollerRefs.current.delete(id);
+        }
+    };
+
+    const syncScroll = (src: ViewInfo, idx: number) => {
+        if (src.id !== 0) return;
+        for (const view of views) {
+            if (view !== src && (view.log ?? logs[0]) === (src.log ?? logs[0])) {
+                const scroller = scrollerRefs.current.get(view.id);
+                if (scroller) {
+                    console.log(`[Scroll Sync] ${src.id} => ${view.id} (idx:${idx})`)
+                    scroller.scrollToIndex(idx);
+                }
+            }
+        }
+    }
 
     if (logs.length <= 0) {
         return <>
@@ -27,8 +50,20 @@ export const MultiLogView = (props: MultiLogViewProps) => {
         {views.map(view => (
             <Flex direction="column" flexBasis="0" flexGrow="1" flexShrink="1" minWidth="0">
                 <LogViewBox key={view.id} log={view.log ?? logs[0]}
+                    scrollerRef={sc => setScrollerRef(view.id, sc)}
+                    onScrolled={sc => {
+                        syncScroll(view, sc.getCurrentIndex());
+                    }}
                     onClose={views.length <= 1 ? undefined : () => setViews(views.filter(v => view !== v))} />
                 <Flex direction="column" my="1" px="3" justify="center" minWidth="0">
+                    <IconButton onClick={() => {
+                        const scroller = scrollerRefs.current.get(view.id);
+                        if (scroller) {
+                            scroller.scrollToIndex(500);
+                        }
+                    }}>
+                        <Plus />
+                    </IconButton>
                     <Select.Root
                         value={view.log?.filename ?? logs[0].filename}
                         onValueChange={sel => setViews(views.map(v => v.id === view.id ? { id: v.id, log: logs.find(l => l.filename === sel) } : v))}
