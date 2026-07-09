@@ -100,7 +100,7 @@ export const LogView = (props: LogViewProps) => {
                         <MessageEntry
                             msg={filteredLog[vItem.index]} filter={filter}
                             onClick={onClick ? () => onClick(filteredLog[vItem.index], vItem.index) : undefined}
-                            debugText={`${vItem.index} / ${filteredLog[vItem.index].index}`}
+                            miniText={`No.${filteredLog[vItem.index].index}`}
                         />
                     </Box>
                 ))}
@@ -112,9 +112,9 @@ export const LogView = (props: LogViewProps) => {
 const MessageEntry = (props: {
     msg: CcfoliaMessage, filter: LogViewFilter,
     onClick?: () => void,
-    debugText?: string
+    miniText?: string
 }) => {
-    const { msg, filter, onClick, debugText } = props;
+    const { msg, filter, onClick, miniText: debugText } = props;
 
     const blockStyle: CSSProperties = {
         display: "block"
@@ -127,7 +127,7 @@ const MessageEntry = (props: {
                 {msg instanceof CoCSkillRollMessage ? <Badge color="lime">技能判定</Badge> : null}
                 {msg instanceof SanityCheckMessage ? <Badge color="ruby">SANチェック</Badge> : null}
                 {msg instanceof ParamChangeMessage ? <Badge color="blue">{msg.paramName}変動</Badge> : null}
-                {debugText ? <Badge color="purple">{debugText}</Badge> : null}
+                {debugText ? <Text size="1" color="gray">{debugText}</Text> : null}
             </Flex>
             {filter.searchText === "" ? <Text style={blockStyle}>{msg.toDisplayText()}</Text> :
                 <Text style={blockStyle}>
