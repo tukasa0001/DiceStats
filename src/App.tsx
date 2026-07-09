@@ -123,6 +123,7 @@ const App: FC = () => {
                             <Tabs.Content value="home">
                                 <Flex direction="column" mx="4">
                                     <HomeTab logs={log} setLogs={setLog} onLogFileChanged={onFileUploaded} />
+                                    <Footer />
                                 </Flex>
                             </Tabs.Content>
                             <Tabs.Content value="stats">
@@ -149,9 +150,6 @@ const App: FC = () => {
                                     <PlayerStats logs={log} />
                                 </Flex>
                             </Tabs.Content>
-                            <Flex direction="column" mx="4" my="2">
-                                <Footer />
-                            </Flex>
                         </Tabs.Root>
 
                         {isDropping ? <div className='upload_area'>
