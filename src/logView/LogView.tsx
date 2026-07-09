@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Card, Code, Flex, ScrollArea } from "@radix-ui/themes";
+import { Badge, Box, Button, Card, Code, Flex, IconButton, ScrollArea } from "@radix-ui/themes";
 import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage";
 import { Heading, Text } from "@radix-ui/themes";
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge";
@@ -7,8 +7,9 @@ import { SanityCheckMessage } from "../ccfoliaLog/message/SanityCheckMessage";
 import { ParamChangeMessage } from "../ccfoliaLog/message/ParamChangeMessage";
 import LogViewFilter, { EMPTY_FILTER } from "./LogViewFilter";
 import { LogFile } from "../file/LogFile";
-import { CSSProperties, Ref, useImperativeHandle, useRef } from "react";
+import { CSSProperties, Ref, useImperativeHandle, useRef, useState } from "react";
 import { useVirtualizer, Virtualizer } from "@tanstack/react-virtual";
+import { Check, Copy } from "lucide-react";
 
 export type LogViewScroller = {
     getCurrentIndex(): number,
@@ -121,18 +122,40 @@ const MessageEntry = (props: {
 }) => {
     const { msg, filter, onClick, miniText: debugText } = props;
 
+    const [showCopyButton, setShowCopyButton] = useState(false);
+    const [isCopied, setCopied] = useState(false);
+
     const blockStyle: CSSProperties = {
         display: "block"
     }
 
     return <>
-        <Box px="4" py="2" position="relative">
-            <Flex gap="2" direction="row">
+        <Box px="4" py="2" position="relative"
+            onMouseEnter={onClick ? undefined : () => setShowCopyButton(true)}
+            onMouseLeave={onClick ? undefined : () => {
+                setShowCopyButton(false);
+                setCopied(false);
+            }}>
+            <Flex gap="2" direction="row" position="relative">
                 <Heading size="4">{msg.sender}</Heading>
                 {msg instanceof CoCSkillRollMessage ? <Badge color="lime">技能判定</Badge> : null}
                 {msg instanceof SanityCheckMessage ? <Badge color="ruby">SANチェック</Badge> : null}
                 {msg instanceof ParamChangeMessage ? <Badge color="blue">{msg.paramName}変動</Badge> : null}
                 {debugText ? <Text size="1" color="gray">{debugText}</Text> : null}
+                {showCopyButton ? (
+                    <IconButton variant="ghost" size="2" color="gray"
+                        style={{
+                            position: "absolute",
+                            top: 0,
+                            right: "4px"
+                        }}
+                        onClick={() => {
+                            navigator.clipboard.writeText(msg.toDisplayText());
+                            setCopied(true);
+                        }}>
+                        {isCopied ? <Check size="1.25em" /> : <Copy size="1.25em" />}
+                    </IconButton>
+                ) : null}
             </Flex>
             {filter.searchText === "" ? <Text style={blockStyle}>{msg.toDisplayText()}</Text> :
                 <Text style={blockStyle}>
