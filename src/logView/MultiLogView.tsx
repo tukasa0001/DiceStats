@@ -23,17 +23,17 @@ export const MultiLogView = (props: MultiLogViewProps) => {
         </>
     }
 
-    return <Flex gap="1" mt="1" height="100%" flexBasis="0" flexGrow="1" flexShrink="1">
+    return <Flex gap="1" mt="1" height="100%" flexBasis="0" flexGrow="1" flexShrink="1" minWidth="0">
         {views.map(view => (
-            <Flex direction="column" flexBasis="0" flexGrow="1" flexShrink="1">
+            <Flex direction="column" flexBasis="0" flexGrow="1" flexShrink="1" minWidth="0">
                 <LogViewBox key={view.id} log={view.log ?? logs[0]}
                     onClose={views.length <= 1 ? undefined : () => setViews(views.filter(v => view !== v))} />
-                <Flex direction="column" my="1" px="3" justify="center">
+                <Flex direction="column" my="1" px="3" justify="center" minWidth="0">
                     <Select.Root
                         value={view.log?.filename ?? logs[0].filename}
                         onValueChange={sel => setViews(views.map(v => v.id === view.id ? { id: v.id, log: logs.find(l => l.filename === sel) } : v))}
                     >
-                        <Select.Trigger />
+                        <Select.Trigger style={{ width: "100%" }} />
                         <Select.Content >
                             <Select.Group>
                                 {logs.map((log, i) => <Select.Item key={i} value={log.filename}>
