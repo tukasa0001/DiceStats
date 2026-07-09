@@ -1,4 +1,4 @@
-import { Text, Flex, Select, IconButton, Box } from "@radix-ui/themes"
+import { Text, Flex, Select, IconButton, Box, Checkbox, Card } from "@radix-ui/themes"
 import { LogFile } from "../file/LogFile"
 import { useRef, useState } from "react"
 import { LogViewBox } from "./LogViewBox"
@@ -11,7 +11,8 @@ type MultiLogViewProps = {
 
 type ViewInfo = {
     id: number,
-    log?: LogFile
+    log?: LogFile,
+    noSync?: boolean
 }
 
 export const MultiLogView = (props: MultiLogViewProps) => {
@@ -30,9 +31,9 @@ export const MultiLogView = (props: MultiLogViewProps) => {
 
 
     const syncScroll = (src: ViewInfo, idx: number) => {
-        if (src.id !== activeViewIdx) return;
+        if (src.id !== activeViewIdx || src.noSync) return;
         for (const view of views) {
-            if (view !== src && (view.log ?? logs[0]) === (src.log ?? logs[0])) {
+            if (view !== src && (view.log ?? logs[0]) === (src.log ?? logs[0]) && !view.noSync) {
                 const scroller = scrollerRefs.current.get(view.id);
                 if (scroller) {
                     console.log(`[Scroll Sync] ${src.id} => ${view.id} (idx:${idx})`)
@@ -58,7 +59,18 @@ export const MultiLogView = (props: MultiLogViewProps) => {
                         syncScroll(view, sc.getCurrentIndex());
                     }}
                     onClose={views.length <= 1 ? undefined : () => setViews(views.filter(v => view !== v))} />
-                <Flex direction="column" my="1" px="3" justify="center" minWidth="0">
+                <Flex direction="column" my="1" px="3" gap="1" justify="center" minWidth="0">
+                    <Flex>
+                        <Card asChild style={{ padding: "4px 12px", flex: "1" }}>
+                            <label>
+                                <Flex align="center" justify="center" gap="1">
+                                    <Text>同期</Text>
+                                    <Checkbox checked={!view.noSync}
+                                        onCheckedChange={val => setViews(views.map(v => v.id === view.id ? { ...v, noSync: !val } : v))} />
+                                </Flex>
+                            </label>
+                        </Card>
+                    </Flex>
                     <Select.Root
                         value={view.log?.filename ?? logs[0].filename}
                         onValueChange={sel => setViews(views.map(v => v.id === view.id ? { id: v.id, log: logs.find(l => l.filename === sel) } : v))}
