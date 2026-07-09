@@ -18,8 +18,13 @@ export type LogViewScroller = {
 const createScroller = (virtualizer: Virtualizer<HTMLDivElement, Element>, log: CcfoliaMessage[]): LogViewScroller => {
     return ({
         getCurrentIndex() {
-            const rawIdx = virtualizer.getVirtualIndexes()[20];
-            return log[rawIdx]?.index ?? 0;
+            const virtualItems = virtualizer.getVirtualItems();
+            const scrollOffset = virtualizer.scrollOffset;
+            if (!scrollOffset) return 0;
+
+            const topVisibleItem = virtualItems.find(item => item.end > scrollOffset);
+            if (!topVisibleItem) return 0;
+            return log[topVisibleItem.index]?.index ?? 0;
         },
         scrollToIndex(idx) {
             let rawIdx = 0;
