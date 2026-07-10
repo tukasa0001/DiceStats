@@ -1,4 +1,4 @@
-import { Text, Flex, Select, IconButton, Box, Checkbox, Card } from "@radix-ui/themes"
+import { Text, Flex, Select, IconButton, Box, Checkbox, Card, DropdownMenu, Button } from "@radix-ui/themes"
 import { LogFile } from "../file/LogFile"
 import { useRef, useState } from "react"
 import { LogViewBox } from "./LogViewBox"
@@ -43,6 +43,23 @@ export const MultiLogView = (props: MultiLogViewProps) => {
         }
     }
 
+    const jumpToIndex = (view: ViewInfo, idx: number) => {
+        const scroller = scrollerRefs.current.get(view.id);
+        if (scroller) {
+            scroller.scrollToIndex(idx);
+        }
+    }
+
+    const jumpToPercentage = (view: ViewInfo, pct: number) => {
+        const scroller = scrollerRefs.current.get(view.id);
+        const log = view.log ?? logs[0];
+        if (scroller) {
+            const max = log.log[log.log.length - 1].index;
+            const idx = max * pct;
+            scroller.scrollToIndex(idx);
+        }
+    }
+
     if (logs.length <= 0) {
         return <>
             <Text>ログをアップロードしてください</Text>
@@ -70,6 +87,62 @@ export const MultiLogView = (props: MultiLogViewProps) => {
                                 </Flex>
                             </label>
                         </Card>
+
+                        <DropdownMenu.Root>
+                            <DropdownMenu.Trigger style={{ flex: "1" }}>
+                                <Button variant="surface" style={{
+                                    overflow: "hidden",
+                                    whiteSpace: "nowrap",
+                                    textAlign: "left"
+                                }}>
+                                    <Text style={{
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis"
+                                    }}>
+                                        ジャンプ
+                                    </Text>
+                                    <DropdownMenu.TriggerIcon />
+                                </Button>
+                            </DropdownMenu.Trigger>
+
+                            <DropdownMenu.Content>
+
+                                <DropdownMenu.Item onClick={() => jumpToIndex(view, 0)}>
+                                    一番上
+                                </DropdownMenu.Item>
+                                <DropdownMenu.Item onClick={() => jumpToPercentage(view, 100)}>
+                                    一番下
+                                </DropdownMenu.Item>
+
+                                <DropdownMenu.Sub>
+                                    <DropdownMenu.SubTrigger>10%刻み</DropdownMenu.SubTrigger>
+                                    <DropdownMenu.SubContent>
+                                        {
+                                            [...Array(9)].map((_, i) => (i + 1) * 10) // 10, 20, ..., 80, 90
+                                                .map(pct => (
+                                                    <DropdownMenu.Item key={`jump-10%-${pct}%`} onClick={() => jumpToPercentage(view, pct / 100)}>
+                                                        {pct}%
+                                                    </DropdownMenu.Item>
+                                                ))
+                                        }
+                                    </DropdownMenu.SubContent>
+                                </DropdownMenu.Sub>
+                                <DropdownMenu.Sub>
+                                    <DropdownMenu.SubTrigger>5%刻み</DropdownMenu.SubTrigger>
+                                    <DropdownMenu.SubContent>
+                                        {
+                                            [...Array(19)].map((_, i) => (i + 1) * 5) // 5, 10, ..., 95, 100
+                                                .map(pct => (
+                                                    <DropdownMenu.Item key={`jump-5%-${pct}%`} onClick={() => jumpToPercentage(view, pct / 100)}>
+                                                        {pct}%
+                                                    </DropdownMenu.Item>
+                                                ))
+                                        }
+                                    </DropdownMenu.SubContent>
+                                </DropdownMenu.Sub>
+
+                            </DropdownMenu.Content>
+                        </DropdownMenu.Root>
                     </Flex>
                     <Select.Root
                         value={view.log?.filename ?? defaultLog.filename}
