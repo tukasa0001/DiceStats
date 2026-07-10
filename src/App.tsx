@@ -77,7 +77,11 @@ const App: FC = () => {
                         setDropping(false)
                     }}>
                     <Theme accentColor="indigo" radius='large' appearance={isDark ? "dark" : "light"}>
-                        <Tabs.Root value={tab} onValueChange={tab => setTab(tab)}>
+                        <Tabs.Root value={tab} onValueChange={tab => setTab(tab)} style={{
+                            minHeight: "100dvh",
+                            display: "flex",
+                            flexDirection: "column"
+                        }}>
                             <Tabs.List>
                                 <Grid mx="4" rows="1" columns="3" width="100%" style={{ textWrap: "nowrap" }}>
                                     <Box />
@@ -119,6 +123,7 @@ const App: FC = () => {
                             <Tabs.Content value="home">
                                 <Flex direction="column" mx="4">
                                     <HomeTab logs={log} setLogs={setLog} onLogFileChanged={onFileUploaded} />
+                                    <Footer />
                                 </Flex>
                             </Tabs.Content>
                             <Tabs.Content value="stats">
@@ -133,8 +138,10 @@ const App: FC = () => {
                                     <ConfigCard />
                                 </Flex>
                             </Tabs.Content>
-                            <Tabs.Content value="logView">
-                                <Flex direction="column" mx="4">
+                            <Tabs.Content value="logView" asChild>
+                                <Flex direction="column" mx="4" style={{
+                                    flexGrow: 1
+                                }}>
                                     <MultiLogView logs={log} />
                                 </Flex>
                             </Tabs.Content>
@@ -143,9 +150,6 @@ const App: FC = () => {
                                     <PlayerStats logs={log} />
                                 </Flex>
                             </Tabs.Content>
-                            <Flex direction="column" mx="4">
-                                <Footer />
-                            </Flex>
                         </Tabs.Root>
 
                         {isDropping ? <div className='upload_area'>

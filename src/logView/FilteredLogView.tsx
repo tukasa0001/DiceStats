@@ -2,7 +2,6 @@ import { Flex, Select, TextField } from "@radix-ui/themes"
 import { useContext, useState } from "react"
 import { LogView } from "./LogView"
 import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage";
-import { EMPTY_FILTER } from "./LogViewFilter";
 import { LogFile } from "../file/LogFile";
 
 const ccfoliaMessageTypeTexts = new Map<string, string>([
@@ -22,14 +21,17 @@ export const FilteredLogView = (props: FilteredLogViewProps) => {
     const UNFILTERED = "$unfiltered";
 
     const { logs, onClick } = props;
-    const [filter, setFilter] = useState(EMPTY_FILTER);
     const allMessageTypes = [...new Set([...logs.log].map(msg => msg.constructor.name))];
     const allCharacters = [...new Set([...logs.log].map(msg => msg.sender))];
+
+    const [hiddenMessageTypes, setHiddenMessageTypes] = useState<string[]>([]);
+    const [hiddenCharacters, setHiddenCharacters] = useState<string[]>([]);
+    const [searchText, setSearchText] = useState("");
 
     return <Flex direction="column" maxHeight="100%">
         <Flex my="2" gap="2" justify="center">
             {/*種類フィルター*/}
-            <Select.Root defaultValue={UNFILTERED} onValueChange={sel => setFilter({ ...filter, hiddenMessageTypes: sel === UNFILTERED ? [] : allMessageTypes.filter(val => val !== sel) })}>
+            <Select.Root defaultValue={UNFILTERED} onValueChange={sel => setHiddenMessageTypes(sel === UNFILTERED ? [] : allMessageTypes.filter(val => val !== sel))}>
                 <Select.Trigger />
                 <Select.Content position="popper">
                     <Select.Group>
@@ -41,7 +43,7 @@ export const FilteredLogView = (props: FilteredLogViewProps) => {
                 </Select.Content>
             </Select.Root>
             {/*発言者フィルター*/}
-            <Select.Root defaultValue={UNFILTERED} onValueChange={sel => setFilter({ ...filter, hiddenCharacters: sel === UNFILTERED ? [] : allCharacters.filter(val => val !== sel) })}>
+            <Select.Root defaultValue={UNFILTERED} onValueChange={sel => setHiddenCharacters(sel === UNFILTERED ? [] : allCharacters.filter(val => val !== sel))}>
                 <Select.Trigger />
                 <Select.Content position="popper">
                     <Select.Group>
@@ -54,11 +56,15 @@ export const FilteredLogView = (props: FilteredLogViewProps) => {
                 </Select.Content>
             </Select.Root>
             {/*内容検索*/}
-            <TextField.Root value={filter.searchText} onChange={e => setFilter({ ...filter, searchText: e.target.value })} placeholder="検索">
+            <TextField.Root value={searchText} onChange={e => setSearchText(e.target.value)} placeholder="検索">
                 <TextField.Slot />
             </TextField.Root>
             {/*フィルタークリア*/}
         </Flex>
-        <LogView logs={logs} filter={filter} onClick={onClick} />
+        <LogView log={logs.log.filter(msg => !hiddenMessageTypes.includes(msg.constructor.name) &&
+            !hiddenCharacters.includes(msg.sender) &&
+            (searchText === "" || msg.toDisplayText().includes(searchText))
+        )}
+            onClick={onClick} highlight={searchText} />
     </Flex>
 }
