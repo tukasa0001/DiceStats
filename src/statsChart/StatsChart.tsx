@@ -209,27 +209,29 @@ const StatsChart = (props: StatsChartProps) => {
     const allCharacters = nameRollPair.map(([name, _]) => name);
 
     const getData = (i: number, name: string): number => {
+        if (deltaDisplay) {
+            return getDeltaData(i, name);
+        }
+        else {
+            return getNumData(i, name);
+        }
+    }
+
+    const getNumData = (i: number, name: string): number => {
         const props = {
             name: name,
             stat: stats[i].perCharacter.get(name),
             status: statusStats[i],
             customStatusName
         }
-        if (1 <= i && deltaDisplay) {
-            const prevStat = stats[i - 1].perCharacter.get(name);
-            const prevStatusStat = statusStats[i - 1];
-            const prevProps = {
-                name: name,
-                stat: prevStat,
-                status: prevStatusStat,
-                customStatusName
-            };
-            return chartDisplayMode.calc(props) - chartDisplayMode.calc(prevProps);
-        }
-        else if (deltaDisplay) {
-            return 0; // 0%時点での変化量
-        }
         return chartDisplayMode.calc(props);
+    }
+
+    const getDeltaData = (i: number, name: string): number => {
+        if (i <= 0) {
+            return 0;
+        }
+        return getNumData(i, name) - getNumData(i - 1, name);
     }
 
     const data = stats.map((stat, i) => ({
