@@ -1,11 +1,11 @@
 import { Box, Button, Card, Checkbox, DropdownMenu, Flex, IconButton, ScrollArea, Tabs, Text, TextField } from "@radix-ui/themes"
 import { Check, Ellipsis, X } from "lucide-react"
-import { LogFile } from "../file/LogFile"
 import { LogView, LogViewScroller } from "./LogView"
 import { Ref, useEffect, useMemo, useState } from "react"
+import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage"
 
 export const LogViewBox = (props: {
-    log: LogFile,
+    log: CcfoliaMessage[],
     onClose?: () => void,
     scrollerRef?: Ref<LogViewScroller>,
     onScrolled?: (scroller: LogViewScroller) => void
@@ -17,7 +17,7 @@ export const LogViewBox = (props: {
     const { allChannels, allCharacters } = useMemo(() => {
         const channels = new Set<string>();
         const characters = new Map<string, number>();
-        for (const msg of log.log) {
+        for (const msg of log) {
             channels.add(msg.channel);
             characters.set(msg.sender, (characters.get(msg.sender) ?? 0) + 1);
         }
@@ -25,24 +25,20 @@ export const LogViewBox = (props: {
             allChannels: [...channels],
             allCharacters: [...characters].sort(([, a], [, b]) => b - a).map(([name,]) => name),
         };
-    }, [log.log]);
+    }, [log]);
     const [charaFilter, setCharaFilter] = useState(() => allCharacters);
     useEffect(() => {
         setCharaFilter(allCharacters);
     }, [allCharacters]);
-    const hiddenCharacters = useMemo(() => allCharacters.filter(chara => !charaFilter.includes(chara)), [allCharacters, charaFilter]);
-    const filter = useMemo(() => ({
-        searchText,
-        hiddenCharacters,
-        hiddenMessageTypes: [] as string[],
-    }), [searchText, hiddenCharacters]);
 
     return (
         <Flex direction="column" flexBasis="0" flexGrow="1" flexShrink="1">
             <Box minHeight="0" height="1px" flexGrow="1" flexShrink="1" overflowY="hidden">
-                <LogView logs={log} tab={currentTab === "@ALL" ? undefined : currentTab}
-                    scrollerRef={scrollerRef} onScrolled={onScrolled}
-                    filter={filter} />
+                <LogView log={log.filter(msg => (currentTab === "@ALL" || msg.channel === currentTab) &&
+                    charaFilter.includes(msg.sender) &&
+                    (searchText === "" || msg.toDisplayText().includes(searchText)))}
+                    highlight={searchText}
+                    scrollerRef={scrollerRef} onScrolled={onScrolled} />
             </Box>
             <Tabs.Root value={currentTab} onValueChange={setTab}>
                 <Tabs.List>

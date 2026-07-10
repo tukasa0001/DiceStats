@@ -1,12 +1,9 @@
 import { Badge, Box, Button, Card, Code, Flex, IconButton, ScrollArea } from "@radix-ui/themes";
 import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage";
 import { Heading, Text } from "@radix-ui/themes";
-import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge";
 import { CoCSkillRollMessage } from "../ccfoliaLog/message/CoCSkillRollMessage";
 import { SanityCheckMessage } from "../ccfoliaLog/message/SanityCheckMessage";
 import { ParamChangeMessage } from "../ccfoliaLog/message/ParamChangeMessage";
-import LogViewFilter, { EMPTY_FILTER } from "./LogViewFilter";
-import { LogFile } from "../file/LogFile";
 import { CSSProperties, Ref, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { useVirtualizer, Virtualizer } from "@tanstack/react-virtual";
 import { Check, Copy } from "lucide-react";
@@ -41,41 +38,19 @@ const createScroller = (virtualizer: Virtualizer<HTMLDivElement, Element>, log: 
 }
 
 type LogViewProps = {
-    logs: LogFile
-    filter?: LogViewFilter,
-    tab?: string,
+    log: CcfoliaMessage[]
     onClick?: (msg: CcfoliaMessage, i: number) => void,
     scrollerRef?: Ref<LogViewScroller>,
-    onScrolled?: (scroller: LogViewScroller) => void
+    onScrolled?: (scroller: LogViewScroller) => void,
+    highlight?: string
 };
 
 export const LogView = (props: LogViewProps) => {
-    const { logs, onClick, scrollerRef, onScrolled, tab } = props;
+    const { log, onClick, scrollerRef, onScrolled, highlight } = props;
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-    const filter = props.filter ?? EMPTY_FILTER;
-
-    const filteredLog = useMemo(() => {
-        let filtered = logs.log.filter(msg => {
-            if (filter.hiddenMessageTypes.includes(msg.constructor.name)) {
-                return false;
-            }
-            if (filter.hiddenCharacters.includes(msg.sender)) {
-                return false;
-            }
-            if (filter.searchText !== "" && !msg.toDisplayText().includes(filter.searchText)) {
-                return false;
-            }
-            return true;
-        });
-        if (tab) {
-            filtered = filtered.filter(msg => msg.channel === tab);
-        }
-        return filtered;
-    }, [logs.log, filter.hiddenMessageTypes, filter.hiddenCharacters, filter.searchText, tab]);
-
     const virtualizer = useVirtualizer({
-        count: filteredLog.length,
+        count: log.length,
         getScrollElement: () => scrollAreaRef.current,
         estimateSize: () => 81.6,
         overscan: 20,
@@ -86,7 +61,7 @@ export const LogView = (props: LogViewProps) => {
             }
         },
     });
-    const scroller = useMemo(() => createScroller(virtualizer, filteredLog), [virtualizer, filteredLog]);
+    const scroller = useMemo(() => createScroller(virtualizer, log), [virtualizer, log]);
     useImperativeHandle(scrollerRef, () => scroller, [scroller]);
 
 
@@ -104,9 +79,9 @@ export const LogView = (props: LogViewProps) => {
                         transform: `translateY(${vItem.start}px)`,
                     }} ref={virtualizer.measureElement}>
                         <MessageEntry
-                            msg={filteredLog[vItem.index]} filter={filter}
-                            onClick={onClick ? () => onClick(filteredLog[vItem.index], vItem.index) : undefined}
-                            miniText={`No.${filteredLog[vItem.index].index}`}
+                            msg={log[vItem.index]} highlight={highlight}
+                            onClick={onClick ? () => onClick(log[vItem.index], vItem.index) : undefined}
+                            miniText={`No.${log[vItem.index].index}`}
                         />
                     </Box>
                 ))}
@@ -116,11 +91,11 @@ export const LogView = (props: LogViewProps) => {
 };
 
 const MessageEntry = (props: {
-    msg: CcfoliaMessage, filter: LogViewFilter,
+    msg: CcfoliaMessage, highlight?: string,
     onClick?: () => void,
     miniText?: string
 }) => {
-    const { msg, filter, onClick, miniText: debugText } = props;
+    const { msg, highlight, onClick, miniText: debugText } = props;
     const displayText = msg.toDisplayText();
 
     const [showCopyButton, setShowCopyButton] = useState(false);
@@ -158,11 +133,11 @@ const MessageEntry = (props: {
                     </IconButton>
                 ) : null}
             </Flex>
-            {filter.searchText === "" ? <Text style={blockStyle}>{displayText}</Text> :
+            {highlight === undefined || highlight === "" ? <Text style={blockStyle}>{displayText}</Text> :
                 <Text style={blockStyle}>
-                    {displayText.split(filter.searchText)
+                    {displayText.split(highlight)
                         .map((text, i) => i === 0 ? text : <>
-                            <u style={{ textDecorationColor: "lime" }}>{filter.searchText}</u>{text}
+                            <u style={{ textDecorationColor: "lime" }}>{highlight}</u>{text}
                         </>)}
                 </Text>
             }
