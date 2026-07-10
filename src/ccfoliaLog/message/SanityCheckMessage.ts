@@ -3,12 +3,14 @@ import { CcfoliaMessage } from "./CcfoliaMessage";
 export class SanityCheckMessage implements CcfoliaMessage {
     channel: string;
     sender: string;
+    index: number;
     diceValue: number;
     successValue: number;
 
-    constructor(channel: string, sender: string, diceValue: number, successValue: number) {
+    constructor(channel: string, sender: string, index: number, diceValue: number, successValue: number) {
         this.channel = channel;
         this.sender = sender;
+        this.index = index;
         this.diceValue = diceValue;
         this.successValue = successValue;
     }

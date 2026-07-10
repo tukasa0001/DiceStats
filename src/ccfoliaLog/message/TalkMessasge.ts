@@ -3,11 +3,13 @@ import { CcfoliaMessage } from "./CcfoliaMessage";
 export class TalkMessage implements CcfoliaMessage {
     channel: string;
     sender: string;
+    index: number;
     text: string;
 
-    constructor(channel: string, sender: string, text: string) {
+    constructor(channel: string, sender: string, index: number, text: string) {
         this.channel = channel;
         this.sender = sender;
+        this.index = index;
         this.text = text;
     }
 

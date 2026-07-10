@@ -3,14 +3,16 @@ import { CcfoliaMessage } from "./CcfoliaMessage";
 export class CoCSkillRollMessage implements CcfoliaMessage {
     channel: string;
     sender: string;
+    index: number;
     skill: string;
     diceValue: number;
     successValue: number;
     isSecret: boolean
 
-    constructor(channel: string, sender: string, skill: string, diceValue: number, successValue: number, isSecret: boolean = false) {
+    constructor(channel: string, sender: string, index: number, skill: string, diceValue: number, successValue: number, isSecret: boolean = false) {
         this.channel = channel;
         this.sender = sender;
+        this.index = index;
         this.skill = skill;
         this.diceValue = diceValue;
         this.successValue = successValue;
