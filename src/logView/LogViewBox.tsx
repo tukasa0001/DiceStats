@@ -1,8 +1,20 @@
-import { Box, Button, Card, Checkbox, DropdownMenu, Flex, IconButton, ScrollArea, Tabs, Text, TextField } from "@radix-ui/themes"
-import { Check, Ellipsis, X } from "lucide-react"
+import { Box, Button, Card, Checkbox, DropdownMenu, Flex, IconButton, ScrollArea, Select, Tabs, Text, TextField } from "@radix-ui/themes"
+import { Check, ChevronDown, ChevronUp, Ellipsis, X } from "lucide-react"
 import { LogView, LogViewScroller } from "./LogView"
-import { Ref, useEffect, useMemo, useState } from "react"
+import { Ref, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage"
+import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge"
+
+type OtherFilterParams = {
+    msg: CcfoliaMessage,
+    searchText: string
+}
+
+const otherFilters: { [key: string]: (params: OtherFilterParams) => boolean } = {
+    "フィルタなし": () => true,
+    "キャラ発言のみ": ({ msg }) => msg instanceof TalkMessage && msg.text.match(/^[「『].*[」』]/) !== null,
+    "検索ワードでフィルタ": ({ msg, searchText }) => msg.toDisplayText().includes(searchText)
+}
 
 export const LogViewBox = (props: {
     log: CcfoliaMessage[],
@@ -10,7 +22,7 @@ export const LogViewBox = (props: {
     scrollerRef?: Ref<LogViewScroller>,
     onScrolled?: (scroller: LogViewScroller) => void
 }) => {
-    const { log, onClose, scrollerRef, onScrolled } = props;
+    const { log, onClose, scrollerRef: parentScrollerRef, onScrolled } = props;
 
     const [currentTab, setTab] = useState("@ALL");
     const [searchText, setSearchText] = useState("");
@@ -27,16 +39,25 @@ export const LogViewBox = (props: {
         };
     }, [log]);
     const [charaFilter, setCharaFilter] = useState(() => allCharacters);
+    const [otherFilter, setOtherFilter] = useState("フィルタなし");
+
+    const filteredLog = useMemo(() => log.filter(msg =>
+        (currentTab === "@ALL" || msg.channel === currentTab) &&
+        charaFilter.includes(msg.sender) &&
+        otherFilters[otherFilter]({ msg, searchText })
+    ), [log, currentTab, charaFilter, otherFilter, searchText]);
+
     useEffect(() => {
         setCharaFilter(allCharacters);
     }, [allCharacters]);
 
+    const scrollerRef = useRef<LogViewScroller>(null);
+    useImperativeHandle(parentScrollerRef, () => scrollerRef.current!, [scrollerRef.current]);
+
     return (
         <Flex direction="column" flexBasis="0" flexGrow="1" flexShrink="1">
             <Box minHeight="0" height="1px" flexGrow="1" flexShrink="1" overflowY="hidden">
-                <LogView log={log.filter(msg => (currentTab === "@ALL" || msg.channel === currentTab) &&
-                    charaFilter.includes(msg.sender) &&
-                    (searchText === "" || msg.toDisplayText().includes(searchText)))}
+                <LogView log={filteredLog}
                     highlight={searchText}
                     scrollerRef={scrollerRef} onScrolled={onScrolled} />
             </Box>
@@ -66,6 +87,38 @@ export const LogViewBox = (props: {
                 <TextField.Root value={searchText} onChange={e => setSearchText(e.target.value)} placeholder="検索" style={{ flex: "2" }}>
                     <TextField.Slot />
                 </TextField.Root>
+
+                {/* 内容検索/1つ上へ */}
+                <IconButton variant="surface"
+                    onClick={() => {
+                        const scroller = scrollerRef.current;
+                        if (!scroller || searchText === "") return;
+                        const idx = scroller.getCurrentIndex();
+                        for (const msg of filteredLog.filter(m => m.index < idx).reverse()) {
+                            if (msg.toDisplayText().includes(searchText)) {
+                                scroller.scrollToIndex(msg.index);
+                                break;
+                            }
+                        }
+                    }}>
+                    <ChevronUp />
+                </IconButton>
+
+                {/* 内容検索/1つ下へ */}
+                <IconButton variant="surface"
+                    onClick={() => {
+                        const scroller = scrollerRef.current;
+                        if (!scroller || searchText === "") return;
+                        const idx = scroller.getCurrentIndex();
+                        for (const msg of filteredLog.filter(m => idx < m.index)) {
+                            if (msg.toDisplayText().includes(searchText)) {
+                                scroller.scrollToIndex(msg.index);
+                                break;
+                            }
+                        }
+                    }}>
+                    <ChevronDown />
+                </IconButton>
 
                 {/* キャラフィルター */}
                 <DropdownMenu.Root>
@@ -121,6 +174,19 @@ export const LogViewBox = (props: {
                         ))}
                     </DropdownMenu.Content>
                 </DropdownMenu.Root>
+
+                <Select.Root defaultValue={"フィルタなし"} onValueChange={sel => setOtherFilter(sel)}>
+                    <Select.Trigger color="blue" variant="surface" style={{
+                        flex: 1,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis"
+                    }} />
+                    <Select.Content position="popper">
+                        <Select.Group>
+                            {Object.keys(otherFilters).map((name, i) => <Select.Item key={i} value={name}>{name}</Select.Item>)}
+                        </Select.Group>
+                    </Select.Content>
+                </Select.Root>
 
             </Flex>
         </Flex>
