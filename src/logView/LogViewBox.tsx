@@ -59,7 +59,8 @@ export const LogViewBox = (props: {
             <Box minHeight="0" height="1px" flexGrow="1" flexShrink="1" overflowY="hidden">
                 <LogView log={filteredLog}
                     highlight={searchText}
-                    scrollerRef={scrollerRef} onScrolled={onScrolled} />
+                    scrollerRef={scrollerRef} onScrolled={onScrolled}
+                    showTab={currentTab === "@ALL"} />
             </Box>
             <Tabs.Root value={currentTab} onValueChange={setTab}>
                 <Tabs.List>

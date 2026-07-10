@@ -42,11 +42,13 @@ type LogViewProps = {
     onClick?: (msg: CcfoliaMessage, i: number) => void,
     scrollerRef?: Ref<LogViewScroller>,
     onScrolled?: (scroller: LogViewScroller) => void,
-    highlight?: string
+    highlight?: string,
+    showTab?: boolean
 };
 
 export const LogView = (props: LogViewProps) => {
     const { log, onClick, scrollerRef, onScrolled, highlight } = props;
+    const showTab = props.showTab ?? false;
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 
     const virtualizer = useVirtualizer({
@@ -81,7 +83,7 @@ export const LogView = (props: LogViewProps) => {
                         <MessageEntry
                             msg={log[vItem.index]} highlight={highlight}
                             onClick={onClick ? () => onClick(log[vItem.index], vItem.index) : undefined}
-                            miniText={`No.${log[vItem.index].index}`}
+                            miniText={showTab ? `No.${log[vItem.index].index} - ${log[vItem.index].channel}` : `No.${log[vItem.index].index}`}
                         />
                     </Box>
                 ))}
