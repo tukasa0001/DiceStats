@@ -35,9 +35,7 @@ const createScroller = (virtualizer: Virtualizer<HTMLDivElement, Element>, log: 
                 }
                 rawIdx++;
             }
-            if (rawIdx) {
-                virtualizer.scrollToIndex(rawIdx, { align: "start", behavior: "smooth" });
-            }
+            virtualizer.scrollToIndex(rawIdx, { align: "start", behavior: "smooth" });
         },
     });
 }
