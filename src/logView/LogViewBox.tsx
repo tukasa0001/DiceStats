@@ -123,11 +123,13 @@ export const LogViewBox = (props: {
                 {/* キャラフィルター */}
                 <DropdownMenu.Root>
                     <DropdownMenu.Trigger style={{ flex: "1" }}>
-                        <Button variant="surface" style={{
-                            overflow: "hidden",
-                            whiteSpace: "nowrap",
-                            textAlign: "left"
-                        }}>
+                        <Button variant="outline"
+                            color={charaFilter.length === allCharacters.length ? "gray" : charaFilter.length === 0 ? "red" : undefined}
+                            style={{
+                                overflow: "hidden",
+                                whiteSpace: "nowrap",
+                                textAlign: "left"
+                            }}>
                             <Text style={{
                                 overflow: "hidden",
                                 textOverflow: "ellipsis"
