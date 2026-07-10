@@ -16,14 +16,14 @@ export const LogViewBox = (props: {
     const [searchText, setSearchText] = useState("");
     const { allChannels, allCharacters } = useMemo(() => {
         const channels = new Set<string>();
-        const characters = new Set<string>();
+        const characters = new Map<string, number>();
         for (const msg of log.log) {
             channels.add(msg.channel);
-            characters.add(msg.sender);
+            characters.set(msg.sender, (characters.get(msg.sender) ?? 0) + 1);
         }
         return {
             allChannels: [...channels],
-            allCharacters: [...characters],
+            allCharacters: [...characters].sort(([, a], [, b]) => b - a).map(([name,]) => name),
         };
     }, [log.log]);
     const [charaFilter, setCharaFilter] = useState(() => allCharacters);
