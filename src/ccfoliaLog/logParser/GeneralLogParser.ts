@@ -5,7 +5,7 @@ import { UnknownSecretDiceMessage } from "../message/UnknownSecretDiceMessage";
 import { LogParser } from "./LogParser";
 
 export class GeneralLogParser implements LogParser {
-    type: "none" = "none";
+    type: "None" = "None";
 
     parse(idx: number, name: string, text: string, channel: string): CcfoliaMessage | undefined {
         let reg: RegExpMatchArray | null = null;
