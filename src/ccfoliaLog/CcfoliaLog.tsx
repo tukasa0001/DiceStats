@@ -1,9 +1,14 @@
-import { logParser } from "./logParser/LogParser";
+import GameSystemType from "../GameSystem";
+import { LogParser, logParser } from "./logParser/LogParser";
 import { CcfoliaMessage } from "./message/CcfoliaMessage";
 
-const parseCcfoliaLog = (log: string): CcfoliaMessage[] => {
+const parseCcfoliaLog = (log: string): { msgs: CcfoliaMessage[], gameSystemType: GameSystemType } => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(log, 'text/html');
+
+    const dedicatedParsers = [logParser.coc];
+    let mainParser: LogParser | undefined = undefined;
+    const fallbackParser = logParser.general;
 
     let msgs: CcfoliaMessage[] = [];
 
@@ -14,18 +19,33 @@ const parseCcfoliaLog = (log: string): CcfoliaMessage[] => {
         const channel = span[0].textContent.substring(2, span[0].textContent.length - 1);
         const name = span[1].textContent.trim();
         const text = span[2].textContent.trim();
+
         let msg: CcfoliaMessage | undefined;
-        if (msg = logParser.coc.parse(idx, name, text, channel)) {
-            msgs.push(msg);
+        if (mainParser) {
+            msg = mainParser.parse(idx, name, text, channel);
         }
-        else if (msg = logParser.general.parse(idx, name, text, channel)) {
+        else {
+            let msg: CcfoliaMessage | undefined;
+            for (const parser of dedicatedParsers) {
+                if (msg = parser.parse(idx, name, text, channel)) {
+                    mainParser = parser;
+                    break;
+                }
+            }
+        }
+
+        if (!msg) {
+            msg = fallbackParser.parse(idx, name, text, channel);
+        }
+
+        if (msg) {
             msgs.push(msg);
         }
 
         idx++;
     }
 
-    return msgs;
+    return { msgs, gameSystemType: mainParser?.type ?? "None" };
 }
 
 export default parseCcfoliaLog;

@@ -34,18 +34,18 @@ const App: FC = () => {
         const logs: LogFile[] = [];
         for (let file of files) {
             const str = await file.text();
-            const parsed = parseCcfoliaLog(str);
-            const stat = cocstats.calc(parsed, {
+            const { msgs } = parseCcfoliaLog(str);
+            const stat = cocstats.calc(msgs, {
                 ...config,
                 startIdx: 0,
-                endIdx: parsed.length - 1
+                endIdx: msgs.length - 1
             })
             logs.push({
                 filename: file.name,
-                log: parsed,
+                log: msgs,
                 stat: stat,
                 startIdx: 0,
-                endIdx: parsed.length - 1,
+                endIdx: msgs.length - 1,
                 ingoredChannels: []
             })
         }
