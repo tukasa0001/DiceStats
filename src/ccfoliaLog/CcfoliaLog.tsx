@@ -2,7 +2,7 @@ import { CcfoliaMessage } from "./message/CcfoliaMessage";
 import { CoCCombinedRollMessage } from "./message/CoCCombinedRollMessage";
 import { CoCSkillRollMessage } from "./message/CoCSkillRollMessage";
 import { ParamChangeMessage } from "./message/ParamChangeMessage";
-import { SanityCheckMessage } from "./message/SanityCheckMessage";
+import { CoCSanityCheckMessage } from "./message/SanityCheckMessage";
 import { TalkMessage } from "./message/TalkMessasge";
 import { UnknownSecretDiceMessage } from "./message/UnknownSecretDiceMessage";
 
@@ -62,7 +62,7 @@ const parseCcfoliaLog = (log: string): CcfoliaMessage[] => {
         }
         else if (reg = text.match(/^(S|s)?1d100<=([0-9]+)\s*【正気度ロール】\s*\(1D100<=[0-9]+\) ＞ ([0-9]+) ＞/)) {
             // 1d100<={successValue} 【正気度ロール】 (1D100<={successValue}) ＞ {diceValue} ＞ 成功
-            msgs.push(new SanityCheckMessage(channel, name, idx, Number(reg[3]), Number(reg[2])));
+            msgs.push(new CoCSanityCheckMessage(channel, name, idx, Number(reg[3]), Number(reg[2])));
         }
         else {
             msgs.push(new TalkMessage(channel, name, idx, text));
