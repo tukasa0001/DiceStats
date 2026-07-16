@@ -1,10 +1,5 @@
+import { logParser } from "./logParser/LogParser";
 import { CcfoliaMessage } from "./message/CcfoliaMessage";
-import { CoCCombinedRollMessage } from "./message/CoCCombinedRollMessage";
-import { CoCSkillRollMessage } from "./message/CoCSkillRollMessage";
-import { ParamChangeMessage } from "./message/ParamChangeMessage";
-import { CoCSanityCheckMessage } from "./message/SanityCheckMessage";
-import { TalkMessage } from "./message/TalkMessasge";
-import { UnknownSecretDiceMessage } from "./message/UnknownSecretDiceMessage";
 
 const parseCcfoliaLog = (log: string): CcfoliaMessage[] => {
     const parser = new DOMParser();
@@ -19,54 +14,14 @@ const parseCcfoliaLog = (log: string): CcfoliaMessage[] => {
         const channel = span[0].textContent.substring(2, span[0].textContent.length - 1);
         const name = span[1].textContent.trim();
         const text = span[2].textContent.trim();
-        let reg: RegExpMatchArray | null = null;
+        let msg: CcfoliaMessage | undefined;
+        if (msg = logParser.coc.parse(idx, name, text, channel)) {
+            msgs.push(msg);
+        }
+        else if (msg = logParser.general.parse(idx, name, text, channel)) {
+            msgs.push(msg);
+        }
 
-        if (text === "シークレットダイス ???") {
-            msgs.push(new UnknownSecretDiceMessage(channel, name, idx));
-        }
-        else if (name === "system" && (reg = text.match(/\[ (.+) \] (.+) : ([+-]?\d+) → ([+-]?\d+)/))) {
-            // [ {name} ] {param} : {prev} → {value}
-            msgs.push(new ParamChangeMessage(channel, reg[1], idx, reg[2], Number(reg[3]), Number(reg[4])));
-        }
-        else if ((reg = text.match(/^(S|s)?(CCB|ccb)<=/)) || (reg = text.match(/^x[0-9]+\s(S|s)?(CCB|ccb)<=/))) {
-            const regSkillName = text.match(/【(.*)】/);
-            const skillName = regSkillName?.[1] ?? "";
-
-            for (let reg2 of text.matchAll(/\(1D100<=([0-9]+)\) ＞ ([0-9]+) ＞/g)) {
-                const successValue = Number(reg2[1]);
-                const diceValue = Number(reg2[2]);
-                msgs.push(new CoCSkillRollMessage(channel, name, idx, skillName === "" ? "不明な技能" : skillName, diceValue, successValue, reg[1] !== undefined));
-            }
-        }
-        // 対抗ロール
-        else if ((reg = text.match(/^S?RESB\(/i)) || (reg = text.match(/^x[0-9]+\S?RESB\(/i))) {
-            const regSkillName = text.match(/【(.*)】/);
-            const skillName = regSkillName?.[1] ?? "";
-
-            for (let reg2 of text.matchAll(/\(1d100<=([0-9]+)\) ＞ ([0-9]+) ＞/g)) {
-                const successValue = Number(reg2[1]);
-                const diceValue = Number(reg2[2]);
-                msgs.push(new CoCSkillRollMessage(channel, name, idx, skillName === "" ? "対抗ロール" : skillName, diceValue, successValue, reg[1] !== undefined));
-            }
-        }
-        // 組み合わせロール
-        else if ((reg = text.match(/^S?CBRB\(/i)) || (reg = text.match(/^x[0-9]+\S?CBRB\(/i))) {
-            const regSkillName = text.match(/【(.*)】/);
-            const skillName = regSkillName?.[1] ?? "";
-
-            for (let reg2 of text.matchAll(/\(1d100<=([0-9]+),([0-9]+)\) ＞ ([0-9]+)\[/g)) {
-                const successValue: [number, number] = [Number(reg2[1]), Number(reg2[2])];
-                const diceValue = Number(reg2[3]);
-                msgs.push(new CoCCombinedRollMessage(channel, name, idx, skillName === "" ? "不明な組み合わせロール" : skillName, diceValue, successValue, reg[1] !== undefined));
-            }
-        }
-        else if (reg = text.match(/^(S|s)?1d100<=([0-9]+)\s*【正気度ロール】\s*\(1D100<=[0-9]+\) ＞ ([0-9]+) ＞/)) {
-            // 1d100<={successValue} 【正気度ロール】 (1D100<={successValue}) ＞ {diceValue} ＞ 成功
-            msgs.push(new CoCSanityCheckMessage(channel, name, idx, Number(reg[3]), Number(reg[2])));
-        }
-        else {
-            msgs.push(new TalkMessage(channel, name, idx, text));
-        }
         idx++;
     }
 
