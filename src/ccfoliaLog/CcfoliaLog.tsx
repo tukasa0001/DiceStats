@@ -56,12 +56,12 @@ const parseOldHtmlLog = (log: string): { msgs: CcfoliaMessage[], gameSystemType:
 
         let msg: CcfoliaMessage | undefined;
         if (mainParser) {
-            msg = mainParser.parse(idx, name, text, channel);
+            msg = mainParser.parse({ idx, name, text, channel });
         }
         else {
             let msg: CcfoliaMessage | undefined;
             for (const parser of dedicatedParsers) {
-                if (msg = parser.parse(idx, name, text, channel)) {
+                if (msg = parser.parse({ idx, name, text, channel })) {
                     mainParser = parser;
                     break;
                 }
@@ -69,7 +69,7 @@ const parseOldHtmlLog = (log: string): { msgs: CcfoliaMessage[], gameSystemType:
         }
 
         if (!msg) {
-            msg = fallbackParser.parse(idx, name, text, channel);
+            msg = fallbackParser.parse({ idx, name, text, channel });
         }
 
         if (msg) {
