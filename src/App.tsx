@@ -34,7 +34,7 @@ const App: FC = () => {
         const logs: LogFile[] = [];
         for (let file of files) {
             const str = await file.text();
-            const { msgs } = parseCcfoliaLog(str);
+            const { msgs, gameSystemType } = parseCcfoliaLog(str);
             const stat = cocstats.calc(msgs, {
                 ...config,
                 startIdx: 0,
@@ -42,6 +42,7 @@ const App: FC = () => {
             })
             logs.push({
                 filename: file.name,
+                gameSystem: gameSystemType,
                 log: msgs,
                 stat: stat,
                 startIdx: 0,

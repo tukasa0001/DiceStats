@@ -1,4 +1,4 @@
-import { Box, Button, Card, Flex, IconButton, Switch, Text, TextField, Tooltip } from "@radix-ui/themes"
+import { Badge, Box, Button, Card, Flex, IconButton, Switch, Text, TextField, Tooltip } from "@radix-ui/themes"
 import { LogFile } from "./LogFile"
 import { useContext, useState } from "react"
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge"
@@ -6,6 +6,7 @@ import { TriangleAlert, X } from "lucide-react"
 import { FilteredLogView } from "../logView/FilteredLogView"
 import { configCtx } from "../App"
 import cocstats from "../StatsCalculator/CoCStats"
+import { GameSystemNames } from "../GameSystem"
 
 type LogFileInfoProps = {
     log: LogFile,
@@ -63,7 +64,10 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
 
     return <Box>
         <Card>
-            <Text as="div" weight="bold">{log.filename} ({log.endIdx - log.startIdx + 1}メッセージ)</Text>
+            <Flex align="center" gap="2">
+                <Text as="div" weight="bold">{log.filename} ({log.endIdx - log.startIdx + 1}メッセージ)</Text>
+                <Badge color={log.gameSystem === "None" ? "gray" : "green"}>{GameSystemNames[log.gameSystem]}</Badge>
+            </Flex>
             <Flex ml="4" my="1" direction="column" gap="2">
                 <Flex gap="2" align="center">
                     <Text>
