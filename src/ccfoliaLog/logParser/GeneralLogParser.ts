@@ -2,13 +2,14 @@ import { CcfoliaMessage } from "../message/CcfoliaMessage";
 import { ParamChangeMessage } from "../message/ParamChangeMessage";
 import { TalkMessage } from "../message/TalkMessasge";
 import { UnknownSecretDiceMessage } from "../message/UnknownSecretDiceMessage";
-import { LogParser } from "./LogParser";
+import { LogParser, RawMessage } from "./LogParser";
 
 export class GeneralLogParser implements LogParser {
     type: "None" = "None";
 
-    parse(idx: number, name: string, text: string, channel: string): CcfoliaMessage | undefined {
+    parse(data: RawMessage): CcfoliaMessage | undefined {
         let reg: RegExpMatchArray | null = null;
+        const { idx, name, text, channel } = data;
 
         // シークレットダイス
         if (text === "シークレットダイス ???") {

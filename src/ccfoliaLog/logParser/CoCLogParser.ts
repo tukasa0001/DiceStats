@@ -2,13 +2,14 @@ import { CcfoliaMessage } from "../message/CcfoliaMessage";
 import { CoCCombinedRollMessage } from "../message/CoC/CoCCombinedRollMessage";
 import { CoCSanityCheckMessage } from "../message/CoC/CoCSanityCheckMessage";
 import { CoCSkillRollMessage } from "../message/CoC/CoCSkillRollMessage";
-import { LogParser } from "./LogParser";
+import { LogParser, RawMessage } from "./LogParser";
 
 export class CoCLogParser implements LogParser {
     type: "CoC" = "CoC";
 
-    parse(idx: number, name: string, text: string, channel: string): CcfoliaMessage | undefined {
+    parse(data: RawMessage): CcfoliaMessage | undefined {
         let reg: RegExpMatchArray | null = null;
+        const { idx, name, text, channel } = data;
 
         // 技能ロール
         if ((reg = text.match(/^(S|s)?(CCB|ccb)<=/)) || (reg = text.match(/^x[0-9]+\s(S|s)?(CCB|ccb)<=/))) {

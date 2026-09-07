@@ -3,9 +3,20 @@ import { CcfoliaMessage } from "../message/CcfoliaMessage";
 import { CoCLogParser } from "../logParser/CoCLogParser"
 import { GeneralLogParser } from "./GeneralLogParser";
 
+export type RawMessage = {
+    idx: number,
+    channel: string,
+    name: string,
+    text: string,
+
+    date?: Date,
+    iconId?: string,
+    messageType?: "text" | "system" | "note"
+}
+
 export interface LogParser {
     type: GameSystemType;
-    parse(idx: number, name: string, text: string, channel: string): CcfoliaMessage | undefined
+    parse(data: RawMessage): CcfoliaMessage | undefined
 }
 
 export const logParser = {
