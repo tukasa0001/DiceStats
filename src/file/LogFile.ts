@@ -10,6 +10,7 @@ type LogFile = {
     endIdx: number,
     ingoredChannels: string[],
     gameSystem: GameSystemType,
+    icons: { [key: string]: string }
 }
 
 export {

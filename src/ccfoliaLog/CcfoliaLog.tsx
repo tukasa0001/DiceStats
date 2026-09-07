@@ -141,7 +141,6 @@ const parseNewHtmlLog = (log: string): ParseResult => {
             icons[key] = value;
         }
     }
-    console.log(icons);
 
     return { success: true, msgs, gameSystemType: mainParser?.type ?? "None", icons };
 }

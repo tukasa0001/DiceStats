@@ -39,7 +39,7 @@ const App: FC = () => {
                 console.warn(result.reason);
                 return;
             }
-            const { msgs, gameSystemType } = result;
+            const { msgs, gameSystemType, icons } = result;
             const stat = cocstats.calc(msgs, {
                 ...config,
                 startIdx: 0,
@@ -52,7 +52,8 @@ const App: FC = () => {
                 stat: stat,
                 startIdx: 0,
                 endIdx: msgs.length - 1,
-                ingoredChannels: []
+                ingoredChannels: [],
+                icons
             })
         }
         setLog(logs);
