@@ -70,7 +70,7 @@ export const MultiLogView = (props: MultiLogViewProps) => {
         {views.map(view => (
             <Flex key={view.id} direction="column" onMouseEnter={() => setActiveViewIdx(view.id)}
                 flexBasis="0" flexGrow="1" flexShrink="1" minWidth="0">
-                <LogViewBox log={view.log?.log ?? defaultLog.log}
+                <LogViewBox log={view.log?.log ?? defaultLog.log} icons={view.log?.icons ?? defaultLog.icons}
                     scrollerRef={sc => setScrollerRef(view.id, sc)}
                     onScrolled={sc => {
                         syncScroll(view, sc.getCurrentIndex());
