@@ -28,6 +28,10 @@ const parseCcfoliaLog = async (file: File): Promise<ParseResult> => {
         const text = await file.text();
         return parseHtmlLog(text);
     }
+    else if (ext === "json") {
+        const text = await file.text();
+        return parseJsonLog(text);
+    }
 
     return {
         success: false,
@@ -165,6 +169,95 @@ const parseOldHtmlLog = (log: string): ParseResult => {
 
         if (!msg) {
             msg = fallbackParser.parse({ idx, name, text, channel });
+        }
+
+        if (msg) {
+            msgs.push(msg);
+        }
+
+        idx++;
+    }
+
+    return { success: true, msgs, gameSystemType: mainParser?.type ?? "None" };
+}
+
+// === json形式のログの型定義 ===
+type JsonLog = {
+    messages: JsonMsg[],
+    images: {
+        [key: string]: string
+    }
+}
+type JsonMsg = {
+    name: string,
+    color: string,
+    text: string,
+    type: "text" | "system" | "note",
+    channel: string,
+    channelName: string,
+    createdAt: number,
+    updatedAt: number,
+    iconImage: string,
+    extend: {
+        roll?: {
+            result: string,
+            dices: {
+                faces: number,
+                value: number,
+                kind: string,
+            }[]
+        },
+        secret?: boolean,
+        success?: boolean,
+        failure?: boolean,
+        critical?: boolean,
+        fumble?: boolean,
+    },
+};
+
+/**
+ * json形式のログ解析処理
+ * @param log 
+ * @returns 
+ */
+const parseJsonLog = (json: string): ParseResult => {
+    const log = JSON.parse(json) as JsonLog;
+
+    const dedicatedParsers = [logParser.coc];
+    let mainParser: LogParser | undefined = undefined;
+    const fallbackParser = logParser.general;
+
+    let msgs: CcfoliaMessage[] = [];
+
+    let idx = 0;
+    for (let jsonMsg of log.messages) {
+        const rawMsg: RawMessage = {
+            idx: idx,
+            channel: jsonMsg.channelName,
+            name: jsonMsg.name,
+            text: jsonMsg.extend.roll ? `${jsonMsg.text} ${jsonMsg.extend.roll.result}` : jsonMsg.text,
+
+            date: new Date(jsonMsg.createdAt),
+            iconId: jsonMsg.iconImage ?? undefined,
+            messageType: jsonMsg.type
+        };
+
+        let msg: CcfoliaMessage | undefined;
+        if (mainParser) {
+            msg = mainParser.parse(rawMsg);
+        }
+        else {
+            let msg: CcfoliaMessage | undefined;
+            for (const parser of dedicatedParsers) {
+                if (msg = parser.parse(rawMsg)) {
+                    mainParser = parser;
+                    break;
+                }
+            }
+        }
+
+        if (!msg) {
+            msg = fallbackParser.parse(rawMsg);
         }
 
         if (msg) {

@@ -15,7 +15,7 @@ const HomeTab = (props: UploadFormProps) => {
     const showUploadDialog = () => {
         const input = document.createElement('input');
         input.type = 'file';
-        input.accept = '.html,.htm';
+        input.accept = '.html,.htm,.json';
         input.multiple = true;
         input.onchange = () => {
             if (input.files != null) {
