@@ -1,16 +1,11 @@
-import { CcfoliaMessage } from "./../CcfoliaMessage";
+import { CcfoliaMessage, CcfoliaMessageData } from "./../CcfoliaMessage";
 
-export class CoCSanityCheckMessage implements CcfoliaMessage {
-    channel: string;
-    sender: string;
-    index: number;
+export class CoCSanityCheckMessage extends CcfoliaMessage {
     diceValue: number;
     successValue: number;
 
-    constructor(channel: string, sender: string, index: number, diceValue: number, successValue: number) {
-        this.channel = channel;
-        this.sender = sender;
-        this.index = index;
+    constructor(data: CcfoliaMessageData, diceValue: number, successValue: number) {
+        super(data);
         this.diceValue = diceValue;
         this.successValue = successValue;
     }

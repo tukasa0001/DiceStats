@@ -14,13 +14,14 @@ const ccfoliaMessageTypeTexts = new Map<string, string>([
 
 type FilteredLogViewProps = {
     logs: LogFile
-    onClick?: (msg: CcfoliaMessage, i: number) => void
+    onClick?: (msg: CcfoliaMessage, i: number) => void,
+    showIcon: boolean
 };
 
 export const FilteredLogView = (props: FilteredLogViewProps) => {
     const UNFILTERED = "$unfiltered";
 
-    const { logs, onClick } = props;
+    const { logs, onClick, showIcon } = props;
     const allMessageTypes = [...new Set([...logs.log].map(msg => msg.constructor.name))];
     const allCharacters = [...new Set([...logs.log].map(msg => msg.sender))];
 
@@ -65,6 +66,6 @@ export const FilteredLogView = (props: FilteredLogViewProps) => {
             !hiddenCharacters.includes(msg.sender) &&
             (searchText === "" || msg.toDisplayText().includes(searchText))
         )}
-            onClick={onClick} highlight={searchText} />
+            onClick={onClick} highlight={searchText} showIcon={showIcon} />
     </Flex>
 }

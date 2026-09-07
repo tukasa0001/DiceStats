@@ -1,15 +1,10 @@
-import { CcfoliaMessage } from "./CcfoliaMessage";
+import { CcfoliaMessage, CcfoliaMessageData } from "./CcfoliaMessage";
 
-export class TalkMessage implements CcfoliaMessage {
-    channel: string;
-    sender: string;
-    index: number;
+export class TalkMessage extends CcfoliaMessage {
     text: string;
 
-    constructor(channel: string, sender: string, index: number, text: string) {
-        this.channel = channel;
-        this.sender = sender;
-        this.index = index;
+    constructor(data: CcfoliaMessageData, text: string) {
+        super(data);
         this.text = text;
     }
 

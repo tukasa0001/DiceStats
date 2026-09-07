@@ -1,17 +1,12 @@
-import { CcfoliaMessage } from "./CcfoliaMessage";
+import { CcfoliaMessage, CcfoliaMessageData } from "./CcfoliaMessage";
 
-export class ParamChangeMessage implements CcfoliaMessage {
-    channel: string;
-    sender: string;
-    index: number;
+export class ParamChangeMessage extends CcfoliaMessage {
     paramName: string;
     prevValue: number;
     value: number;
 
-    constructor(channel: string, sender: string, index: number, paramName: string, prevValue: number, value: number) {
-        this.channel = channel;
-        this.sender = sender;
-        this.index = index;
+    constructor(data: CcfoliaMessageData, paramName: string, prevValue: number, value: number) {
+        super(data);
         this.paramName = paramName;
         this.prevValue = prevValue;
         this.value = value;

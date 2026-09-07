@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Card, Code, Flex, IconButton, ScrollArea } from "@radix-ui/themes";
+import { Avatar, Badge, Box, Button, Card, Code, Flex, IconButton, ScrollArea } from "@radix-ui/themes";
 import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage";
 import { Heading, Text } from "@radix-ui/themes";
 import { CoCSkillRollMessage } from "../ccfoliaLog/message/CoC/CoCSkillRollMessage";
@@ -43,11 +43,13 @@ type LogViewProps = {
     scrollerRef?: Ref<LogViewScroller>,
     onScrolled?: (scroller: LogViewScroller) => void,
     highlight?: string,
-    showTab?: boolean
+    showTab?: boolean,
+    showIcon?: boolean,
+    icons?: { [key: string]: string }
 };
 
 export const LogView = (props: LogViewProps) => {
-    const { log, onClick, scrollerRef, onScrolled, highlight } = props;
+    const { log, onClick, scrollerRef, onScrolled, highlight, showIcon, icons } = props;
     const showTab = props.showTab ?? false;
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -84,6 +86,8 @@ export const LogView = (props: LogViewProps) => {
                             msg={log[vItem.index]} highlight={highlight}
                             onClick={onClick ? () => onClick(log[vItem.index], vItem.index) : undefined}
                             miniText={showTab ? `No.${log[vItem.index].index} - ${log[vItem.index].channel}` : `No.${log[vItem.index].index}`}
+                            showIcon={showIcon ?? (icons !== undefined && 0 < Object.keys(icons).length)}
+                            icon={showIcon !== false && icons && log[vItem.index].iconId ? icons[log[vItem.index].iconId!] : undefined}
                         />
                     </Box>
                 ))}
@@ -95,9 +99,11 @@ export const LogView = (props: LogViewProps) => {
 const MessageEntry = (props: {
     msg: CcfoliaMessage, highlight?: string,
     onClick?: () => void,
-    miniText?: string
+    miniText?: string,
+    showIcon: boolean,
+    icon?: string
 }) => {
-    const { msg, highlight, onClick, miniText: debugText } = props;
+    const { msg, highlight, onClick, miniText: debugText, showIcon, icon } = props;
     const displayText = msg.toDisplayText();
 
     const [showCopyButton, setShowCopyButton] = useState(false);
@@ -108,52 +114,58 @@ const MessageEntry = (props: {
     }
 
     return <>
-        <Box px="4" py="2" position="relative"
+        <Flex px="4" py="2" gap="2"
             onMouseEnter={onClick ? undefined : () => setShowCopyButton(true)}
             onMouseLeave={onClick ? undefined : () => {
                 setShowCopyButton(false);
                 setCopied(false);
             }}>
-            <Flex gap="2" direction="row" position="relative">
-                <Heading size="4">{msg.sender}</Heading>
-                {msg instanceof CoCSkillRollMessage ? <Badge color="lime">技能判定</Badge> : null}
-                {msg instanceof CoCSanityCheckMessage ? <Badge color="ruby">SANチェック</Badge> : null}
-                {msg instanceof ParamChangeMessage ? <Badge color="blue">{msg.paramName}変動</Badge> : null}
-                {debugText ? <Text size="1" color="gray">{debugText}</Text> : null}
-                {showCopyButton ? (
-                    <IconButton variant="ghost" size="2" color="gray"
-                        style={{
-                            position: "absolute",
-                            top: 0,
-                            right: "4px"
-                        }}
-                        onClick={() => {
-                            navigator.clipboard.writeText(displayText);
-                            setCopied(true);
-                        }}>
-                        {isCopied ? <Check size="1.25em" /> : <Copy size="1.25em" />}
-                    </IconButton>
-                ) : null}
-            </Flex>
-            {highlight === undefined || highlight === "" ? <Text style={blockStyle}>{displayText}</Text> :
-                <Text style={blockStyle}>
-                    {displayText.split(highlight)
-                        .map((text, i) => i === 0 ? text : <>
-                            <u style={{ textDecorationColor: "lime" }}>{highlight}</u>{text}
-                        </>)}
-                </Text>
-            }
-
-            {onClick === undefined ? null : (
-                <Button variant="ghost" onClick={onClick} style={{
-                    position: "absolute",
-                    bottom: "1em",
-                    right: "1.5em",
-                }}>
-                    選択
-                </Button>
-            )}
-        </Box>
+            {showIcon ? <Avatar src={icon} color="gray" fallback="-" /> : null}
+            <Box position="relative" flexGrow="1">
+                {/*名前などの表示*/}
+                <Flex gap="2" direction="row" position="relative">
+                    <Heading size="4">{msg.sender}</Heading>
+                    {msg instanceof CoCSkillRollMessage ? <Badge color="lime">技能判定</Badge> : null}
+                    {msg instanceof CoCSanityCheckMessage ? <Badge color="ruby">SANチェック</Badge> : null}
+                    {msg instanceof ParamChangeMessage ? <Badge color="blue">{msg.paramName}変動</Badge> : null}
+                    {debugText ? <Text size="1" color="gray">{debugText}</Text> : null}
+                    {/*コピーボタン*/}
+                    {showCopyButton ? (
+                        <IconButton variant="ghost" size="2" color="gray"
+                            style={{
+                                position: "absolute",
+                                top: 0,
+                                right: "4px"
+                            }}
+                            onClick={() => {
+                                navigator.clipboard.writeText(displayText);
+                                setCopied(true);
+                            }}>
+                            {isCopied ? <Check size="1.25em" /> : <Copy size="1.25em" />}
+                        </IconButton>
+                    ) : null}
+                </Flex>
+                {/*本文表示*/}
+                {highlight === undefined || highlight === "" ? <Text style={blockStyle}>{displayText}</Text> :
+                    <Text style={blockStyle}>
+                        {displayText.split(highlight)
+                            .map((text, i) => i === 0 ? text : <>
+                                <u style={{ textDecorationColor: "lime" }}>{highlight}</u>{text}
+                            </>)}
+                    </Text>
+                }
+                {/*選択ボタン*/}
+                {onClick === undefined ? null : (
+                    <Button variant="ghost" onClick={onClick} style={{
+                        position: "absolute",
+                        bottom: "1em",
+                        right: "1.5em",
+                    }}>
+                        選択
+                    </Button>
+                )}
+            </Box>
+        </Flex>
 
         <hr style={{
             borderColor: "#3f3f3f",
