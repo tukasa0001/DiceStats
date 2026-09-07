@@ -1,8 +1,8 @@
 import { Badge, Box, Button, Card, Code, Flex, IconButton, ScrollArea } from "@radix-ui/themes";
 import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage";
 import { Heading, Text } from "@radix-ui/themes";
-import { CoCSkillRollMessage } from "../ccfoliaLog/message/CoCSkillRollMessage";
-import { SanityCheckMessage } from "../ccfoliaLog/message/SanityCheckMessage";
+import { CoCSkillRollMessage } from "../ccfoliaLog/message/CoC/CoCSkillRollMessage";
+import { CoCSanityCheckMessage } from "../ccfoliaLog/message/CoC/CoCSanityCheckMessage";
 import { ParamChangeMessage } from "../ccfoliaLog/message/ParamChangeMessage";
 import { CSSProperties, Ref, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { useVirtualizer, Virtualizer } from "@tanstack/react-virtual";
@@ -117,7 +117,7 @@ const MessageEntry = (props: {
             <Flex gap="2" direction="row" position="relative">
                 <Heading size="4">{msg.sender}</Heading>
                 {msg instanceof CoCSkillRollMessage ? <Badge color="lime">技能判定</Badge> : null}
-                {msg instanceof SanityCheckMessage ? <Badge color="ruby">SANチェック</Badge> : null}
+                {msg instanceof CoCSanityCheckMessage ? <Badge color="ruby">SANチェック</Badge> : null}
                 {msg instanceof ParamChangeMessage ? <Badge color="blue">{msg.paramName}変動</Badge> : null}
                 {debugText ? <Text size="1" color="gray">{debugText}</Text> : null}
                 {showCopyButton ? (

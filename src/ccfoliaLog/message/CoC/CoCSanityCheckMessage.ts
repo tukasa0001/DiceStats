@@ -1,6 +1,6 @@
-import { CcfoliaMessage } from "./CcfoliaMessage";
+import { CcfoliaMessage } from "./../CcfoliaMessage";
 
-export class SanityCheckMessage implements CcfoliaMessage {
+export class CoCSanityCheckMessage implements CcfoliaMessage {
     channel: string;
     sender: string;
     index: number;

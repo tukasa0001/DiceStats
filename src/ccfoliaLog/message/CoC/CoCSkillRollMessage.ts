@@ -1,4 +1,4 @@
-import { CcfoliaMessage } from "./CcfoliaMessage";
+import { CcfoliaMessage } from "./../CcfoliaMessage";
 
 export class CoCSkillRollMessage implements CcfoliaMessage {
     channel: string;
