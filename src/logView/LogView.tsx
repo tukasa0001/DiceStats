@@ -44,7 +44,7 @@ type LogViewProps = {
     onScrolled?: (scroller: LogViewScroller) => void,
     highlight?: string,
     showTab?: boolean,
-    showIcon: boolean,
+    showIcon?: boolean,
     icons?: { [key: string]: string }
 };
 
@@ -86,8 +86,8 @@ export const LogView = (props: LogViewProps) => {
                             msg={log[vItem.index]} highlight={highlight}
                             onClick={onClick ? () => onClick(log[vItem.index], vItem.index) : undefined}
                             miniText={showTab ? `No.${log[vItem.index].index} - ${log[vItem.index].channel}` : `No.${log[vItem.index].index}`}
-                            showIcon={showIcon}
-                            icon={showIcon && icons && log[vItem.index].iconId ? icons[log[vItem.index].iconId!] : undefined}
+                            showIcon={showIcon ?? (icons !== undefined && 0 < Object.keys(icons).length)}
+                            icon={showIcon !== false && icons && log[vItem.index].iconId ? icons[log[vItem.index].iconId!] : undefined}
                         />
                     </Box>
                 ))}
