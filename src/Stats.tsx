@@ -89,7 +89,7 @@ const Stats = (props: StatsProps) => {
             </ErrorBlock>*/}
             <Heading my="4">技能振り統計</Heading>
             {0 < skills.length ?
-                <StatTable characters={skills.map(tp => tp[0])} data={[
+                <StatTable characters={skills.map(tp => tp[0])} icons={iconMap} data={[
                     Data("技能振り回数", skills.map(tp => tp[1].rollNum)),
                     Data("平均出目", skills.map(tp => tp[1].valueSum / tp[1].rollNum), { formatter: avgFormatter }),
                     StrData("一番振った技能", skills.map(([name, stat]) => {
@@ -122,7 +122,7 @@ const Stats = (props: StatsProps) => {
 
             <Heading my="4">ステータス統計</Heading>
             {0 < status.length ?
-                <StatTable characters={status.map(tp => tp[0])} data={[
+                <StatTable characters={status.map(tp => tp[0])} icons={iconMap} data={[
                     Data("合計被ダメージ", status.map(tp => tp[1].totalDamage)),
                     Data("最低HP", status.map(tp => tp[1].minHealth ?? NaN)),
                     Data("合計喪失SAN", status.map(tp => tp[1].totalLostSAN)),
@@ -132,7 +132,7 @@ const Stats = (props: StatsProps) => {
 
             <Heading my="4">SANチェック統計</Heading>
             {0 < sanity.length ?
-                <StatTable characters={sanity.map(tp => tp[0])} data={[
+                <StatTable characters={sanity.map(tp => tp[0])} icons={iconMap} data={[
                     Data("合計回数", sanity.map(tp => tp[1].rollNum)),
                     Data("成功回数", sanity.map(tp => tp[1].successNum)),
                     Data("失敗回数", sanity.map(tp => tp[1].rollNum - tp[1].successNum)),
@@ -153,7 +153,7 @@ const Stats = (props: StatsProps) => {
                     </Select.Group>
                 </Select.Content>
             </Select.Root>
-            {skillFilter !== "none" ? <StatTable characters={filteredSkills.map(tp => tp[0])} data={[
+            {skillFilter !== "none" ? <StatTable characters={filteredSkills.map(tp => tp[0])} icons={iconMap} data={[
                 Data("技能振り回数", filteredSkills.map(tp => tp[1].rollNum)),
                 Data("平均出目", filteredSkills.map(tp => tp[1].valueSum / tp[1].rollNum), { formatter: avgFormatter }),
 
@@ -174,7 +174,7 @@ const Stats = (props: StatsProps) => {
 
             <Heading my="4">会話の統計</Heading>
             {0 < talks.length ?
-                <StatTable characters={talks.map(tp => tp[0])} data={[
+                <StatTable characters={talks.map(tp => tp[0])} icons={iconMap} data={[
                     Data("発言数", talks.map(tp => tp[1].talkNum)),
                     Data("発言文字数", talks.map(tp => tp[1].charNum)),
                     Data("平均文字数", talks.map(tp => tp[1].charNum / tp[1].talkNum), { formatter: avgFormatter }),
@@ -191,7 +191,8 @@ const Stats = (props: StatsProps) => {
 
 type StatTableProps = {
     characters: string[],
-    data: StatTableData[]
+    data: StatTableData[],
+    icons?: { [key: string]: string },
 };
 
 type StatTableData = {
@@ -209,6 +210,9 @@ const StatTable = (props: StatTableProps) => {
     const [isNameChanging, setNameChanging] = useState(false);
     const [changingName, setChangingName] = useState(""); // 変更中の名前
     const [changedName, setChangedName] = useState(""); // 変更後の名前
+
+    // アイコン
+    const icons = props.icons ?? {};
 
     // ソート
     const [sortOrder, setSortOrder] = useState<number[] | undefined>(undefined);
@@ -239,6 +243,14 @@ const StatTable = (props: StatTableProps) => {
                                 <ContextMenu.Root>
                                     <ContextMenu.Trigger>
                                         <Table.ColumnHeaderCell justify="center" onDoubleClick={e => openChangeNameDialog(name)}>
+                                            {icons[name] === undefined ? null : (
+                                                <img src={icons[name]} style={{
+                                                    height: "1.2em",
+                                                    width: "auto",
+                                                    margin: "0 0.1em",
+                                                    verticalAlign: "middle",
+                                                }} />
+                                            )}
                                             {name}
                                         </Table.ColumnHeaderCell>
                                     </ContextMenu.Trigger>
