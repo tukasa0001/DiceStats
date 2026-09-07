@@ -6,7 +6,7 @@ import "./PlayerStats.css"
 import domtoimage from "dom-to-image"
 import cocstats, { CharacterStat, CoCStat, SkillStat } from '../StatsCalculator/CoCStats';
 import { LogFile } from '../file/LogFile';
-import { CoCSkillRollMessage } from '../ccfoliaLog/message/CoCSkillRollMessage';
+import { CoCSkillRollMessage } from '../ccfoliaLog/message/CoC/CoCSkillRollMessage';
 
 type StatsProps = {
     logs: LogFile[]

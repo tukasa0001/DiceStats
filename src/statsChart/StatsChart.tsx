@@ -108,6 +108,7 @@ const StatsChart = (props: StatsChartProps) => {
     const [statusStats, setStatusStats] = useState<StatusStats[]>([]);
 
     const [deltaDisplay, setDeltaDisplay] = useState(false);
+    const [showAvg, setShowAvg] = useState(false);
 
     const [chartDisplayMode, setChartDisplayMode] = useState<ChartDisplayMode>(chartDisplayModes[0]);
     const [activeCharacters, setActiveCharacters] = useState<string[]>([]);
@@ -207,33 +208,38 @@ const StatsChart = (props: StatsChartProps) => {
 
     const allCharacters = nameRollPair.map(([name, _]) => name);
 
+    const getData = (i: number, name: string): number => {
+        if (deltaDisplay) {
+            return getDeltaData(i, name);
+        }
+        else {
+            return getNumData(i, name);
+        }
+    }
+
+    const getNumData = (i: number, name: string): number => {
+        const props = {
+            name: name,
+            stat: stats[i].perCharacter.get(name),
+            status: statusStats[i],
+            customStatusName
+        }
+        return chartDisplayMode.calc(props);
+    }
+
+    const getDeltaData = (i: number, name: string): number => {
+        if (i <= 0) {
+            return 0;
+        }
+        return getNumData(i, name) - getNumData(i - 1, name);
+    }
+
     const data = stats.map((stat, i) => ({
         name: `${i * (100 / split)}%`,
         ...activeCharacters.map(name => ({
-            [name]: (() => {
-                const props = {
-                    name: name,
-                    stat: stat.perCharacter.get(name),
-                    status: statusStats[i],
-                    customStatusName
-                }
-                if (1 <= i && deltaDisplay) {
-                    const prevStat = stats[i - 1].perCharacter.get(name);
-                    const prevStatusStat = statusStats[i - 1];
-                    const prevProps = {
-                        name: name,
-                        stat: prevStat,
-                        status: prevStatusStat,
-                        customStatusName
-                    };
-                    return chartDisplayMode.calc(props) - chartDisplayMode.calc(prevProps);
-                }
-                else if (deltaDisplay) {
-                    return 0; // 0%時点での変化量
-                }
-                return chartDisplayMode.calc(props);
-            })()
-        })).reduce((a, b) => ({ ...a, ...b }), {})
+            [name]: getData(i, name)
+        })).reduce((a, b) => ({ ...a, ...b }), {}),
+        "平均": activeCharacters.length == 0 ? undefined : activeCharacters.map(name => getData(i, name)).reduce((a, b) => a + b) / activeCharacters.length
     }));
 
     return (
@@ -273,6 +279,16 @@ const StatsChart = (props: StatsChartProps) => {
                             checked={deltaDisplay}
                             onCheckedChange={val => setDeltaDisplay(val)} />
                         変化量を表示
+                    </Flex>
+                </Text>
+
+                {/* 平均表示 */}
+                <Text as="label">
+                    <Flex gap="1" align="center">
+                        <Switch
+                            checked={showAvg}
+                            onCheckedChange={val => setShowAvg(val)} />
+                        平均を表示
                     </Flex>
                 </Text>
 
@@ -320,6 +336,13 @@ const StatsChart = (props: StatsChartProps) => {
                         stroke={colors[i]}
                         isAnimationActive={split <= 20}
                     />)}
+                    {showAvg && 2 <= activeCharacters.length ? (
+                        <Line key={"平均"} dataKey={"平均"}
+                            stroke="white"
+                            strokeDasharray="4 4 2"
+                            isAnimationActive={split <= 20}
+                        />
+                    ) : null}
                 </LineChart>
             </Flex>
         </Box >

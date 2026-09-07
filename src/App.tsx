@@ -33,20 +33,27 @@ const App: FC = () => {
     const onFileUploaded = async (files: File[]) => {
         const logs: LogFile[] = [];
         for (let file of files) {
-            const str = await file.text();
-            const parsed = parseCcfoliaLog(str);
-            const stat = cocstats.calc(parsed, {
+            const result = await parseCcfoliaLog(file);
+            if (!result.success) {
+                //失敗
+                console.warn(result.reason);
+                return;
+            }
+            const { msgs, gameSystemType, icons } = result;
+            const stat = cocstats.calc(msgs, {
                 ...config,
                 startIdx: 0,
-                endIdx: parsed.length - 1
+                endIdx: msgs.length - 1
             })
             logs.push({
                 filename: file.name,
-                log: parsed,
+                gameSystem: gameSystemType,
+                log: msgs,
                 stat: stat,
                 startIdx: 0,
-                endIdx: parsed.length - 1,
-                ingoredChannels: []
+                endIdx: msgs.length - 1,
+                ingoredChannels: [],
+                icons
             })
         }
         setLog(logs);

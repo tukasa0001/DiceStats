@@ -1,8 +1,8 @@
 import { CcfoliaMessage } from "../ccfoliaLog/message/CcfoliaMessage";
-import { CoCCombinedRollMessage } from "../ccfoliaLog/message/CoCCombinedRollMessage";
-import { CoCSkillRollMessage } from "../ccfoliaLog/message/CoCSkillRollMessage";
+import { CoCCombinedRollMessage } from "../ccfoliaLog/message/CoC/CoCCombinedRollMessage";
+import { CoCSkillRollMessage } from "../ccfoliaLog/message/CoC/CoCSkillRollMessage";
 import { ParamChangeMessage } from "../ccfoliaLog/message/ParamChangeMessage";
-import { SanityCheckMessage } from "../ccfoliaLog/message/SanityCheckMessage";
+import { CoCSanityCheckMessage } from "../ccfoliaLog/message/CoC/CoCSanityCheckMessage";
 import { TalkMessage } from "../ccfoliaLog/message/TalkMessasge";
 
 class CoCStatsCounter {
@@ -56,7 +56,7 @@ class CoCStatsCounter {
         else if (msg instanceof ParamChangeMessage) {
             this.incrementStatusStat(stat, msg);
         }
-        else if (msg instanceof SanityCheckMessage) {
+        else if (msg instanceof CoCSanityCheckMessage) {
             this.incrementSkillStat(stat.sanityCheck, msg);
         }
         else if (msg instanceof TalkMessage) {
@@ -64,7 +64,7 @@ class CoCStatsCounter {
         }
     }
 
-    incrementSkillStat = (stat: SkillStat, msg: CoCSkillRollMessage | SanityCheckMessage | CoCCombinedRollMessage) => {
+    incrementSkillStat = (stat: SkillStat, msg: CoCSkillRollMessage | CoCSanityCheckMessage | CoCCombinedRollMessage) => {
         stat.rollNum++;
         stat.valueSum += msg.diceValue;
         stat.successNum += msg.successNum();

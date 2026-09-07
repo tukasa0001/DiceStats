@@ -20,9 +20,10 @@ export const LogViewBox = (props: {
     log: CcfoliaMessage[],
     onClose?: () => void,
     scrollerRef?: Ref<LogViewScroller>,
-    onScrolled?: (scroller: LogViewScroller) => void
+    onScrolled?: (scroller: LogViewScroller) => void,
+    icons: { [key: string]: string }
 }) => {
-    const { log, onClose, scrollerRef: parentScrollerRef, onScrolled } = props;
+    const { log, onClose, scrollerRef: parentScrollerRef, onScrolled, icons } = props;
 
     const [currentTab, setTab] = useState("@ALL");
     const [searchText, setSearchText] = useState("");
@@ -57,7 +58,7 @@ export const LogViewBox = (props: {
     return (
         <Flex direction="column" flexBasis="0" flexGrow="1" flexShrink="1">
             <Box minHeight="0" height="1px" flexGrow="1" flexShrink="1" overflowY="hidden">
-                <LogView log={filteredLog}
+                <LogView log={filteredLog} icons={icons}
                     highlight={searchText}
                     scrollerRef={scrollerRef} onScrolled={onScrolled}
                     showTab={currentTab === "@ALL"} />
