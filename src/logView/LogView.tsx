@@ -120,7 +120,7 @@ const MessageEntry = (props: {
                 setShowCopyButton(false);
                 setCopied(false);
             }}>
-            {showIcon ? <Avatar src={icon} fallback="?" /> : null}
+            {showIcon ? <Avatar src={icon} color="gray" fallback="-" /> : null}
             <Box position="relative" flexGrow="1">
                 {/*名前などの表示*/}
                 <Flex gap="2" direction="row" position="relative">
