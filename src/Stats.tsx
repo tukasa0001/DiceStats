@@ -53,6 +53,21 @@ const Stats = (props: StatsProps) => {
         .filter(([name, stat]) => 0 < stat.talkNum)
         .sort(jpnTextComparer);
 
+    // 名前-アイコンの連想配列を作る
+    const iconMap: { [key: string]: string } = {};
+    for (const logFile of logs) {
+        const { log, icons } = logFile;
+        if (Object.keys(icons).length <= 0) continue;
+        for (const iconId in icons) {
+            for (const msg of log) {
+                if (msg.iconId === iconId) {
+                    iconMap[msg.sender] = icons[iconId];
+                    break;
+                }
+            }
+        }
+    }
+
     const avgFormatter = Intl.NumberFormat("ja-JP", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
