@@ -2,7 +2,41 @@ import GameSystemType from "../GameSystem";
 import { LogParser, logParser } from "./logParser/LogParser";
 import { CcfoliaMessage } from "./message/CcfoliaMessage";
 
-const parseCcfoliaLog = (log: string): { msgs: CcfoliaMessage[], gameSystemType: GameSystemType } => {
+type ParseResult = ParseResultSuccess | ParseResultFail;
+type ParseResultSuccess = {
+    success: true
+    msgs: CcfoliaMessage[],
+    gameSystemType: GameSystemType
+};
+type ParseResultFail = {
+    success: false,
+    reason: string
+}
+
+const parseCcfoliaLog = async (file: File): Promise<ParseResult> => {
+    let reg = file.name.match(/([^\.]*)$/);
+    if (reg === null) {
+        return {
+            success: false,
+            reason: "非対応のファイル"
+        };
+    }
+    const ext = reg[1];
+    if (ext === "htm" || ext === "html") {
+        const text = await file.text();
+        return {
+            success: true,
+            ...parseOldHtmlLog(text)
+        };
+    }
+
+    return {
+        success: false,
+        reason: `非対応のファイル (.${ext})`
+    };
+}
+
+const parseOldHtmlLog = (log: string): { msgs: CcfoliaMessage[], gameSystemType: GameSystemType } => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(log, 'text/html');
 
