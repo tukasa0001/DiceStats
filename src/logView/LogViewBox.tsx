@@ -60,7 +60,8 @@ export const LogViewBox = (props: {
                 <LogView log={filteredLog}
                     highlight={searchText}
                     scrollerRef={scrollerRef} onScrolled={onScrolled}
-                    showTab={currentTab === "@ALL"} />
+                    showTab={currentTab === "@ALL"}
+                    showIcon={true} />
             </Box>
             <Tabs.Root value={currentTab} onValueChange={setTab}>
                 <Tabs.List>

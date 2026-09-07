@@ -137,7 +137,7 @@ export const LogFileInfo = (props: LogFileInfoProps) => {
                 }} onClick={() => setSelectMode("none")}>
                     <X />
                 </IconButton>
-                <FilteredLogView logs={log} onClick={(msg, i) => {
+                <FilteredLogView logs={log} showIcon={false} onClick={(msg, i) => {
                     if (selectMode === "start") {
                         setStartMsg(i === 0 ? "" : msg.toDisplayText())
                         setLogRange({ startIdx: i })

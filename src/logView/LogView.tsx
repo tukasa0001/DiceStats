@@ -43,11 +43,12 @@ type LogViewProps = {
     scrollerRef?: Ref<LogViewScroller>,
     onScrolled?: (scroller: LogViewScroller) => void,
     highlight?: string,
-    showTab?: boolean
+    showTab?: boolean,
+    showIcon: boolean
 };
 
 export const LogView = (props: LogViewProps) => {
-    const { log, onClick, scrollerRef, onScrolled, highlight } = props;
+    const { log, onClick, scrollerRef, onScrolled, highlight, showIcon } = props;
     const showTab = props.showTab ?? false;
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -84,6 +85,7 @@ export const LogView = (props: LogViewProps) => {
                             msg={log[vItem.index]} highlight={highlight}
                             onClick={onClick ? () => onClick(log[vItem.index], vItem.index) : undefined}
                             miniText={showTab ? `No.${log[vItem.index].index} - ${log[vItem.index].channel}` : `No.${log[vItem.index].index}`}
+                            showIcon={showIcon}
                         />
                     </Box>
                 ))}
@@ -95,9 +97,10 @@ export const LogView = (props: LogViewProps) => {
 const MessageEntry = (props: {
     msg: CcfoliaMessage, highlight?: string,
     onClick?: () => void,
-    miniText?: string
+    miniText?: string,
+    showIcon: boolean
 }) => {
-    const { msg, highlight, onClick, miniText: debugText } = props;
+    const { msg, highlight, onClick, miniText: debugText, showIcon } = props;
     const displayText = msg.toDisplayText();
 
     const [showCopyButton, setShowCopyButton] = useState(false);
@@ -114,7 +117,7 @@ const MessageEntry = (props: {
                 setShowCopyButton(false);
                 setCopied(false);
             }}>
-            <Avatar fallback="?" />
+            {showIcon ? <Avatar fallback="?" /> : null}
             <Box position="relative" flexGrow="1">
                 {/*名前などの表示*/}
                 <Flex gap="2" direction="row" position="relative">
