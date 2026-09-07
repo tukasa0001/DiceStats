@@ -13,16 +13,16 @@ export class GeneralLogParser implements LogParser {
 
         // シークレットダイス
         if (text === "シークレットダイス ???") {
-            return new UnknownSecretDiceMessage(channel, name, idx);
+            return new UnknownSecretDiceMessage(data);
         }
         // ステータス変動
         else if (name === "system" && (reg = text.match(/\[ (.+) \] (.+) : ([+-]?\d+) → ([+-]?\d+)/))) {
             // [ {name} ] {param} : {prev} → {value}
-            return new ParamChangeMessage(channel, reg[1], idx, reg[2], Number(reg[3]), Number(reg[4]));
+            return new ParamChangeMessage({ ...data, name: reg[1] }, reg[2], Number(reg[3]), Number(reg[4]));
         }
         // その他:会話
         else {
-            return new TalkMessage(channel, name, idx, text);
+            return new TalkMessage(data, text);
         }
     }
 

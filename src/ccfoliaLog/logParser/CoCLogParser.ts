@@ -19,7 +19,7 @@ export class CoCLogParser implements LogParser {
             for (let reg2 of text.matchAll(/\(1D100<=([0-9]+)\) ＞ ([0-9]+) ＞/g)) {
                 const successValue = Number(reg2[1]);
                 const diceValue = Number(reg2[2]);
-                return new CoCSkillRollMessage(channel, name, idx, skillName === "" ? "不明な技能" : skillName, diceValue, successValue, reg[1] !== undefined);
+                return new CoCSkillRollMessage(data, skillName === "" ? "不明な技能" : skillName, diceValue, successValue, reg[1] !== undefined);
             }
         }
         // 対抗ロール
@@ -30,7 +30,7 @@ export class CoCLogParser implements LogParser {
             for (let reg2 of text.matchAll(/\(1d100<=([0-9]+)\) ＞ ([0-9]+) ＞/g)) {
                 const successValue = Number(reg2[1]);
                 const diceValue = Number(reg2[2]);
-                return new CoCSkillRollMessage(channel, name, idx, skillName === "" ? "対抗ロール" : skillName, diceValue, successValue, reg[1] !== undefined);
+                return new CoCSkillRollMessage(data, skillName === "" ? "対抗ロール" : skillName, diceValue, successValue, reg[1] !== undefined);
             }
         }
         // 組み合わせロール
@@ -41,12 +41,12 @@ export class CoCLogParser implements LogParser {
             for (let reg2 of text.matchAll(/\(1d100<=([0-9]+),([0-9]+)\) ＞ ([0-9]+)\[/g)) {
                 const successValue: [number, number] = [Number(reg2[1]), Number(reg2[2])];
                 const diceValue = Number(reg2[3]);
-                return new CoCCombinedRollMessage(channel, name, idx, skillName === "" ? "不明な組み合わせロール" : skillName, diceValue, successValue, reg[1] !== undefined);
+                return new CoCCombinedRollMessage(data, skillName === "" ? "不明な組み合わせロール" : skillName, diceValue, successValue, reg[1] !== undefined);
             }
         }
         else if (reg = text.match(/^(S|s)?1d100<=([0-9]+)\s*【正気度ロール】\s*\(1D100<=[0-9]+\) ＞ ([0-9]+) ＞/)) {
             // 1d100<={successValue} 【正気度ロール】 (1D100<={successValue}) ＞ {diceValue} ＞ 成功
-            return new CoCSanityCheckMessage(channel, name, idx, Number(reg[3]), Number(reg[2]));
+            return new CoCSanityCheckMessage(data, Number(reg[3]), Number(reg[2]));
         }
         return undefined;
     }
