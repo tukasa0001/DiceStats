@@ -6,7 +6,10 @@ type ParseResult = ParseResultSuccess | ParseResultFail;
 type ParseResultSuccess = {
     success: true
     msgs: CcfoliaMessage[],
-    gameSystemType: GameSystemType
+    gameSystemType: GameSystemType,
+    icons: {
+        [key: string]: string
+    }
 };
 type ParseResultFail = {
     success: false,
@@ -129,7 +132,18 @@ const parseNewHtmlLog = (log: string): ParseResult => {
         idx++;
     }
 
-    return { success: true, msgs, gameSystemType: mainParser?.type ?? "None" };
+    // アイコンデータの読み取り
+    let icons: { [key: string]: string } = {};
+    const css = doc.querySelector("style")?.textContent;
+    if (css) {
+        for (const reg of css?.matchAll(/.(avatar-image-\d+) { background-image: url\("(.*)"\); }$/gm)) {
+            const [key, value] = [reg[1], reg[2]];
+            icons[key] = value;
+        }
+    }
+    console.log(icons);
+
+    return { success: true, msgs, gameSystemType: mainParser?.type ?? "None", icons };
 }
 
 /**
@@ -178,7 +192,7 @@ const parseOldHtmlLog = (log: string): ParseResult => {
         idx++;
     }
 
-    return { success: true, msgs, gameSystemType: mainParser?.type ?? "None" };
+    return { success: true, msgs, gameSystemType: mainParser?.type ?? "None", icons: {} };
 }
 
 // === json形式のログの型定義 ===
@@ -267,7 +281,7 @@ const parseJsonLog = (json: string): ParseResult => {
         idx++;
     }
 
-    return { success: true, msgs, gameSystemType: mainParser?.type ?? "None" };
+    return { success: true, msgs, gameSystemType: mainParser?.type ?? "None", icons: log.images };
 }
 
 export default parseCcfoliaLog;
